@@ -1,7 +1,17 @@
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Package } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getActiveBusiness } from "@/lib/business/get-active-business";
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser();
+
+  if (user) {
+    const business = await getActiveBusiness(user.id);
+    redirect(business ? "/dashboard" : "/onboarding");
+  }
+
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="border-b bg-background/80 backdrop-blur">
@@ -9,6 +19,20 @@ export default function Home() {
           <div className="flex items-center gap-2 font-medium">
             <Package className="size-6 text-foreground" aria-hidden />
             <span>MultiStock</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/auth/login"
+              className="inline-flex h-8 items-center rounded-lg px-2.5 text-sm font-medium hover:bg-muted"
+            >
+              Ingresar
+            </Link>
+            <Link
+              href="/auth/register"
+              className="inline-flex h-8 items-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              Crear cuenta
+            </Link>
           </div>
         </div>
       </header>
@@ -22,9 +46,9 @@ export default function Home() {
             conectar el backend.
           </p>
         </div>
-        <div>
-          <Button>Boton de ejemplo (shadcn/ui)</Button>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          Rubros iniciales soportados: verduleria, almacen y ferreteria.
+        </p>
       </main>
     </div>
   );
