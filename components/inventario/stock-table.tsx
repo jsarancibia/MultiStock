@@ -1,5 +1,9 @@
 import Link from "next/link";
+import { Boxes } from "lucide-react";
 import type { Database } from "@/types/database";
+import { cn, formatQuantity } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type StockProduct = Pick<
   Database["public"]["Tables"]["products"]["Row"],
@@ -11,6 +15,21 @@ type StockTableProps = {
 };
 
 export function StockTable({ products }: StockTableProps) {
+  if (!products.length) {
+    return (
+      <EmptyState
+        icon={<Boxes aria-hidden />}
+        title="Sin productos en inventario"
+        description="Necesitás al menos un producto activo. Creá uno y el stock aparecerá aquí."
+        action={
+          <Link href="/productos/nuevo" className={cn(buttonVariants())}>
+            Crear producto
+          </Link>
+        }
+      />
+    );
+  }
+
   return (
     <div className="overflow-x-auto rounded-lg border">
       <table className="w-full text-sm">
@@ -31,8 +50,10 @@ export function StockTable({ products }: StockTableProps) {
               <tr key={product.id} className="border-t">
                 <td className="px-3 py-2 font-medium">{product.name}</td>
                 <td className="px-3 py-2">{product.unit_type}</td>
-                <td className={`px-3 py-2 ${lowStock ? "text-destructive" : ""}`}>{product.current_stock}</td>
-                <td className="px-3 py-2">{product.min_stock}</td>
+                <td className={`px-3 py-2 ${lowStock ? "text-destructive" : ""}`}>
+                  {formatQuantity(product.current_stock)}
+                </td>
+                <td className="px-3 py-2">{formatQuantity(product.min_stock)}</td>
                 <td className="px-3 py-2">{product.sku || product.barcode || "-"}</td>
                 <td className="px-3 py-2">
                   <Link
@@ -45,13 +66,6 @@ export function StockTable({ products }: StockTableProps) {
               </tr>
             );
           })}
-          {!products.length ? (
-            <tr>
-              <td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">
-                No hay productos activos en inventario.
-              </td>
-            </tr>
-          ) : null}
         </tbody>
       </table>
     </div>

@@ -19,14 +19,19 @@ export function VerduleriaProductFields({ metadata }: VerduleriaProductFieldsPro
         <input type="checkbox" name="is_perishable" defaultChecked={checkedOf(metadata, "is_perishable")} />
         Perecible
       </label>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          name="allows_weight_sale"
-          defaultChecked={checkedOf(metadata, "allows_weight_sale")}
-        />
-        Venta por peso
-      </label>
+      <div className="space-y-1 sm:col-span-2">
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="allows_weight_sale"
+            defaultChecked={checkedOf(metadata, "allows_weight_sale")}
+          />
+          Venta por peso
+        </label>
+        <p className="text-xs text-muted-foreground pl-6">
+          Al activarla, en ventas podrás vender en decimales (kg, litros) con pasos de 0,5 o según unidad.
+        </p>
+      </div>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="waste_tracking" defaultChecked={checkedOf(metadata, "waste_tracking")} />
         Control de merma

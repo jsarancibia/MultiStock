@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { Package } from "lucide-react";
 import type { BusinessType } from "@/config/business-types";
 import { marginPercentOnCost } from "@/lib/business/business-type-config";
+import { cn, formatCurrency, formatQuantity } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type ProductRow = {
   id: string;
@@ -29,12 +33,23 @@ function meta(m: unknown) {
 
 export function ProductsTable({ businessType, products }: ProductsTableProps) {
   if (!products.length) {
-    return <p className="text-sm text-muted-foreground">No hay productos para mostrar.</p>;
+    return (
+      <EmptyState
+        icon={<Package aria-hidden />}
+        title="No hay productos para mostrar"
+        description="Creá el primero o probá otro criterio de búsqueda o filtros."
+        action={
+          <Link href="/productos/nuevo" className={cn(buttonVariants())}>
+            Crear producto
+          </Link>
+        }
+      />
+    );
   }
 
   return (
     <div className="overflow-x-auto rounded-lg border">
-      <table className="w-full text-sm">
+      <table className="w-full min-w-[720px] text-sm">
         <thead className="bg-muted/50 text-left">
           <tr>
             <th className="px-3 py-2 font-medium">Nombre</th>
@@ -98,9 +113,9 @@ export function ProductsTable({ businessType, products }: ProductsTableProps) {
                 <td className="px-3 py-2">{product.categories?.name ?? "-"}</td>
                 <td className="px-3 py-2">{product.suppliers?.name ?? "-"}</td>
                 <td className="px-3 py-2">
-                  {product.current_stock} / min {product.min_stock}
+                  {formatQuantity(product.current_stock)} / min {formatQuantity(product.min_stock)}
                 </td>
-                <td className="px-3 py-2">${product.sale_price}</td>
+                <td className="px-3 py-2">{formatCurrency(product.sale_price)}</td>
                 <td className="px-3 py-2">{product.active ? "Activo" : "Inactivo"}</td>
               </tr>
             );

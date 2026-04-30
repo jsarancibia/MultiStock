@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { BusinessType } from "@/config/business-types";
+import { formatCurrency, formatQuantity } from "@/lib/utils";
 
 export type SaleProductOption = {
   id: string;
@@ -130,9 +131,9 @@ export function ProductSearch({ businessType, products, onAddProduct }: ProductS
                   </p>
                 </td>
                 <td className="px-3 py-2">
-                  {product.current_stock} {product.unit_type}
+                  {formatQuantity(product.current_stock)} {product.unit_type}
                 </td>
-                <td className="px-3 py-2">${product.sale_price}</td>
+                <td className="px-3 py-2">{formatCurrency(product.sale_price)}</td>
                 <td className="px-3 py-2 text-right">
                   <button
                     type="button"
@@ -147,7 +148,7 @@ export function ProductSearch({ businessType, products, onAddProduct }: ProductS
             {!filteredProducts.length ? (
               <tr>
                 <td colSpan={4} className="px-3 py-4 text-center text-muted-foreground">
-                  No hay coincidencias para tu busqueda.
+                  No hay coincidencias para tu búsqueda.
                 </td>
               </tr>
             ) : null}

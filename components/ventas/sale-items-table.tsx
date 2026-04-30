@@ -1,5 +1,7 @@
 "use client";
 
+import { formatCurrency, formatQuantity } from "@/lib/utils";
+
 const DECIMAL_UNITS = new Set(["kg", "g", "liter", "meter"]);
 
 function quantityInputAttrs(unitType: string) {
@@ -33,7 +35,7 @@ export function SaleItemsTable({
 }: SaleItemsTableProps) {
   return (
     <div className="overflow-x-auto rounded-lg border">
-      <table className="w-full text-sm">
+      <table className="w-full min-w-[520px] text-sm">
         <thead className="bg-muted/50 text-left">
           <tr>
             <th className="px-3 py-2 font-medium">Producto</th>
@@ -52,7 +54,7 @@ export function SaleItemsTable({
                 <td className="px-3 py-2">
                   <p className="font-medium">{item.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    Stock: {item.stock} {item.unitType}
+                    Stock: {formatQuantity(item.stock)} {item.unitType}
                   </p>
                 </td>
                 <td className="px-3 py-2">
@@ -75,7 +77,7 @@ export function SaleItemsTable({
                     className="w-28 rounded-md border px-2 py-1"
                   />
                 </td>
-                <td className="px-3 py-2">${subtotal.toFixed(2)}</td>
+                <td className="px-3 py-2">{formatCurrency(subtotal)}</td>
                 <td className="px-3 py-2 text-right">
                   <button
                     type="button"
@@ -91,7 +93,7 @@ export function SaleItemsTable({
           {!items.length ? (
             <tr>
               <td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">
-                Todavia no agregaste productos a la venta.
+                Todavía no agregaste productos a la venta.
               </td>
             </tr>
           ) : null}

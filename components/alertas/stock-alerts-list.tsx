@@ -1,3 +1,7 @@
+import { Bell } from "lucide-react";
+import { formatQuantity } from "@/lib/utils";
+import { EmptyState } from "@/components/ui/empty-state";
+
 type AlertRow = {
   id: string;
   type: string;
@@ -19,9 +23,19 @@ const alertTypeLabels: Record<string, string> = {
 };
 
 export function StockAlertsList({ alerts }: StockAlertsListProps) {
+  if (!alerts.length) {
+    return (
+      <EmptyState
+        icon={<Bell aria-hidden />}
+        title="No hay alertas"
+        description="Cuando haya stock bajo, faltante u otros avisos configurados, los verás en esta lista."
+      />
+    );
+  }
+
   return (
     <div className="overflow-x-auto rounded-lg border">
-      <table className="w-full text-sm">
+      <table className="w-full min-w-[560px] text-sm">
         <thead className="bg-muted/50 text-left">
           <tr>
             <th className="px-3 py-2 font-medium">Fecha</th>
@@ -34,11 +48,14 @@ export function StockAlertsList({ alerts }: StockAlertsListProps) {
         <tbody>
           {alerts.map((alert) => (
             <tr key={alert.id} className="border-t">
-              <td className="px-3 py-2">{new Date(alert.created_at).toLocaleString("es-AR")}</td>
+              <td className="px-3 py-2 whitespace-nowrap">{new Date(alert.created_at).toLocaleString("es-AR")}</td>
               <td className="px-3 py-2">
                 {alert.products?.name ?? "-"}
                 <p className="text-xs text-muted-foreground">
-                  Stock: {alert.products?.current_stock ?? "-"} / min {alert.products?.min_stock ?? "-"}
+                  Stock:{" "}
+                  {alert.products
+                    ? `${formatQuantity(alert.products.current_stock)} / min ${formatQuantity(alert.products.min_stock)}`
+                    : "—"}
                 </p>
               </td>
               <td className="px-3 py-2">{alertTypeLabels[alert.type] ?? alert.type}</td>
@@ -46,13 +63,6 @@ export function StockAlertsList({ alerts }: StockAlertsListProps) {
               <td className="px-3 py-2">{alert.resolved ? "Resuelta" : "Pendiente"}</td>
             </tr>
           ))}
-          {!alerts.length ? (
-            <tr>
-              <td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">
-                No hay alertas registradas.
-              </td>
-            </tr>
-          ) : null}
         </tbody>
       </table>
     </div>

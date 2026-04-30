@@ -1,6 +1,7 @@
 "use client";
 
 import { paymentMethodLabels, paymentMethodValues } from "@/lib/validations/sale";
+import { formatCurrency } from "@/lib/utils";
 
 type SaleSummaryProps = {
   paymentMethod: (typeof paymentMethodValues)[number];
@@ -21,7 +22,7 @@ export function SaleSummary({
 
       <div className="space-y-1">
         <label htmlFor="paymentMethod" className="text-sm font-medium">
-          Metodo de pago
+          Método de pago
         </label>
         <select
           id="paymentMethod"
@@ -38,11 +39,14 @@ export function SaleSummary({
             </option>
           ))}
         </select>
+        <p className="text-xs text-muted-foreground">
+          Se guarda con la venta para el historial; podés mezclar criterio contable fuera de MultiStock.
+        </p>
       </div>
 
       <div className="rounded-md bg-muted/40 p-3">
-        <p className="text-sm text-muted-foreground">Items: {itemsCount}</p>
-        <p className="text-lg font-semibold">Total: ${total.toFixed(2)}</p>
+        <p className="text-sm text-muted-foreground">Ítems: {itemsCount}</p>
+        <p className="text-lg font-semibold">Total: {formatCurrency(total)}</p>
       </div>
     </div>
   );

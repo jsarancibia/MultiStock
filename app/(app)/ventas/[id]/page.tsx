@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { paymentMethodLabels } from "@/lib/validations/sale";
+import { formatCurrency, formatQuantity } from "@/lib/utils";
 import { getSaleById } from "@/modules/core/sales/actions";
 
 type VentaDetallePageProps = {
@@ -29,14 +30,14 @@ export default async function VentaDetallePage({ params }: VentaDetallePageProps
       />
 
       <div className="rounded-lg border p-4">
-        <p className="text-sm text-muted-foreground">Metodo de pago</p>
+        <p className="text-sm text-muted-foreground">Método de pago</p>
         <p className="font-medium">{paymentLabel}</p>
         <p className="mt-2 text-sm text-muted-foreground">Total</p>
-        <p className="text-lg font-semibold">${Number(sale.total).toFixed(2)}</p>
+        <p className="text-lg font-semibold">{formatCurrency(sale.total)}</p>
       </div>
 
       <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[520px] text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
               <th className="px-3 py-2 font-medium">Producto</th>
@@ -55,16 +56,16 @@ export default async function VentaDetallePage({ params }: VentaDetallePageProps
                   </p>
                 </td>
                 <td className="px-3 py-2">
-                  {item.quantity} {item.products?.unit_type ?? ""}
+                  {formatQuantity(item.quantity)} {item.products?.unit_type ?? ""}
                 </td>
-                <td className="px-3 py-2">${Number(item.unit_price).toFixed(2)}</td>
-                <td className="px-3 py-2">${Number(item.subtotal).toFixed(2)}</td>
+                <td className="px-3 py-2">{formatCurrency(item.unit_price)}</td>
+                <td className="px-3 py-2">{formatCurrency(item.subtotal)}</td>
               </tr>
             ))}
             {!sale.sale_items?.length ? (
               <tr>
                 <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                  Esta venta no tiene items registrados.
+                  Esta venta no tiene ítems registrados.
                 </td>
               </tr>
             ) : null}

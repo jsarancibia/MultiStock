@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { businessTypes } from "@/config/business-types";
 import { getDashboardMetrics } from "@/lib/business/dashboard-metrics";
+import { formatCurrency } from "@/lib/utils";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
 import { VerduleriaDashboardCards } from "@/modules/verduleria/dashboard-cards";
@@ -33,7 +34,7 @@ export default async function DashboardPage() {
           value={metrics.salesTodayCount}
           helperText={
             metrics.salesTodayCount > 0
-              ? `Monto aprox. $${metrics.salesTodayTotal.toFixed(2)}`
+              ? `Monto aprox. ${formatCurrency(metrics.salesTodayTotal)}`
               : "Sin ventas registradas hoy"
           }
         />

@@ -13,8 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MultiStock",
-  description: "SaaS de control de inventario para pequenos comercios.",
+  title: {
+    default: "MultiStock",
+    template: "%s | MultiStock",
+  },
+  description:
+    "Inventario, ventas y alertas en un solo panel para verdulería, almacén y ferretería.",
 };
 
 export default function RootLayout({

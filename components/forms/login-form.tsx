@@ -31,7 +31,7 @@ export function LoginForm() {
 
       <div className="space-y-1.5">
         <label htmlFor="password" className="text-sm font-medium">
-          Contrasena
+          Contraseña
         </label>
         <input
           id="password"
@@ -53,9 +53,9 @@ export function LoginForm() {
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
-        No tienes cuenta?{" "}
+        ¿No tienes cuenta?{" "}
         <Link href="/auth/register" className="underline underline-offset-4">
-          Registrate
+          Regístrate
         </Link>
       </p>
     </form>
