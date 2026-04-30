@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { paymentMethodLabels } from "@/lib/validations/sale";
-import { cn, formatCurrency } from "@/lib/utils";
+import { APP_LOCALE, cn, formatCurrency } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -27,7 +27,7 @@ export function SalesTable({ sales }: SalesTableProps) {
       <EmptyState
         icon={<ShoppingCart aria-hidden />}
         title="Aún no hay ventas"
-        description="Registrá la primera venta para ver el historial, totales y método de pago en esta lista."
+        description="Registra la primera venta para ver el historial, totales y método de pago en esta lista."
         action={
           <Link href="/ventas/nueva" className={cn(buttonVariants())}>
             Nueva venta
@@ -59,7 +59,7 @@ export function SalesTable({ sales }: SalesTableProps) {
                 : (sale.payment_method ?? "-");
             return (
               <tr key={sale.id} className="border-t">
-                <td className="px-3 py-2">{new Date(sale.created_at).toLocaleString("es-AR")}</td>
+                <td className="px-3 py-2">{new Date(sale.created_at).toLocaleString(APP_LOCALE)}</td>
                 <td className="px-3 py-2">{lineCount}</td>
                 <td className="px-3 py-2">{methodLabel}</td>
                 <td className="px-3 py-2">{formatCurrency(sale.total)}</td>

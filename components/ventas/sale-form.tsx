@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useActionState } from "react";
 import type { BusinessType } from "@/config/business-types";
 import { Button } from "@/components/ui/button";
+import { FormMessage } from "@/components/ui/form-message";
 import { ProductSearch, type SaleProductOption } from "@/components/ventas/product-search";
 import { SaleItemsTable, type SaleCartItem } from "@/components/ventas/sale-items-table";
 import { SaleSummary } from "@/components/ventas/sale-summary";
@@ -136,26 +137,36 @@ export function SaleForm({ businessType, products, action }: SaleFormProps) {
       <input type="hidden" name="paymentMethod" value={paymentMethod} />
       <input type="hidden" name="items" value={payload} />
 
-      <ProductSearch businessType={businessType} products={products} onAddProduct={addProduct} />
-      <SaleItemsTable
-        items={items}
-        onUpdateQuantity={updateQuantity}
-        onUpdateUnitPrice={updateUnitPrice}
-        onRemove={removeItem}
-      />
-      <SaleSummary
-        paymentMethod={paymentMethod}
-        total={total}
-        itemsCount={items.length}
-        onPaymentMethodChange={setPaymentMethod}
-      />
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
+          <ProductSearch businessType={businessType} products={products} onAddProduct={addProduct} />
+          <SaleItemsTable
+            items={items}
+            onUpdateQuantity={updateQuantity}
+            onUpdateUnitPrice={updateUnitPrice}
+            onRemove={removeItem}
+          />
+        </div>
 
-      {clientError ? <p className="text-sm text-destructive">{clientError}</p> : null}
-      {state?.message ? <p className="text-sm text-destructive">{state.message}</p> : null}
-
-      <Button type="submit" disabled={pending || !items.length}>
-        {pending ? "Confirmando venta..." : "Confirmar venta"}
-      </Button>
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <div className="space-y-3 rounded-xl border border-border bg-card p-3 text-card-foreground shadow-sm">
+            <SaleSummary
+              paymentMethod={paymentMethod}
+              total={total}
+              itemsCount={items.length}
+              onPaymentMethodChange={setPaymentMethod}
+            />
+            <FormMessage message={clientError} />
+            <FormMessage message={state?.message} />
+            <Button className="w-full" type="submit" disabled={pending || !items.length}>
+              {pending ? "Confirmando venta..." : "Confirmar venta"}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Confirma solo cuando revises total, método de pago y cantidades.
+            </p>
+          </div>
+        </aside>
+      </div>
     </form>
   );
 }

@@ -1,9 +1,14 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
+import { normalizeBarcode } from "@/lib/barcode/normalize";
+import { mapProductForSale, type ProductFromDb, type SaleFormProduct } from "@/lib/products/map-product-for-sale";
+import { barcodeLookupSchema } from "@/lib/validations/barcode";
 import { productFiltersSchema, productSchema } from "@/lib/validations/product";
 import type { BusinessType } from "@/config/business-types";
 import { isLowMargin } from "@/lib/business/business-type-config";
@@ -179,6 +184,105 @@ export async function getProductById(productId: string) {
   return data;
 }
 
+type BarcodeOwner = {
+  id: string;
+  name: string;
+  sku: string | null;
+  barcode: string | null;
+};
+
+async function findProductUsingBarcode(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  businessId: string,
+  barcode: string,
+  exceptProductId?: string
+): Promise<BarcodeOwner | null> {
+  let exactQuery = supabase
+    .from("products")
+    .select("id,name,sku,barcode")
+    .eq("business_id", businessId)
+    .eq("barcode", barcode);
+  if (exceptProductId) exactQuery = exactQuery.neq("id", exceptProductId);
+
+  const { data: exactRows } = await exactQuery.limit(1);
+  const exact = exactRows?.[0] ?? null;
+  if (exact) return exact;
+
+  let looseQuery = supabase
+    .from("products")
+    .select("id,name,sku,barcode")
+    .eq("business_id", businessId)
+    .ilike("barcode", barcode);
+  if (exceptProductId) looseQuery = looseQuery.neq("id", exceptProductId);
+
+  const { data: looseRows } = await looseQuery.limit(10);
+
+  return (
+    (looseRows ?? []).find((row) => row.barcode && normalizeBarcode(row.barcode) === barcode) ??
+    null
+  );
+}
+
+export async function findActiveProductByBarcode(
+  raw: string
+): Promise<{ ok: true; product: SaleFormProduct } | { ok: false; message: string }> {
+  const user = await requireUser();
+  const business = await requireActiveBusiness(user.id);
+
+  const parsed = barcodeLookupSchema.safeParse(raw);
+  if (!parsed.success) {
+    const msg = parsed.error.issues[0]?.message ?? "Código inválido.";
+    return { ok: false, message: msg };
+  }
+
+  const code = parsed.data;
+  const supabase = await createClient();
+
+  const addSearchFilters = () =>
+    supabase
+      .from("products")
+      .select("id,name,sku,barcode,unit_type,current_stock,sale_price,active,metadata")
+      .eq("business_id", business.id)
+      .eq("active", true);
+
+  const { data: exactRows, error: errExact } = await addSearchFilters()
+    .eq("barcode", code)
+    .limit(2);
+  if (errExact) {
+    return { ok: false, message: "No se pudo buscar el producto." };
+  }
+
+  if ((exactRows ?? []).length > 1) {
+    return { ok: false, message: "Hay más de un producto activo con ese código." };
+  }
+
+  let row = exactRows?.[0] ?? null;
+  if (!row) {
+    const { data: looseRows, error: errLoose } = await addSearchFilters()
+      .ilike("barcode", code)
+      .limit(10);
+    if (errLoose) {
+      return { ok: false, message: "No se pudo buscar el producto." };
+    }
+    const normalizedMatches = (looseRows ?? []).filter(
+      (r) => r.barcode && normalizeBarcode(r.barcode) === code
+    );
+    if (normalizedMatches.length > 1) {
+      return { ok: false, message: "Hay más de un producto activo con ese código." };
+    }
+    row = normalizedMatches[0] ?? null;
+  }
+
+  if (!row) {
+    return {
+      ok: false,
+      message: "No encontramos un producto activo con ese código.",
+    };
+  }
+
+  return { ok: true, product: mapProductForSale(row as ProductFromDb) };
+}
+
 export async function getProductFormData() {
   const user = await requireUser();
   const business = await requireActiveBusiness(user.id);
@@ -221,8 +325,17 @@ export async function createProductAction(
   });
 
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors };
+  const createAnother = String(formData.get("intent") ?? "") === "create_another";
 
   const supabase = await createClient();
+  if (parsed.data.barcode) {
+    const barcodeTaken = await findProductUsingBarcode(supabase, business.id, parsed.data.barcode);
+    if (barcodeTaken) {
+      const ref = barcodeTaken.sku ? `${barcodeTaken.name} (${barcodeTaken.sku})` : barcodeTaken.name;
+      return { message: `El código de barras ya existe y pertenece a ${ref}.` };
+    }
+  }
+
   const { data: product, error } = await supabase
     .from("products")
     .insert({
@@ -267,6 +380,19 @@ export async function createProductAction(
     }
   }
 
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "product",
+    entityId: product.id,
+    action: "created",
+    summary: `Producto creado: ${parsed.data.name}`,
+    afterData: { name: parsed.data.name },
+  });
+
+  if (createAnother) {
+    redirect("/productos/nuevo");
+  }
   redirect("/productos");
 }
 
@@ -298,6 +424,26 @@ export async function updateProductAction(
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors };
 
   const supabase = await createClient();
+  if (parsed.data.barcode) {
+    const barcodeTaken = await findProductUsingBarcode(
+      supabase,
+      business.id,
+      parsed.data.barcode,
+      productId
+    );
+    if (barcodeTaken) {
+      const ref = barcodeTaken.sku ? `${barcodeTaken.name} (${barcodeTaken.sku})` : barcodeTaken.name;
+      return { message: `El código de barras ya existe y pertenece a ${ref}.` };
+    }
+  }
+
+  const { data: prior } = await supabase
+    .from("products")
+    .select("name,cost_price,sale_price,active")
+    .eq("id", productId)
+    .eq("business_id", business.id)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("products")
     .update({
@@ -316,7 +462,7 @@ export async function updateProductAction(
     .eq("id", productId)
     .eq("business_id", business.id);
 
-  if (error) return { message: error.message };
+  if (error) return { message: humanizeActionError(error.message, "No se pudo actualizar el producto.") };
 
   await syncPerishableProductAlert(
     supabase,
@@ -326,6 +472,44 @@ export async function updateProductAction(
     parsed.data.metadata as Record<string, unknown>
   );
 
+  const costChanged =
+    prior && String(prior.cost_price) !== String(parsed.data.costPrice);
+  const saleChanged =
+    prior && String(prior.sale_price) !== String(parsed.data.salePrice);
+  const action =
+    costChanged || saleChanged ? ("price_changed" as const) : ("updated" as const);
+  const summaryParts = [`Producto actualizado: ${parsed.data.name}`];
+  if (costChanged) {
+    summaryParts.push(`costo ${prior?.cost_price ?? "?"} → ${parsed.data.costPrice}`);
+  }
+  if (saleChanged) {
+    summaryParts.push(`venta ${prior?.sale_price ?? "?"} → ${parsed.data.salePrice}`);
+  }
+  if (prior && prior.active && !parsed.data.active) {
+    summaryParts.push("marcado inactivo en formulario");
+  }
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "product",
+    entityId: productId,
+    action,
+    summary: summaryParts.join(" · "),
+    beforeData: prior
+      ? {
+          cost_price: prior.cost_price,
+          sale_price: prior.sale_price,
+          active: prior.active,
+        }
+      : null,
+    afterData: {
+      cost_price: String(parsed.data.costPrice),
+      sale_price: String(parsed.data.salePrice),
+      active: parsed.data.active,
+    },
+  });
+
   redirect(`/productos/${productId}`);
 }
 
@@ -333,6 +517,25 @@ export async function deactivateProductAction(productId: string) {
   const user = await requireUser();
   const business = await requireActiveBusiness(user.id);
   const supabase = await createClient();
+  const { data: row } = await supabase
+    .from("products")
+    .select("name")
+    .eq("id", productId)
+    .eq("business_id", business.id)
+    .maybeSingle();
+
   await supabase.from("products").update({ active: false }).eq("id", productId).eq("business_id", business.id);
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "product",
+    entityId: productId,
+    action: "deactivated",
+    summary: `Producto desactivado: ${row?.name ?? productId}`,
+    beforeData: { active: true },
+    afterData: { active: false },
+  });
+
   redirect("/productos");
 }

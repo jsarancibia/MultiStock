@@ -1,5 +1,6 @@
 "use client";
 
+import { panelSelectClass } from "@/components/ui/form-field-styles";
 import { paymentMethodLabels, paymentMethodValues } from "@/lib/validations/sale";
 import { formatCurrency } from "@/lib/utils";
 
@@ -17,11 +18,11 @@ export function SaleSummary({
   onPaymentMethodChange,
 }: SaleSummaryProps) {
   return (
-    <div className="space-y-3 rounded-lg border p-4">
-      <h2 className="font-medium">Resumen de venta</h2>
+    <div className="space-y-3 rounded-lg border border-border bg-card p-4 text-card-foreground">
+      <h2 className="font-medium text-foreground">Resumen de venta</h2>
 
       <div className="space-y-1">
-        <label htmlFor="paymentMethod" className="text-sm font-medium">
+        <label htmlFor="paymentMethod" className="text-sm font-medium text-foreground">
           Método de pago
         </label>
         <select
@@ -31,7 +32,7 @@ export function SaleSummary({
           onChange={(event) =>
             onPaymentMethodChange(event.target.value as (typeof paymentMethodValues)[number])
           }
-          className="w-full rounded-md border px-3 py-2 text-sm"
+          className={panelSelectClass}
         >
           {paymentMethodValues.map((method) => (
             <option key={method} value={method}>
@@ -40,7 +41,7 @@ export function SaleSummary({
           ))}
         </select>
         <p className="text-xs text-muted-foreground">
-          Se guarda con la venta para el historial; podés mezclar criterio contable fuera de MultiStock.
+          Se guarda con la venta para el historial; puedes mezclar criterio contable fuera de MultiStock.
         </p>
       </div>
 

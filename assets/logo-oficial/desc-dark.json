@@ -1,0 +1,574 @@
+{
+  "scene": {
+    "description": "A vibrant and dynamic logo for 'MULTISTOCK' featuring a central stylized 'i' surrounded by six interconnected 3D cubes. Four of the cubes display outline icons representing different product categories, while two smaller cubes are purely decorative. The elements are connected by triangular prisms and abstract flowing lines with dots, set against a dark background, conveying a sense of interconnectedness and data flow.",
+    "type": "logo"
+  },
+  "background": {
+    "type": "solid",
+    "colors": [
+      "#151924"
+    ],
+    "description": "A deep, dark navy blue solid background that provides strong contrast for the colorful foreground elements."
+  },
+  "elements": [
+    {
+      "id": 1,
+      "type": "shape",
+      "description": "The top, square part of the central stylized 'i' character, rendered as a 3D isometric cube.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#2A97DE",
+        "#2488CA",
+        "#1E75AF"
+      ],
+      "style": "3d",
+      "details": "Isometric perspective, showing top, front, and left faces. Lightest blue on top face, mid-blue on front, darkest blue on left face."
+    },
+    {
+      "id": 2,
+      "type": "shape",
+      "description": "The bottom, rectangular stem part of the central stylized 'i' character, rendered as a 3D isometric rectangular prism.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#2A97DE",
+        "#2488CA",
+        "#1E75AF"
+      ],
+      "style": "3d",
+      "details": "Isometric perspective, showing top, front, and left faces. Lightest blue on top face, mid-blue on front, darkest blue on left face. Forms the lower part of the 'i' and is wider than the top cube."
+    },
+    {
+      "id": 3,
+      "type": "shape",
+      "description": "A large 3D isometric cube positioned above and to the left of the central 'i', with an orange to pink gradient.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#FF8C4B",
+        "#FF5D86",
+        "#CB3E8C"
+      ],
+      "style": "3d",
+      "details": "Isometric perspective, showing top, front, and left faces. Top face is orange, front face is pink, left face is a darker pink/purple. Has a subtle shadow underneath."
+    },
+    {
+      "id": 4,
+      "type": "shape",
+      "description": "A large 3D isometric cube positioned above and to the right of the central 'i', with an orange to pink gradient.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#FF8C4B",
+        "#FF5D86",
+        "#CB3E8C"
+      ],
+      "style": "3d",
+      "details": "Isometric perspective, showing top, front, and left faces. Top face is orange, front face is pink, left face is a darker pink/purple. Has a subtle shadow underneath."
+    },
+    {
+      "id": 5,
+      "type": "shape",
+      "description": "A large 3D isometric cube positioned below and to the left of the central 'i', with a green to teal gradient.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#77DCAE",
+        "#3ACDB6",
+        "#28B1A0"
+      ],
+      "style": "3d",
+      "details": "Isometric perspective, showing top, front, and left faces. Top face is light green, front face is teal, left face is a darker teal. Has a subtle shadow underneath."
+    },
+    {
+      "id": 6,
+      "type": "shape",
+      "description": "A large 3D isometric cube positioned below and to the right of the central 'i', with an orange to pink gradient.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#FF8C4B",
+        "#FF5D86",
+        "#CB3E8C"
+      ],
+      "style": "3d",
+      "details": "Isometric perspective, showing top, front, and left faces. Top face is orange, front face is pink, left face is a darker pink/purple. Has a subtle shadow underneath."
+    },
+    {
+      "id": 7,
+      "type": "shape",
+      "description": "A small 3D isometric cube positioned slightly above and to the right of the central 'i', behind the top-right large cube.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#2A97DE",
+        "#2488CA",
+        "#1E75AF"
+      ],
+      "style": "3d",
+      "details": "Isometric perspective, showing top, front, and left faces. Part of the blue block structure surrounding the 'i'."
+    },
+    {
+      "id": 8,
+      "type": "shape",
+      "description": "A small 3D isometric cube positioned slightly below and to the left of the central 'i', behind the bottom-left large cube.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#2A97DE",
+        "#2488CA",
+        "#1E75AF"
+      ],
+      "style": "3d",
+      "details": "Isometric perspective, showing top, front, and left faces. Part of the blue block structure surrounding the 'i'."
+    },
+    {
+      "id": 9,
+      "type": "shape",
+      "description": "A triangular prism connecting the central 'i' structure to the top-left orange/pink cube.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#2A97DE",
+        "#FF8C4B",
+        "#2488CA",
+        "#FF5D86"
+      ],
+      "style": "gradient",
+      "details": "Forms a connection, transitioning from blue (from the 'i') to orange/pink (to the cube) with a gradient."
+    },
+    {
+      "id": 10,
+      "type": "shape",
+      "description": "A triangular prism connecting the central 'i' structure to the top-right orange/pink cube.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#2A97DE",
+        "#FF8C4B",
+        "#2488CA",
+        "#FF5D86"
+      ],
+      "style": "gradient",
+      "details": "Forms a connection, transitioning from blue (from the 'i') to orange/pink (to the cube) with a gradient."
+    },
+    {
+      "id": 11,
+      "type": "shape",
+      "description": "A triangular prism connecting the central 'i' structure to the bottom-left green/teal cube.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#2A97DE",
+        "#77DCAE",
+        "#2488CA",
+        "#3ACDB6"
+      ],
+      "style": "gradient",
+      "details": "Forms a connection, transitioning from blue (from the 'i') to green/teal (to the cube) with a gradient."
+    },
+    {
+      "id": 12,
+      "type": "shape",
+      "description": "A triangular prism connecting the central 'i' structure to the bottom-right orange/pink cube.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#2A97DE",
+        "#FF8C4B",
+        "#2488CA",
+        "#FF5D86"
+      ],
+      "style": "gradient",
+      "details": "Forms a connection, transitioning from blue (from the 'i') to orange/pink (to the cube) with a gradient."
+    },
+    {
+      "id": 13,
+      "type": "icon",
+      "description": "A white outlined icon of a t-shirt, centered on the top face of the top-left orange/pink cube.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Represents clothing or apparel inventory."
+    },
+    {
+      "id": 14,
+      "type": "icon",
+      "description": "A white outlined icon of an open book, centered on the top face of the top-right orange/pink cube.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Represents books, media, or education-related stock."
+    },
+    {
+      "id": 15,
+      "type": "icon",
+      "description": "A white outlined icon of a bottle, centered on the top face of the bottom-left green/teal cube.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Represents beverages, liquids, or bottled products."
+    },
+    {
+      "id": 16,
+      "type": "icon",
+      "description": "A white outlined icon of a gear or cogwheel, centered on the top face of the bottom-right orange/pink cube.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Represents machinery, tools, settings, or industrial stock."
+    },
+    {
+      "id": 17,
+      "type": "decoration",
+      "description": "A curving line with a gradient from teal to blue, extending from the top-left area.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#4DD2BC",
+        "#2AA7DE"
+      ],
+      "style": "gradient",
+      "details": "Thin line, suggesting data flow or connectivity, with a rounded end."
+    },
+    {
+      "id": 18,
+      "type": "decoration",
+      "description": "A small circular dot, blue in color, at the end of the top-left decorative line.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#2AA7DE"
+      ],
+      "style": "filled",
+      "details": "Part of the abstract data flow pattern."
+    },
+    {
+      "id": 19,
+      "type": "decoration",
+      "description": "A small circular dot, teal in color, at the beginning of the top-left decorative line.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#4DD2BC"
+      ],
+      "style": "filled",
+      "details": "Part of the abstract data flow pattern."
+    },
+    {
+      "id": 20,
+      "type": "decoration",
+      "description": "A curving line with a gradient from orange to pink, extending from the top-right area.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#FF8C4B",
+        "#FF5D86"
+      ],
+      "style": "gradient",
+      "details": "Thin line, suggesting data flow or connectivity, with a rounded end."
+    },
+    {
+      "id": 21,
+      "type": "decoration",
+      "description": "A small circular dot, orange in color, at the end of the top-right decorative line.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#FF8C4B"
+      ],
+      "style": "filled",
+      "details": "Part of the abstract data flow pattern."
+    },
+    {
+      "id": 22,
+      "type": "decoration",
+      "description": "A small circular dot, pink in color, at the beginning of the top-right decorative line.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#FF5D86"
+      ],
+      "style": "filled",
+      "details": "Part of the abstract data flow pattern."
+    },
+    {
+      "id": 23,
+      "type": "decoration",
+      "description": "A curving line with a gradient from green to teal, extending from the bottom-left area.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#77DCAE",
+        "#3ACDB6"
+      ],
+      "style": "gradient",
+      "details": "Thin line, suggesting data flow or connectivity, with a rounded end."
+    },
+    {
+      "id": 24,
+      "type": "decoration",
+      "description": "A small circular dot, green in color, at the end of the bottom-left decorative line.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#77DCAE"
+      ],
+      "style": "filled",
+      "details": "Part of the abstract data flow pattern."
+    },
+    {
+      "id": 25,
+      "type": "decoration",
+      "description": "A small circular dot, teal in color, at the beginning of the bottom-left decorative line.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#3ACDB6"
+      ],
+      "style": "filled",
+      "details": "Part of the abstract data flow pattern."
+    },
+    {
+      "id": 26,
+      "type": "decoration",
+      "description": "A curving line with a gradient from orange to pink, extending from the bottom-right area.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#FF8C4B",
+        "#FF5D86"
+      ],
+      "style": "gradient",
+      "details": "Thin line, suggesting data flow or connectivity, with a rounded end."
+    },
+    {
+      "id": 27,
+      "type": "decoration",
+      "description": "A small circular dot, orange in color, at the end of the bottom-right decorative line.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#FF8C4B"
+      ],
+      "style": "filled",
+      "details": "Part of the abstract data flow pattern."
+    },
+    {
+      "id": 28,
+      "type": "decoration",
+      "description": "A small circular dot, pink in color, at the beginning of the bottom-right decorative line.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#FF5D86"
+      ],
+      "style": "filled",
+      "details": "Part of the abstract data flow pattern."
+    },
+    {
+      "id": 29,
+      "type": "decoration",
+      "description": "A smaller, wavy blue line segment extending from the bottom-left.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#2AA7DE"
+      ],
+      "style": "flat",
+      "details": "A thin, rounded line, part of the abstract background decoration."
+    },
+    {
+      "id": 30,
+      "type": "decoration",
+      "description": "A small circular blue dot accompanying the wavy blue line segment in the bottom-left.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#2AA7DE"
+      ],
+      "style": "filled",
+      "details": "Part of the abstract background decoration."
+    },
+    {
+      "id": 31,
+      "type": "decoration",
+      "description": "A smaller, wavy green line segment extending from the top-left, near the central structure.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#77DCAE"
+      ],
+      "style": "flat",
+      "details": "A thin, rounded line, part of the abstract background decoration."
+    },
+    {
+      "id": 32,
+      "type": "decoration",
+      "description": "A small circular green dot accompanying the wavy green line segment in the top-left.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#77DCAE"
+      ],
+      "style": "filled",
+      "details": "Part of the abstract background decoration."
+    }
+  ],
+  "text_content": [
+    {
+      "text": "MULTI",
+      "font": "sans-serif",
+      "weight": "bold",
+      "color": "#2AA7DE",
+      "position": {
+        "x": "center",
+        "y": "bottom"
+      },
+      "size": "xl"
+    },
+    {
+      "text": "STOCK",
+      "font": "sans-serif",
+      "weight": "bold",
+      "color": "#FF8C4B",
+      "position": {
+        "x": "center",
+        "y": "bottom"
+      },
+      "size": "xl"
+    }
+  ],
+  "style": {
+    "art_style": "vector",
+    "color_scheme": "vibrant",
+    "mood": "modern|corporate|dynamic|technological",
+    "effects": [
+      "gradient",
+      "shadow",
+      "rounded_corners"
+    ]
+  },
+  "colors": {
+    "palette": [
+      "#151924",
+      "#2A97DE",
+      "#FF8C4B",
+      "#77DCAE",
+      "#FF5D86",
+      "#3ACDB6",
+      "#FFFFFF"
+    ],
+    "dominant": "#151924",
+    "accent": "#2AA7DE"
+  }
+}

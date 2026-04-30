@@ -7,7 +7,10 @@ export type AppModule =
   | "inventory"
   | "sales"
   | "suppliers"
-  | "alerts";
+  | "alerts"
+  | "audit"
+  | "reports"
+  | "exports";
 
 export type NavigationItem = {
   label: string;
@@ -46,10 +49,31 @@ export const navigationItems: NavigationItem[] = [
     href: "/alertas",
     module: "alerts",
   },
+  {
+    label: "Auditoría",
+    href: "/auditoria",
+    module: "audit",
+  },
+  {
+    label: "Reportes",
+    href: "/reportes",
+    module: "reports",
+  },
+  {
+    label: "Exportaciones",
+    href: "/exportaciones",
+    module: "exports",
+  },
 ];
 
 export function getEnabledModules(businessType: BusinessType): Set<AppModule> {
-  const enabled = new Set<AppModule>(["dashboard", "alerts"]);
+  const enabled = new Set<AppModule>([
+    "dashboard",
+    "alerts",
+    "audit",
+    "reports",
+    "exports",
+  ]);
   const businessModules = businessTypes[businessType].modules;
 
   if (businessModules.includes("products")) enabled.add("products");

@@ -1,6 +1,11 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { BusinessType } from "@/config/business-types";
+import { requireUser } from "@/lib/auth/session";
+import {
+  getActiveBusinessIdFromCookie,
+  setActiveBusinessCookie,
+} from "@/lib/business/active-business-cookie";
 
 export type ActiveBusiness = {
   id: string;
@@ -9,9 +14,55 @@ export type ActiveBusiness = {
   owner_id: string;
 };
 
-export async function getActiveBusiness(userId: string): Promise<ActiveBusiness | null> {
+export async function listUserBusinesses(userId: string): Promise<ActiveBusiness[]> {
   const supabase = await createClient();
+  const { data: links, error } = await supabase
+    .from("business_users")
+    .select("business_id")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true });
 
+  const membershipBusinessIds = [...new Set((links ?? []).map((row) => row.business_id))];
+  const { data: memberBusinesses } =
+    membershipBusinessIds.length > 0
+      ? await supabase
+          .from("businesses")
+          .select("id,name,business_type,owner_id")
+          .in("id", membershipBusinessIds)
+      : { data: [] as ActiveBusiness[] };
+
+  const { data: ownerRows } = await supabase
+    .from("businesses")
+    .select("id,name,business_type,owner_id")
+    .eq("owner_id", userId)
+    .order("created_at", { ascending: true });
+
+  if (error && !ownerRows) return [];
+  const merged = [
+    ...((memberBusinesses as ActiveBusiness[] | null) ?? []),
+    ...((ownerRows as ActiveBusiness[] | null) ?? []),
+  ];
+  const deduped = new Map<string, ActiveBusiness>();
+  for (const business of merged) deduped.set(business.id, business);
+  return [...deduped.values()];
+}
+
+export async function getActiveBusiness(userId: string): Promise<ActiveBusiness | null> {
+  const userBusinesses = await listUserBusinesses(userId);
+  const cookieBusinessId = await getActiveBusinessIdFromCookie();
+
+  if (cookieBusinessId) {
+    const businessByCookie = userBusinesses.find((business) => business.id === cookieBusinessId);
+    if (businessByCookie) {
+      return businessByCookie;
+    }
+  }
+
+  if (userBusinesses.length > 0) {
+    return userBusinesses[0];
+  }
+
+  const supabase = await createClient();
   const { data: membership, error: membershipError } = await supabase
     .from("business_users")
     .select("business_id")
@@ -49,4 +100,13 @@ export async function requireActiveBusiness(userId: string) {
     redirect("/onboarding");
   }
   return business;
+}
+
+export async function setActiveBusinessAction(formData: FormData) {
+  const value = String(formData.get("businessId") ?? "").trim();
+  if (!value) return;
+  const user = await requireUser();
+  const userBusinesses = await listUserBusinesses(user.id);
+  if (!userBusinesses.some((business) => business.id === value)) return;
+  await setActiveBusinessCookie(value);
 }

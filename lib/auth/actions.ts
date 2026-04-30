@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
 
@@ -59,7 +60,7 @@ export async function registerAction(
   });
 
   if (signUpError) {
-    return { message: signUpError.message };
+    return { message: humanizeActionError(signUpError.message, "No se pudo crear la cuenta.") };
   }
 
   // Intentamos iniciar sesion automaticamente para ir al onboarding.

@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { AuthCard } from "@/components/auth/auth-card";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { RegisterForm } from "@/components/forms/register-form";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getActiveBusiness } from "@/lib/business/get-active-business";
@@ -11,16 +13,17 @@ export default async function RegisterPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md items-center px-4 py-10">
-      <section className="w-full space-y-6 rounded-xl border bg-card p-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold">Crear cuenta</h1>
-          <p className="text-sm text-muted-foreground">
-            Registra tu usuario para configurar tu negocio.
-          </p>
-        </div>
-        <RegisterForm />
-      </section>
-    </main>
+    <AuthShell
+      mode="register"
+      card={
+        <AuthCard
+          badge="Cuenta gratis"
+          title="Crear cuenta"
+          description="Configura tu negocio y accede al panel de MultiStock."
+        >
+          <RegisterForm />
+        </AuthCard>
+      }
+    />
   );
 }

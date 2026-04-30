@@ -68,7 +68,7 @@ export default function PricingPage() {
           <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
           <p>
             Los importes o límites definitivos se definirán más adelante. Hoy el foco es uso real del
-            producto y feedback: registrá una cuenta y probá el panel sin costo in-app.
+            producto y feedback: registra una cuenta y prueba el panel sin costo in-app.
           </p>
         </div>
 

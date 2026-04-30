@@ -370,6 +370,51 @@ export type Database = {
           { foreignKeyName: "stock_alerts_product_id_fkey"; columns: ["product_id"]; isOneToOne: false; referencedRelation: "products"; referencedColumns: ["id"] },
         ];
       };
+      audit_logs: {
+        Row: {
+          id: string;
+          business_id: string;
+          user_id: string | null;
+          entity_type: string;
+          entity_id: string | null;
+          action: string;
+          summary: string;
+          before_data: Json | null;
+          after_data: Json | null;
+          metadata: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          user_id?: string | null;
+          entity_type: string;
+          entity_id?: string | null;
+          action: string;
+          summary: string;
+          before_data?: Json | null;
+          after_data?: Json | null;
+          metadata?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          user_id?: string | null;
+          entity_type?: string;
+          entity_id?: string | null;
+          action?: string;
+          summary?: string;
+          before_data?: Json | null;
+          after_data?: Json | null;
+          metadata?: Json | null;
+          created_at?: string;
+        };
+        Relationships: [
+          { foreignKeyName: "audit_logs_business_id_fkey"; columns: ["business_id"]; isOneToOne: false; referencedRelation: "businesses"; referencedColumns: ["id"] },
+          { foreignKeyName: "audit_logs_user_id_fkey"; columns: ["user_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { businessTypeValues } from "@/config/business-types";
+import { barcodeFieldSchema } from "@/lib/validations/barcode";
 
 export const unitTypeValues = ["unit", "kg", "g", "box", "liter", "meter"] as const;
 
@@ -10,7 +11,7 @@ export const productSchema = z.object({
   categoryId: z.string().uuid().optional().or(z.literal("")),
   supplierId: z.string().uuid().optional().or(z.literal("")),
   sku: z.string().max(120).optional().or(z.literal("")),
-  barcode: z.string().max(120).optional().or(z.literal("")),
+  barcode: barcodeFieldSchema,
   unitType: z.enum(unitTypeValues, { message: "Unidad invalida." }),
   costPrice: z.coerce.number().min(0, "Costo invalido."),
   salePrice: z.coerce.number().min(0, "Precio de venta invalido."),

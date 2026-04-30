@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { onboardingSchema } from "@/lib/validations/business";
 import { requireUser } from "@/lib/auth/session";
@@ -44,7 +45,12 @@ export async function createBusinessAction(
     .single();
 
   if (businessError || !business) {
-    return { message: businessError?.message ?? "No se pudo crear el negocio." };
+    return {
+      message: humanizeActionError(
+        businessError?.message,
+        "No se pudo crear el negocio."
+      ),
+    };
   }
 
   const { error: membershipError } = await supabase.from("business_users").upsert(
@@ -60,7 +66,7 @@ export async function createBusinessAction(
   );
 
   if (membershipError) {
-    return { message: membershipError.message };
+    return { message: humanizeActionError(membershipError.message) };
   }
 
   redirect("/dashboard");

@@ -8,7 +8,7 @@ export function MarketingFooter() {
           <div>
             <p className="font-medium text-foreground">MultiStock</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Inventario y ventas para comercios que no tienen tiempo para sistemas rígidos.
+              Inventario y ventas para comercios en Chile que no tienen tiempo para sistemas rígidos.
             </p>
           </div>
           <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm" aria-label="Pie de página">
@@ -27,7 +27,7 @@ export function MarketingFooter() {
           </nav>
         </div>
         <p className="mt-8 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} MultiStock. Hecho para negocios en Argentina.
+          © {new Date().getFullYear()} MultiStock. Hecho para negocios en Chile.
         </p>
       </div>
     </footer>

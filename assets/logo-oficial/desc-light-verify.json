@@ -1,0 +1,304 @@
+{
+  "scene": {
+    "description": "A vibrant 3D isometric illustration featuring a central stylized 'i' character formed by blue cubes, surrounded by six additional cubes in a hexagonal arrangement. These surrounding cubes display various icons and feature colorful gradients. The entire structure is adorned with energetic, flowing lines and dots, suggesting connectivity and data flow, casting a soft shadow on a plain white background.",
+    "type": "illustration"
+  },
+  "background": {
+    "type": "solid",
+    "colors": [
+      "#FFFFFF"
+    ],
+    "description": "A clean, solid white background with a subtle, very light texture resembling fine paper grain."
+  },
+  "elements": [
+    {
+      "id": 1,
+      "type": "character",
+      "description": "The main body of a stylized lowercase 'i', rendered as a tall, blue isometric prism. It's composed of two main faces: a lighter front face and a darker side face, creating a 3D effect. The top edge is angled to fit the dot above.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#337DCB",
+        "#2A69B1",
+        "#418DD2"
+      ],
+      "style": "3d",
+      "details": "Composed of two visible faces: a brighter front trapezoidal face (facing slightly left) and a darker rectangular side face (facing right). The bottom is flat."
+    },
+    {
+      "id": 2,
+      "type": "shape",
+      "description": "The dot of the stylized lowercase 'i', rendered as a small, blue isometric cube positioned directly above the main body. It also has visible top, front, and side faces with varying shades of blue.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#337DCB",
+        "#2A69B1",
+        "#418DD2"
+      ],
+      "style": "3d",
+      "details": "A small cube with a brighter top square face, a medium blue front square face (facing slightly left), and a darker blue side square face (facing right)."
+    },
+    {
+      "id": 3,
+      "type": "shape",
+      "description": "An isometric cube positioned at the top-left, featuring a gradient from vibrant orange to bright pink. Its visible faces are the top, front-left, and front-right. It houses a white T-shirt icon.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#FA8C54",
+        "#F46F9E",
+        "#EC7D6F",
+        "#E46695"
+      ],
+      "style": "3d",
+      "details": "Top face is orange, front-left face is orange-pink gradient, front-right face is pink."
+    },
+    {
+      "id": 4,
+      "type": "icon",
+      "description": "A simple outline icon of a T-shirt, centered on the top face of the top-left gradient cube.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Single continuous white line forming the shape of a short-sleeved T-shirt."
+    },
+    {
+      "id": 5,
+      "type": "shape",
+      "description": "An isometric cube positioned at the top-right, featuring a gradient from bright green to vibrant orange. Its visible faces are the top, front-left, and front-right. It houses a white open book icon.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#83CF98",
+        "#3F9A68",
+        "#FC8C54",
+        "#EC7B59"
+      ],
+      "style": "3d",
+      "details": "Top face is green, front-left face is green-orange gradient, front-right face is orange."
+    },
+    {
+      "id": 6,
+      "type": "icon",
+      "description": "A simple outline icon of an open book, centered on the top face of the top-right gradient cube.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Two rectangular shapes for pages, with a 'spine' indicated by a slightly curved line."
+    },
+    {
+      "id": 7,
+      "type": "shape",
+      "description": "An isometric cube positioned at the bottom-left, featuring a gradient from bright green to teal. Its visible faces are the top, front-left, and front-right. It houses a white bottle icon.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#55C3B4",
+        "#3B8C7E",
+        "#82CF98",
+        "#4DA581"
+      ],
+      "style": "3d",
+      "details": "Top face is teal, front-left face is teal-green gradient, front-right face is green."
+    },
+    {
+      "id": 8,
+      "type": "icon",
+      "description": "A simple outline icon of a generic bottle, centered on the top face of the bottom-left gradient cube.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Outline of a bottle with a slightly narrower neck and a wider base."
+    },
+    {
+      "id": 9,
+      "type": "shape",
+      "description": "An isometric cube positioned at the bottom-right, featuring a gradient from vibrant orange to bright pink. Its visible faces are the top, front-left, and front-right. It houses a white gear icon.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#FA8C54",
+        "#F46F9E",
+        "#EC7D6F",
+        "#E46695"
+      ],
+      "style": "3d",
+      "details": "Top face is orange, front-left face is orange-pink gradient, front-right face is pink."
+    },
+    {
+      "id": 10,
+      "type": "icon",
+      "description": "A simple outline icon of a cogwheel or gear, centered on the top face of the bottom-right gradient cube.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Circular shape with regular teeth around the perimeter and a smaller circle in the center."
+    },
+    {
+      "id": 11,
+      "type": "shape",
+      "description": "An isometric cube positioned at the top-center, directly above the central 'i', rendered in shades of blue. Its visible faces are the top, front-left, and front-right.",
+      "position": {
+        "x": "center",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#337DCB",
+        "#2A69B1",
+        "#418DD2"
+      ],
+      "style": "3d",
+      "details": "Solid blue cube, similar coloring to the 'i' structure. No icon."
+    },
+    {
+      "id": 12,
+      "type": "shape",
+      "description": "An isometric cube positioned at the bottom-center, directly below the central 'i', rendered in shades of blue. Its visible faces are the top, front-left, and front-right.",
+      "position": {
+        "x": "center",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#337DCB",
+        "#2A69B1",
+        "#418DD2"
+      ],
+      "style": "3d",
+      "details": "Solid blue cube, similar coloring to the 'i' structure. No icon."
+    },
+    {
+      "id": 13,
+      "type": "decoration",
+      "description": "A set of four flowing, dashed lines and several small circular dots emanating from the left side of the central cube arrangement. These lines are in shades of blue and green, indicating connectivity.",
+      "position": {
+        "x": "left",
+        "y": "center"
+      },
+      "size": "large",
+      "colors": [
+        "#3483D0",
+        "#2A69B1",
+        "#56BF82",
+        "#3D8B6D"
+      ],
+      "style": "flat",
+      "details": "Comprises multiple segments, some curved, with small circular termination points or mid-line dots. Includes two blue lines and two green lines."
+    },
+    {
+      "id": 14,
+      "type": "decoration",
+      "description": "A set of four flowing, dashed lines and several small circular dots emanating from the right side of the central cube arrangement. These lines are in shades of orange and green, indicating connectivity.",
+      "position": {
+        "x": "right",
+        "y": "center"
+      },
+      "size": "large",
+      "colors": [
+        "#EE874D",
+        "#DA7C49",
+        "#56BF82",
+        "#3D8B6D"
+      ],
+      "style": "flat",
+      "details": "Comprises multiple segments, some curved, with small circular termination points or mid-line dots. Includes two orange lines and two green lines."
+    },
+    {
+      "id": 15,
+      "type": "decoration",
+      "description": "A soft, blurry drop shadow cast beneath the entire floating cube and line structure, creating a sense of depth and lift from the background.",
+      "position": {
+        "x": "center",
+        "y": "bottom"
+      },
+      "size": "large",
+      "colors": [
+        "#000000"
+      ],
+      "style": "flat",
+      "details": "Oval shape, highly diffused and semi-transparent, centered below the main graphic."
+    }
+  ],
+  "text_content": [
+    {
+      "text": "i",
+      "font": "decorative",
+      "weight": "bold",
+      "color": "#337DCB",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "xl"
+    }
+  ],
+  "style": {
+    "art_style": "vector",
+    "color_scheme": "vibrant",
+    "mood": "modern|corporate|informative|dynamic",
+    "effects": [
+      "gradient",
+      "shadow",
+      "3d",
+      "rounded_corners"
+    ]
+  },
+  "colors": {
+    "palette": [
+      "#FFFFFF",
+      "#337DCB",
+      "#FA8C54",
+      "#F46F9E",
+      "#83CF98",
+      "#55C3B4",
+      "#EE874D",
+      "#2A69B1"
+    ],
+    "dominant": "#FFFFFF",
+    "accent": "#337DCB"
+  }
+}

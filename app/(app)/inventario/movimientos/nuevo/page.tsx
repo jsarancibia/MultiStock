@@ -15,12 +15,12 @@ export default async function NuevoMovimientoPage() {
       <section className="space-y-6">
         <PageHeader
           title="Registrar movimiento"
-          description="Actualizá el stock y guardá el historial del cambio."
+          description="Actualiza el stock y guarda el historial del cambio."
         />
         <EmptyState
           icon={<Package aria-hidden />}
-          title="Necesitás al menos un producto"
-          description="Cargá un producto activo y volvé a esta pantalla para registrar compras, ajustes o mermas."
+          title="Necesitas al menos un producto"
+          description="Carga un producto activo y vuelve a esta pantalla para registrar compras, ajustes o mermas."
           action={
             <Link href="/productos/nuevo" className={cn(buttonVariants())}>
               Crear producto
@@ -33,7 +33,7 @@ export default async function NuevoMovimientoPage() {
 
   return (
     <section className="space-y-6">
-      <PageHeader title="Registrar movimiento" description="Actualizá el stock y guardá el historial del cambio." />
+      <PageHeader title="Registrar movimiento" description="Actualiza el stock y guarda el historial del cambio." />
       <StockMovementForm products={products} action={createStockMovementAction} />
     </section>
   );

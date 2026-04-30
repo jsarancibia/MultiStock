@@ -1,10 +1,9 @@
-import Image from "next/image";
-import brandMark from "@/assets/logo-system/responsive/icon-only-mark-light.png";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 /** Bloque decorativo estilo “screenshot” para la landing. */
 export function DashboardMockup() {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-b from-card to-muted/30 shadow-2xl shadow-foreground/5">
+    <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-b from-card to-muted/30 shadow-2xl shadow-black/25 ring-1 ring-white/10 dark:shadow-black/60 dark:ring-white/5">
       <div className="border-b border-border/60 bg-muted/40 px-3 py-2">
         <div className="flex items-center gap-1.5">
           <span className="size-2.5 rounded-full bg-red-400/80" />
@@ -15,7 +14,7 @@ export function DashboardMockup() {
       <div className="grid gap-0 lg:grid-cols-[10rem_1fr]">
         <aside className="hidden border-r border-border/60 bg-muted/25 p-3 lg:block">
           <div className="mb-3 flex items-center justify-center">
-            <Image src={brandMark} alt="" width={36} height={36} className="opacity-80" />
+            <BrandLogo alt="" className="h-9 w-12 rounded-lg opacity-80" fit="cover" sizes="48px" />
           </div>
           <div className="space-y-1.5">
             {["Dashboard", "Productos", "Ventas", "Alertas"].map((item) => (

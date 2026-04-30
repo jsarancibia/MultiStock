@@ -1,3 +1,5 @@
+import { panelInputClass, panelTextareaClass } from "@/components/ui/form-field-styles";
+
 type FerreteriaProductFieldsProps = {
   metadata?: Record<string, unknown> | null;
 };
@@ -10,39 +12,39 @@ function valueOf(metadata: Record<string, unknown> | null | undefined, key: stri
 
 export function FerreteriaProductFields({ metadata }: FerreteriaProductFieldsProps) {
   return (
-    <div className="grid gap-3 rounded-lg border p-4 sm:grid-cols-2">
+    <div className="grid gap-3 rounded-lg border border-border bg-muted/40 p-4 sm:grid-cols-2">
       <div className="space-y-1">
-        <label htmlFor="brand" className="text-sm font-medium">
+        <label htmlFor="brand" className="text-sm font-medium text-foreground">
           Marca
         </label>
-        <input id="brand" name="brand" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={valueOf(metadata, "brand")} />
+        <input id="brand" name="brand" className={panelInputClass} defaultValue={valueOf(metadata, "brand")} />
       </div>
       <div className="space-y-1">
-        <label htmlFor="model" className="text-sm font-medium">
+        <label htmlFor="model" className="text-sm font-medium text-foreground">
           Modelo
         </label>
-        <input id="model" name="model" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={valueOf(metadata, "model")} />
+        <input id="model" name="model" className={panelInputClass} defaultValue={valueOf(metadata, "model")} />
       </div>
       <div className="space-y-1">
-        <label htmlFor="material" className="text-sm font-medium">
+        <label htmlFor="material" className="text-sm font-medium text-foreground">
           Material
         </label>
-        <input id="material" name="material" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={valueOf(metadata, "material")} />
+        <input id="material" name="material" className={panelInputClass} defaultValue={valueOf(metadata, "material")} />
       </div>
       <div className="space-y-1">
-        <label htmlFor="measure" className="text-sm font-medium">
+        <label htmlFor="measure" className="text-sm font-medium text-foreground">
           Medida
         </label>
-        <input id="measure" name="measure" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={valueOf(metadata, "measure")} />
+        <input id="measure" name="measure" className={panelInputClass} defaultValue={valueOf(metadata, "measure")} />
       </div>
       <div className="space-y-1 sm:col-span-2">
-        <label htmlFor="technical_specs" className="text-sm font-medium">
+        <label htmlFor="technical_specs" className="text-sm font-medium text-foreground">
           Especificaciones tecnicas
         </label>
         <textarea
           id="technical_specs"
           name="technical_specs"
-          className="w-full rounded-md border px-3 py-2 text-sm"
+          className={panelTextareaClass}
           defaultValue={valueOf(metadata, "technical_specs")}
         />
       </div>

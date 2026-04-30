@@ -37,7 +37,7 @@ export function ProductsTable({ businessType, products }: ProductsTableProps) {
       <EmptyState
         icon={<Package aria-hidden />}
         title="No hay productos para mostrar"
-        description="Creá el primero o probá otro criterio de búsqueda o filtros."
+        description="Crea el primero o prueba otro criterio de búsqueda o filtros."
         action={
           <Link href="/productos/nuevo" className={cn(buttonVariants())}>
             Crear producto

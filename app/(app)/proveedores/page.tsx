@@ -28,7 +28,7 @@ export default async function ProveedoresPage() {
         <EmptyState
           icon={<Building2 aria-hidden />}
           title="Aún no cargaste proveedores"
-          description="Asigná proveedores a tus productos para filtrar y organizar las compras."
+          description="Asigna proveedores a tus productos para filtrar y organizar las compras."
           action={
             <Link href="/proveedores/nuevo" className={cn(buttonVariants())}>
               Añadir proveedor

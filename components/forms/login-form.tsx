@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
+import { authInputClass } from "@/components/auth/auth-field-styles";
 import { loginAction, type AuthActionState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
+import { FormMessage } from "@/components/ui/form-message";
 
 const initialState: AuthActionState = {};
 
@@ -13,7 +14,7 @@ export function LoginForm() {
   return (
     <form action={formAction} className="space-y-4">
       <div className="space-y-1.5">
-        <label htmlFor="email" className="text-sm font-medium">
+        <label htmlFor="email" className="text-sm font-medium text-foreground">
           Email
         </label>
         <input
@@ -21,16 +22,15 @@ export function LoginForm() {
           name="email"
           type="email"
           required
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+          autoComplete="email"
+          className={authInputClass}
           placeholder="tu@email.com"
         />
-        {state?.errors?.email?.[0] ? (
-          <p className="text-sm text-destructive">{state.errors.email[0]}</p>
-        ) : null}
+        <FormMessage message={state?.errors?.email?.[0]} />
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="password" className="text-sm font-medium">
+        <label htmlFor="password" className="text-sm font-medium text-foreground">
           Contraseña
         </label>
         <input
@@ -38,26 +38,22 @@ export function LoginForm() {
           name="password"
           type="password"
           required
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-          placeholder="******"
+          autoComplete="current-password"
+          className={authInputClass}
+          placeholder="••••••"
         />
-        {state?.errors?.password?.[0] ? (
-          <p className="text-sm text-destructive">{state.errors.password[0]}</p>
-        ) : null}
+        <FormMessage message={state?.errors?.password?.[0]} />
       </div>
 
-      {state?.message ? <p className="text-sm text-destructive">{state.message}</p> : null}
+      <FormMessage message={state?.message} />
 
-      <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Ingresando..." : "Ingresar"}
+      <Button
+        type="submit"
+        disabled={pending}
+        className="h-12 w-full text-[0.9375rem] font-semibold shadow-md shadow-primary/30 transition hover:shadow-lg hover:shadow-primary/40"
+      >
+        {pending ? "Ingresando…" : "Ingresar al panel"}
       </Button>
-
-      <p className="text-center text-sm text-muted-foreground">
-        ¿No tienes cuenta?{" "}
-        <Link href="/auth/register" className="underline underline-offset-4">
-          Regístrate
-        </Link>
-      </p>
     </form>
   );
 }

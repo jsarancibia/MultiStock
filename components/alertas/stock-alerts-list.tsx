@@ -1,6 +1,8 @@
 import { Bell } from "lucide-react";
-import { formatQuantity } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { APP_LOCALE, formatQuantity } from "@/lib/utils";
+import { resolveStockAlertAction } from "@/modules/core/alerts/actions";
 
 type AlertRow = {
   id: string;
@@ -28,7 +30,7 @@ export function StockAlertsList({ alerts }: StockAlertsListProps) {
       <EmptyState
         icon={<Bell aria-hidden />}
         title="No hay alertas"
-        description="Cuando haya stock bajo, faltante u otros avisos configurados, los verás en esta lista."
+        description="Cuando haya stock bajo, faltante u otros avisos configurados, aparecerán en esta lista."
       />
     );
   }
@@ -43,12 +45,13 @@ export function StockAlertsList({ alerts }: StockAlertsListProps) {
             <th className="px-3 py-2 font-medium">Tipo</th>
             <th className="px-3 py-2 font-medium">Mensaje</th>
             <th className="px-3 py-2 font-medium">Estado</th>
+            <th className="px-3 py-2 font-medium">Acción</th>
           </tr>
         </thead>
         <tbody>
           {alerts.map((alert) => (
             <tr key={alert.id} className="border-t">
-              <td className="px-3 py-2 whitespace-nowrap">{new Date(alert.created_at).toLocaleString("es-AR")}</td>
+              <td className="px-3 py-2 whitespace-nowrap">{new Date(alert.created_at).toLocaleString(APP_LOCALE)}</td>
               <td className="px-3 py-2">
                 {alert.products?.name ?? "-"}
                 <p className="text-xs text-muted-foreground">
@@ -61,6 +64,18 @@ export function StockAlertsList({ alerts }: StockAlertsListProps) {
               <td className="px-3 py-2">{alertTypeLabels[alert.type] ?? alert.type}</td>
               <td className="px-3 py-2">{alert.message}</td>
               <td className="px-3 py-2">{alert.resolved ? "Resuelta" : "Pendiente"}</td>
+              <td className="px-3 py-2">
+                {!alert.resolved ? (
+                  <form action={resolveStockAlertAction}>
+                    <input type="hidden" name="alertId" value={alert.id} />
+                    <Button type="submit" variant="outline" size="xs">
+                      Marcar resuelta
+                    </Button>
+                  </form>
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

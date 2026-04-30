@@ -10,14 +10,14 @@ export function AlmacenDashboardCards({ metrics }: Props) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <StatCard
-        label="Alta rotacion (activos)"
+        label="Alta rotación (activos)"
         value={almacen.fastRotationCount}
-        helperText="Productos con marca de rotacion rapida."
+        helperText="Productos marcados como rotación rápida."
       />
       <StatCard
         label="Margen promedio (sobre costo)"
-        value={almacen.avgMarginPercent === null ? "N/A" : `${almacen.avgMarginPercent.toFixed(1)}%`}
-        helperText="Solo productos con costo mayor a cero."
+        value={almacen.avgMarginPercent === null ? "N/D" : `${almacen.avgMarginPercent.toFixed(1)}%`}
+        helperText="Promedio sobre productos con costo > 0. El ranking de ventas está arriba."
       />
     </div>
   );

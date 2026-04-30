@@ -20,7 +20,7 @@ export function StockTable({ products }: StockTableProps) {
       <EmptyState
         icon={<Boxes aria-hidden />}
         title="Sin productos en inventario"
-        description="Necesitás al menos un producto activo. Creá uno y el stock aparecerá aquí."
+        description="Necesitas al menos un producto activo. Crea uno y el stock aparecerá aquí."
         action={
           <Link href="/productos/nuevo" className={cn(buttonVariants())}>
             Crear producto

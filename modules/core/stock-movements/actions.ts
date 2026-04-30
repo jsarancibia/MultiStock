@@ -1,6 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { movementTypeLabel } from "@/lib/business/movement-type-labels";
+import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
@@ -69,7 +72,7 @@ export async function createStockMovement(input: StockMovementInput) {
 
   const { data: product, error: productError } = await supabase
     .from("products")
-    .select("id,current_stock,min_stock,unit_type,active")
+    .select("id,name,current_stock,min_stock,unit_type,active")
     .eq("id", input.productId)
     .eq("business_id", business.id)
     .maybeSingle();
@@ -95,18 +98,28 @@ export async function createStockMovement(input: StockMovementInput) {
     return { ok: false as const, message: "No se permite stock negativo." };
   }
 
-  const { error: movementError } = await supabase.from("stock_movements").insert({
-    business_id: business.id,
-    product_id: input.productId,
-    type: input.type,
-    quantity: String(delta),
-    reason: input.reason || null,
-    unit_cost: input.unitCost === undefined ? null : String(input.unitCost),
-    created_by: user.id,
-  });
+  const { data: insertedMovement, error: movementError } = await supabase
+    .from("stock_movements")
+    .insert({
+      business_id: business.id,
+      product_id: input.productId,
+      type: input.type,
+      quantity: String(delta),
+      reason: input.reason || null,
+      unit_cost: input.unitCost === undefined ? null : String(input.unitCost),
+      created_by: user.id,
+    })
+    .select("id")
+    .single();
 
-  if (movementError) {
-    return { ok: false as const, message: movementError.message };
+  if (movementError || !insertedMovement) {
+    return {
+      ok: false as const,
+      message: humanizeActionError(
+        movementError?.message,
+        "No se pudo registrar el movimiento."
+      ),
+    };
   }
 
   const { error: updateError } = await supabase
@@ -116,10 +129,25 @@ export async function createStockMovement(input: StockMovementInput) {
     .eq("business_id", business.id);
 
   if (updateError) {
-    return { ok: false as const, message: updateError.message };
+    return { ok: false as const, message: humanizeActionError(updateError.message) };
   }
 
   await syncLowStockAlert(input.productId, business.id, newStock, minStock);
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "stock_movement",
+    entityId: insertedMovement.id,
+    action: "stock_changed",
+    summary: `${movementTypeLabel(input.type)} · ${product.name}: Δ ${delta} (stock ${currentStock} → ${newStock})`,
+    afterData: {
+      type: input.type,
+      quantity: String(delta),
+      product_id: input.productId,
+    },
+    metadata: { reason: input.reason ?? null },
+  });
 
   return { ok: true as const };
 }
@@ -171,7 +199,7 @@ export async function getMovementFormData() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("products")
-    .select("id,name,unit_type,current_stock")
+    .select("id,name,unit_type,current_stock,barcode")
     .eq("business_id", business.id)
     .eq("active", true)
     .order("name");

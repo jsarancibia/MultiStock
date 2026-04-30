@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import { createBusinessAction, type OnboardingActionState } from "@/lib/business/actions";
 import { businessTypes, businessTypeValues } from "@/config/business-types";
 import { Button } from "@/components/ui/button";
+import { panelInputClass } from "@/components/ui/form-field-styles";
+import { FormMessage } from "@/components/ui/form-message";
 
 const initialState: OnboardingActionState = {};
 
@@ -13,43 +15,40 @@ export function OnboardingForm() {
   return (
     <form action={formAction} className="space-y-5">
       <div className="space-y-1.5">
-        <label htmlFor="name" className="text-sm font-medium">
+        <label htmlFor="name" className="text-sm font-medium text-foreground">
           Nombre del negocio
         </label>
         <input
           id="name"
           name="name"
           required
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+          className={panelInputClass}
           placeholder="Ej: Mi Verduleria Central"
         />
-        {state?.errors?.name?.[0] ? (
-          <p className="text-sm text-destructive">{state.errors.name[0]}</p>
-        ) : null}
+        <FormMessage message={state?.errors?.name?.[0]} />
+        <p className="text-xs text-muted-foreground">Ejemplo: Kiosco Centro, Verdulería San Martín, Ferretería Norte.</p>
       </div>
 
       <div className="space-y-2">
-        <p className="text-sm font-medium">Tipo de negocio</p>
+        <p className="text-sm font-medium text-foreground">Tipo de negocio</p>
         <div className="grid gap-2 sm:grid-cols-3">
           {businessTypeValues.map((type) => (
             <label
               key={type}
-              className="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-sm"
+              className="flex cursor-pointer items-center gap-2 rounded-md border border-border bg-card p-3 text-sm text-foreground hover:bg-muted/50"
             >
               <input type="radio" name="businessType" value={type} required />
               <span>{businessTypes[type].label}</span>
             </label>
           ))}
         </div>
-        {state?.errors?.businessType?.[0] ? (
-          <p className="text-sm text-destructive">{state.errors.businessType[0]}</p>
-        ) : null}
+        <FormMessage message={state?.errors?.businessType?.[0]} />
       </div>
 
-      {state?.message ? <p className="text-sm text-destructive">{state.message}</p> : null}
+      <FormMessage message={state?.message} />
 
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Creando negocio..." : "Continuar al dashboard"}
+        {pending ? "Creando negocio..." : "Crear negocio y continuar"}
       </Button>
     </form>
   );

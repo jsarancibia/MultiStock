@@ -3,6 +3,9 @@
 import { useActionState } from "react";
 import type { BusinessType } from "@/config/business-types";
 import { Button } from "@/components/ui/button";
+import { formSectionClass, panelInputClass } from "@/components/ui/form-field-styles";
+import { cn } from "@/lib/utils";
+import { FormMessage } from "@/components/ui/form-message";
 import type { CategoryActionState } from "@/modules/core/categories/actions";
 
 const initialState: CategoryActionState = {};
@@ -19,13 +22,18 @@ export function CategoryForm({ businessType, action }: CategoryFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="space-y-3 rounded-lg border p-4">
-      <h2 className="font-medium">Nueva categoria</h2>
+    <form action={formAction} className={cn("space-y-3", formSectionClass)}>
+      <h2 className="font-medium text-foreground">Nueva categoria</h2>
       <input type="hidden" name="businessType" value={businessType} />
-      <input name="name" placeholder="Ej: Frutas" className="w-full rounded-md border px-3 py-2 text-sm" required />
-      {state?.message ? <p className="text-xs text-emerald-600">{state.message}</p> : null}
+      <input
+        name="name"
+        placeholder="Ej: Frutas"
+        className={panelInputClass}
+        required
+      />
+      <FormMessage message={state?.message} tone="success" className="text-xs" />
       <Button type="submit" disabled={pending} variant="outline">
-        {pending ? "Guardando..." : "Agregar categoria"}
+        {pending ? "Guardando..." : "Agregar categoría"}
       </Button>
     </form>
   );

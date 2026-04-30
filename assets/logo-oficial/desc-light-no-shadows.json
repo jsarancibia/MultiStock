@@ -1,0 +1,318 @@
+{
+  "scene": {
+    "description": "A vibrant 3D isometric illustration featuring a central stylized letter i formed by blue geometric blocks, surrounded by a hexagonal arrangement of additional isometric blocks with gradient colors and white outline icons. Dynamic colored dashed lines and small dots extend from the perimeter. The graphic sits on a completely flat, uniform background with NO drop shadow, NO soft ground shadow, NO ambient occlusion blob, and NO darkening under the cluster; the background is perfectly clean and solid. Keep normal 3D face lighting on the cubes (faceted shading) only.",
+    "type": "illustration"
+  },
+  "background": {
+    "type": "solid",
+    "colors": [
+      "#FFFFFF"
+    ],
+    "description": "A plain, uniform white background providing clear contrast for the colorful central graphic."
+  },
+  "elements": [
+    {
+      "id": 1,
+      "type": "shape",
+      "description": "Small isometric cube forming the dot of the central 'i'.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#2980B9",
+        "#3D9EDF",
+        "#2475A9"
+      ],
+      "style": "3d",
+      "details": "Part of a larger blue 'i' structure, top component, features blue gradient."
+    },
+    {
+      "id": 2,
+      "type": "shape",
+      "description": "Tall isometric rectangular prism forming the stem of the central 'i'.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#2475A9",
+        "#3D9EDF",
+        "#1B5D88"
+      ],
+      "style": "3d",
+      "details": "Part of a larger blue 'i' structure, middle component, wider at the bottom, features blue gradient."
+    },
+    {
+      "id": 3,
+      "type": "shape",
+      "description": "Isometric inverted trapezoidal prism or wedge, forming the base/foot of the central 'i'.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#2980B9",
+        "#3D9EDF",
+        "#2475A9"
+      ],
+      "style": "3d",
+      "details": "Part of a larger blue 'i' structure, bottom component, features blue gradient."
+    },
+    {
+      "id": 4,
+      "type": "shape",
+      "description": "Isometric cube situated directly above the 'i' dot, at the top position of the surrounding hexagonal pattern.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#2980B9",
+        "#3D9EDF",
+        "#2475A9"
+      ],
+      "style": "3d",
+      "details": "Solid blue gradient cube, no icon inside."
+    },
+    {
+      "id": 5,
+      "type": "shape",
+      "description": "Isometric cube with an orange-pink gradient, positioned at the top-right of the central cluster.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#FF9A4D",
+        "#FF6B6B",
+        "#FFC06B"
+      ],
+      "style": "3d",
+      "details": "Features an orange to pink gradient, contains a white outline icon of an open book."
+    },
+    {
+      "id": 6,
+      "type": "icon",
+      "description": "Simple white outline icon of an open book, centered on the visible front face of the top-right orange-pink cube (Element 5).",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Represents knowledge or learning."
+    },
+    {
+      "id": 7,
+      "type": "shape",
+      "description": "Isometric cube with an orange-pink gradient, positioned at the middle-right of the central cluster.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#FF9A4D",
+        "#FF6B6B",
+        "#FFC06B"
+      ],
+      "style": "3d",
+      "details": "Features an orange to pink gradient, contains a white outline icon of a cogwheel/gear."
+    },
+    {
+      "id": 8,
+      "type": "icon",
+      "description": "Simple white outline icon of a cogwheel or gear, centered on the visible front face of the mid-right orange-pink cube (Element 7).",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Represents settings, mechanics, or industry."
+    },
+    {
+      "id": 9,
+      "type": "shape",
+      "description": "Isometric cube situated directly below the 'i' base, at the bottom position of the surrounding hexagonal pattern.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#2980B9",
+        "#3D9EDF",
+        "#2475A9"
+      ],
+      "style": "3d",
+      "details": "Solid blue gradient cube, no icon inside."
+    },
+    {
+      "id": 10,
+      "type": "shape",
+      "description": "Isometric cube with a green-teal gradient, positioned at the middle-left of the central cluster.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#34D1BF",
+        "#6BFFB6",
+        "#39A57D"
+      ],
+      "style": "3d",
+      "details": "Features a teal to green gradient, contains a white outline icon of a bottle."
+    },
+    {
+      "id": 11,
+      "type": "icon",
+      "description": "Simple white outline icon of a bottle (possibly for beverages or liquids), centered on the visible front face of the mid-left green-teal cube (Element 10).",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Represents liquids, packaging, or consumables."
+    },
+    {
+      "id": 12,
+      "type": "shape",
+      "description": "Isometric cube with a green-teal gradient, positioned at the top-left of the central cluster.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#34D1BF",
+        "#6BFFB6",
+        "#39A57D"
+      ],
+      "style": "3d",
+      "details": "Features a teal to green gradient, contains a white outline icon of a t-shirt."
+    },
+    {
+      "id": 13,
+      "type": "icon",
+      "description": "Simple white outline icon of a t-shirt, centered on the visible front face of the top-left green-teal cube (Element 12).",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Represents apparel or fashion."
+    },
+    {
+      "id": 14,
+      "type": "decoration",
+      "description": "Two wavy blue dashed line segments extending from the top-left of the cluster, each ending with a small solid blue dot.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#3498DB"
+      ],
+      "style": "outlined, dashed, filled",
+      "details": "Represents connectivity or data flow."
+    },
+    {
+      "id": 15,
+      "type": "decoration",
+      "description": "Two wavy green dashed line segments extending from the mid-left of the cluster, each ending with a small solid green dot.",
+      "position": {
+        "x": "left",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#2ECC71"
+      ],
+      "style": "outlined, dashed, filled",
+      "details": "Represents connectivity or data flow."
+    },
+    {
+      "id": 16,
+      "type": "decoration",
+      "description": "Two wavy orange dashed line segments extending from the mid-right of the cluster, each ending with a small solid orange dot.",
+      "position": {
+        "x": "right",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#E67E22"
+      ],
+      "style": "outlined, dashed, filled",
+      "details": "Represents connectivity or data flow."
+    },
+    {
+      "id": 17,
+      "type": "decoration",
+      "description": "Two wavy light green dashed line segments extending from the top-right of the cluster, each ending with a small solid light green dot.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#4CAF50"
+      ],
+      "style": "outlined, dashed, filled",
+      "details": "Represents connectivity or data flow."
+    }
+  ],
+  "text_content": [],
+  "style": {
+    "art_style": "vector, 3d, material",
+    "color_scheme": "vibrant, cool (with warm accents)",
+    "mood": "modern, corporate, professional, dynamic",
+    "effects": [
+      "gradient"
+    ]
+  },
+  "colors": {
+    "palette": [
+      "#FFFFFF",
+      "#2980B9",
+      "#3D9EDF",
+      "#1B5D88",
+      "#FF9A4D",
+      "#FF6B6B",
+      "#FFC06B",
+      "#34D1BF",
+      "#6BFFB6",
+      "#39A57D",
+      "#3498DB",
+      "#2ECC71",
+      "#E67E22",
+      "#4CAF50",
+      "#000000"
+    ],
+    "dominant": "#2980B9",
+    "accent": "#FF9A4D"
+  }
+}

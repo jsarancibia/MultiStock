@@ -1,0 +1,402 @@
+{
+  "scene": {
+    "description": "A vibrant, abstract logo or icon featuring a central 'i' symbol composed of blue 3D blocks, surrounded by a hexagonal arrangement of additional 3D cuboid blocks in contrasting orange and green colors. Wavy, colored lines with dots emanate outwards from the central structure, suggesting connectivity or data flow. The overall composition is balanced and dynamic, set against a clean white background.",
+    "type": "logo"
+  },
+  "background": {
+    "type": "solid",
+    "colors": [
+      "#FFFFFF"
+    ],
+    "description": "A plain, solid white background, providing a clean canvas that makes the colorful central illustration stand out."
+  },
+  "elements": [
+    {
+      "id": 1,
+      "type": "shape",
+      "description": "Large vertical blue cuboid block forming the main body (stem) of the central 'i' symbol. It features distinct shades creating a 3D effect.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "large",
+      "colors": [
+        "#2196F3",
+        "#1976D2",
+        "#1565C0"
+      ],
+      "style": "3d",
+      "details": "Isometric projection, visible top face (lightest blue), front face (medium blue), and right side face (darkest blue)."
+    },
+    {
+      "id": 2,
+      "type": "shape",
+      "description": "Small blue cuboid block positioned directly above the main 'i' body, acting as the dot of the 'i' symbol. It also has a 3D appearance with blue shades.",
+      "position": {
+        "x": "center",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#2196F3",
+        "#1976D2",
+        "#1565C0"
+      ],
+      "style": "3d",
+      "details": "Isometric projection, visible top face (lightest blue), front face (medium blue), and right side face (darkest blue)."
+    },
+    {
+      "id": 3,
+      "type": "shape",
+      "description": "A medium-sized blue cuboid block positioned at the top-center of the overall hexagonal arrangement, above the 'i' dot, connecting to other elements.",
+      "position": {
+        "x": "center",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#2196F3",
+        "#1976D2",
+        "#1565C0"
+      ],
+      "style": "3d",
+      "details": "Isometric projection, visible top face (lightest blue), front face (medium blue), and right side face (darkest blue)."
+    },
+    {
+      "id": 4,
+      "type": "shape",
+      "description": "A medium-sized blue cuboid block positioned at the bottom-center of the overall hexagonal arrangement, below the 'i' body, connecting to other elements.",
+      "position": {
+        "x": "center",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#2196F3",
+        "#1976D2",
+        "#1565C0"
+      ],
+      "style": "3d",
+      "details": "Isometric projection, visible top face (lightest blue), front face (medium blue), and right side face (darkest blue)."
+    },
+    {
+      "id": 5,
+      "type": "object",
+      "description": "A medium-sized 3D cuboid block with an orange to red gradient, positioned at the top-left of the central structure. It features a white outline icon of a T-shirt on its front face.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#FFB74D",
+        "#FF7043",
+        "#F4511E",
+        "#FFFFFF"
+      ],
+      "style": "3d",
+      "details": "Isometric projection. Top face is lighter orange, front face is medium orange, and right side face is a deeper red-orange. The T-shirt icon is minimalist and outlined."
+    },
+    {
+      "id": 6,
+      "type": "object",
+      "description": "A medium-sized 3D cuboid block with an orange to red gradient, positioned at the top-right of the central structure. It features a white outline icon of an open book on its front face.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#FFB74D",
+        "#FF7043",
+        "#F4511E",
+        "#FFFFFF"
+      ],
+      "style": "3d",
+      "details": "Isometric projection. Top face is lighter orange, front face is medium orange, and left side face is a deeper red-orange. The book icon is minimalist and outlined, showing two pages."
+    },
+    {
+      "id": 7,
+      "type": "object",
+      "description": "A medium-sized 3D cuboid block with an orange to red gradient, positioned at the middle-right of the central structure. It features a white outline icon of a gear (cogwheel) on its front face.",
+      "position": {
+        "x": "right",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#FFB74D",
+        "#FF7043",
+        "#F4511E",
+        "#FFFFFF"
+      ],
+      "style": "3d",
+      "details": "Isometric projection. Top face is lighter orange, front face is medium orange, and left side face is a deeper red-orange. The gear icon is minimalist and outlined with twelve teeth."
+    },
+    {
+      "id": 8,
+      "type": "shape",
+      "description": "A medium-sized blue cuboid block, positioned at the bottom-right of the hexagonal arrangement. It is structural and visually extends the central blue elements, completing the hexagon. No icon is present.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#2196F3",
+        "#1976D2",
+        "#1565C0"
+      ],
+      "style": "3d",
+      "details": "Isometric projection, visible top face (lightest blue), front face (medium blue), and left side face (darkest blue)."
+    },
+    {
+      "id": 9,
+      "type": "object",
+      "description": "A medium-sized 3D cuboid block with a green gradient, positioned at the bottom-left of the central structure. It features a white outline icon of a bottle on its front face.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#81C784",
+        "#66BB6A",
+        "#4CAF50",
+        "#FFFFFF"
+      ],
+      "style": "3d",
+      "details": "Isometric projection. Top face is lighter green, front face is medium green, and right side face is a deeper green. The bottle icon is minimalist and outlined."
+    },
+    {
+      "id": 10,
+      "type": "shape",
+      "description": "A medium-sized 3D cuboid block with a green gradient, positioned at the middle-left of the central structure. No icon is visible on its front face.",
+      "position": {
+        "x": "left",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#81C784",
+        "#66BB6A",
+        "#4CAF50"
+      ],
+      "style": "3d",
+      "details": "Isometric projection. Top face is lighter green, front face is medium green, and right side face is a deeper green."
+    },
+    {
+      "id": 11,
+      "type": "decoration",
+      "description": "A thin, wavy line with a blue to green gradient, extending from the top-left area outwards and upwards. It terminates with a small circular dot.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#2196F3",
+        "#66BB6A"
+      ],
+      "style": "gradient",
+      "details": "Organic, flowing curve, resembling a data stream or circuit trace."
+    },
+    {
+      "id": 12,
+      "type": "decoration",
+      "description": "A thin, slightly curved line with a green gradient, extending from the top-right area outwards and upwards. It terminates with a small circular dot.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#81C784",
+        "#4CAF50"
+      ],
+      "style": "gradient",
+      "details": "Organic, flowing curve, resembling a data stream or circuit trace."
+    },
+    {
+      "id": 13,
+      "type": "decoration",
+      "description": "A thin, wavy line with an orange to red gradient, extending from the middle-right area outwards to the right. It terminates with a small circular dot.",
+      "position": {
+        "x": "right",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FFB74D",
+        "#F4511E"
+      ],
+      "style": "gradient",
+      "details": "Organic, flowing curve, resembling a data stream or circuit trace."
+    },
+    {
+      "id": 14,
+      "type": "decoration",
+      "description": "A thin, wavy line with an orange to red gradient, extending from the bottom-right area outwards and downwards. It terminates with a small circular dot.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#FF7043",
+        "#F4511E"
+      ],
+      "style": "gradient",
+      "details": "Organic, flowing curve, resembling a data stream or circuit trace."
+    },
+    {
+      "id": 15,
+      "type": "decoration",
+      "description": "A thin, wavy line with a blue to green gradient, extending from the bottom-left area outwards and downwards. It terminates with a small circular dot.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#2196F3",
+        "#66BB6A"
+      ],
+      "style": "gradient",
+      "details": "Organic, flowing curve, resembling a data stream or circuit trace."
+    },
+    {
+      "id": 16,
+      "type": "decoration",
+      "description": "A thin, wavy line with a green to blue gradient, extending from the middle-left area outwards and upwards. It terminates with a small circular dot.",
+      "position": {
+        "x": "left",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#66BB6A",
+        "#2196F3"
+      ],
+      "style": "gradient",
+      "details": "Organic, flowing curve, resembling a data stream or circuit trace."
+    },
+    {
+      "id": 17,
+      "type": "decoration",
+      "description": "A small, solid circular dot, marking the end of Decorative Line 1.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#2196F3"
+      ],
+      "style": "filled",
+      "details": "Matches the blue color of the line's origin."
+    },
+    {
+      "id": 18,
+      "type": "decoration",
+      "description": "A small, solid circular dot, marking the end of Decorative Line 2.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#81C784"
+      ],
+      "style": "filled",
+      "details": "Matches the green color of the line's origin."
+    },
+    {
+      "id": 19,
+      "type": "decoration",
+      "description": "A small, solid circular dot, marking the end of Decorative Line 3.",
+      "position": {
+        "x": "right",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FFB74D"
+      ],
+      "style": "filled",
+      "details": "Matches the orange color of the line's origin."
+    },
+    {
+      "id": 20,
+      "type": "decoration",
+      "description": "A small, solid circular dot, marking the end of Decorative Line 4.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#F4511E"
+      ],
+      "style": "filled",
+      "details": "Matches the red-orange color of the line's end."
+    },
+    {
+      "id": 21,
+      "type": "decoration",
+      "description": "A small, solid circular dot, marking the end of Decorative Line 5.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#66BB6A"
+      ],
+      "style": "filled",
+      "details": "Matches the green color of the line's end."
+    },
+    {
+      "id": 22,
+      "type": "decoration",
+      "description": "A small, solid circular dot, marking the end of Decorative Line 6.",
+      "position": {
+        "x": "left",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#2196F3"
+      ],
+      "style": "filled",
+      "details": "Matches the blue color of the line's end."
+    }
+  ],
+  "text_content": [],
+  "style": {
+    "art_style": "vector",
+    "color_scheme": "vibrant",
+    "mood": "modern",
+    "effects": [
+      "shadow",
+      "gradient",
+      "rounded_corners"
+    ]
+  },
+  "colors": {
+    "palette": [
+      "#FFFFFF",
+      "#2196F3",
+      "#1976D2",
+      "#1565C0",
+      "#81C784",
+      "#66BB6A",
+      "#4CAF50",
+      "#FFB74D",
+      "#FF7043",
+      "#F4511E"
+    ],
+    "dominant": "#2196F3",
+    "accent": "#FF7043"
+  }
+}

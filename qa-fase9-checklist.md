@@ -1,59 +1,61 @@
-# QA Fase 9 - Cierre MVP
+# QA Fase 15 - Demo y Release
 
-Checklist sugerido para validar el flujo completo de MultiStock en local y en produccion.
+Checklist operativo para validar MultiStock antes de demo o despliegue.
 
-## Flujo funcional base
+## 1) Flujo funcional end-to-end
 
-- Registro de usuario.
-- Login y acceso a rutas privadas.
-- Creacion de negocio y seleccion de rubro.
-- Creacion de categoria.
-- Creacion de proveedor.
-- Creacion y edicion de producto.
-- Movimiento de stock (compra, ajuste, merma).
-- Venta con descuento de stock.
-- Generacion/actualizacion de alertas.
-- Visualizacion de dashboard.
+- [ ] Registro de usuario (`/auth/register`).
+- [ ] Login (`/auth/login`).
+- [ ] Onboarding y creación de negocio (`/onboarding`).
+- [ ] Dashboard carga sin errores (`/dashboard`).
+- [ ] Crear categoría desde `Productos`.
+- [ ] Crear proveedor desde `Proveedores`.
+- [ ] Crear producto y editar precio/stock mínimo.
+- [ ] Registrar movimiento de stock.
+- [ ] Registrar venta y validar descuento de stock.
+- [ ] Revisar alertas y marcar una como resuelta.
+- [ ] Revisar auditoría (`/auditoria`): alta producto, movimiento, venta, alerta resuelta.
 
-## Pruebas por rubro
+## 2) Pruebas por rubro
 
-### Verduleria
+### Verdulería
+- [ ] Productos por kg y por unidad.
+- [ ] Producto perecible (`is_perishable`).
+- [ ] Venta por peso (`allows_weight_sale`).
+- [ ] Movimiento de merma.
 
-- Producto con `is_perishable`.
-- Producto con `allows_weight_sale`.
-- Venta con cantidad decimal en `kg` o `g`.
-- Movimiento de merma y reflejo en dashboard.
+### Almacén
+- [ ] Producto de alta rotación (`fast_rotation`).
+- [ ] Producto con margen sugerido.
+- [ ] Búsqueda por SKU/código de barras.
+- [ ] Filtro por foco comercial.
 
-### Almacen
+### Ferretería
+- [ ] Producto con marca/modelo/medida.
+- [ ] Búsqueda técnica por marca o medida.
+- [ ] Producto técnico en alerta de stock.
 
-- Producto con `fast_rotation`.
-- Producto con `suggested_margin`.
-- Busqueda por codigo de barras en ventas.
-- Filtro de productos por `low_margin`.
+## 3) Multi-tenant y seguridad
 
-### Ferreteria
+- [ ] Todas las pantallas muestran solo datos del `business_id` activo.
+- [ ] RLS activo en tablas core + `audit_logs`.
+- [ ] No se exponen datos de otro negocio.
 
-- Producto con marca/modelo/medida.
-- Busqueda tecnica por marca o medida.
-- Filtro `stale` en productos.
-- Tarjetas tecnicas en dashboard.
+## 4) UX de robustez
 
-## Seguridad y multi-tenant
+- [ ] Error boundaries activos en dashboard/productos/inventario/ventas/proveedores/alertas.
+- [ ] Loaders por ruta principal visibles.
+- [ ] Mensajes de formulario y acciones son comprensibles (sin stack técnico).
 
-- Verificar que consultas siempre filtren por `business_id`.
-- Validar que no se vean datos de negocios ajenos.
-- Confirmar RLS activo para tablas core:
-  - `products`
-  - `stock_movements`
-  - `sales`
-  - `sale_items`
-  - `stock_alerts`
+## 5) Calidad técnica
 
-## Build y deploy
+- [ ] `npm run lint` sin errores.
+- [ ] `npm run build` pasa.
+- [ ] Migraciones locales y remotas alineadas (`supabase migration list`).
 
-- `npm run lint`
-- `npm run build`
-- Revisar variables en Vercel:
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- Configurar redirects de Supabase Auth para dominio productivo.
+## 6) Release readiness
+
+- [ ] Variables en Vercel cargadas.
+- [ ] Supabase Auth Redirect URLs configuradas.
+- [ ] Deploy en preview validado con navegador limpio.
+- [ ] Checklist de demo completado con datos realistas.

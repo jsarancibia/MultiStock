@@ -1,5 +1,7 @@
 "use server";
 
+import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
@@ -41,15 +43,34 @@ export async function createCategoryAction(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("categories").insert({
-    business_id: business.id,
-    name: parsed.data.name,
-    business_type: parsed.data.businessType,
-  });
+  const { data: row, error } = await supabase
+    .from("categories")
+    .insert({
+      business_id: business.id,
+      name: parsed.data.name,
+      business_type: parsed.data.businessType,
+    })
+    .select("id")
+    .single();
 
-  if (error) {
-    return { message: error.message };
+  if (error || !row) {
+    return {
+      message: humanizeActionError(
+        error?.message,
+        "No se pudo crear la categoría."
+      ),
+    };
   }
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "category",
+    entityId: row.id,
+    action: "created",
+    summary: `Categoría creada: ${parsed.data.name}`,
+    afterData: { name: parsed.data.name },
+  });
 
   return { message: "Categoria creada." };
 }

@@ -1,10 +1,14 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
+import { formatCurrency } from "@/lib/utils";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
 import { createSaleSchema } from "@/lib/validations/sale";
+import { mapProductForSale, type ProductFromDb, type SaleFormProduct } from "@/lib/products/map-product-for-sale";
 
 export type SaleActionState = {
   message?: string;
@@ -12,51 +16,6 @@ export type SaleActionState = {
 };
 
 const DECIMAL_UNITS = new Set(["kg", "g", "liter", "meter"]);
-
-type ProductFromDb = {
-  id: string;
-  name: string;
-  sku: string | null;
-  barcode: string | null;
-  unit_type: string;
-  current_stock: string;
-  sale_price: string;
-  active: boolean;
-  metadata: Record<string, unknown> | null;
-};
-
-export type SaleFormProduct = {
-  id: string;
-  name: string;
-  sku: string | null;
-  barcode: string | null;
-  unit_type: string;
-  current_stock: string;
-  sale_price: string;
-  brand: string | null;
-  model: string | null;
-  measure: string | null;
-};
-
-function strMeta(v: unknown) {
-  return typeof v === "string" && v.trim() ? v.trim() : null;
-}
-
-function mapProductForSale(row: ProductFromDb): SaleFormProduct {
-  const meta = (row.metadata ?? {}) as Record<string, unknown>;
-  return {
-    id: row.id,
-    name: row.name,
-    sku: row.sku,
-    barcode: row.barcode,
-    unit_type: row.unit_type,
-    current_stock: row.current_stock,
-    sale_price: row.sale_price,
-    brand: strMeta(meta.brand),
-    model: strMeta(meta.model),
-    measure: strMeta(meta.measure),
-  };
-}
 
 function sortProductsForAlmacen(products: ProductFromDb[]): ProductFromDb[] {
   return [...products].sort((a, b) => {
@@ -196,8 +155,24 @@ export async function createSaleAction(
   });
 
   if (rpcError || !saleId) {
-    return { message: rpcError?.message ?? "No se pudo registrar la venta." };
+    return {
+      message: humanizeActionError(
+        rpcError?.message,
+        "No se pudo registrar la venta."
+      ),
+    };
   }
+
+  const itemsTotal = parsed.data.items.reduce((acc, it) => acc + it.quantity * it.unitPrice, 0);
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "sale",
+    entityId: saleId,
+    action: "sale_confirmed",
+    summary: `Venta ${formatCurrency(itemsTotal)} · ${parsed.data.items.length} línea(s) · pago ${parsed.data.paymentMethod}`,
+    metadata: { payment_method: parsed.data.paymentMethod, lines: parsed.data.items.length },
+  });
 
   redirect(`/ventas/${saleId}`);
 }

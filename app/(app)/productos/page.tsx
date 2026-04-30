@@ -3,6 +3,11 @@ import { CategoryForm } from "@/components/forms/category-form";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProductsTable } from "@/components/productos/products-table";
 import { Button } from "@/components/ui/button";
+import {
+  panelInputClass,
+  panelSelectClass,
+} from "@/components/ui/form-field-styles";
+import { cn } from "@/lib/utils";
 import { listCategories, createCategoryAction } from "@/modules/core/categories/actions";
 import { listSuppliers } from "@/modules/core/suppliers/actions";
 import { getProductFocusFilterOptions } from "@/lib/business/business-type-config";
@@ -27,7 +32,7 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
         description="Listado general con busqueda y filtros por negocio activo."
       />
 
-      <form className="grid gap-3 rounded-lg border p-4 sm:grid-cols-4">
+      <form className="grid gap-3 rounded-lg border border-border bg-card p-4 text-card-foreground sm:grid-cols-4">
         <input
           name="q"
           placeholder={
@@ -36,9 +41,13 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
               : "Buscar por nombre, SKU o codigo"
           }
           defaultValue={params.q ?? ""}
-          className="rounded-md border px-3 py-2 text-sm sm:col-span-2"
+          className={cn(panelInputClass, "sm:col-span-2")}
         />
-        <select name="categoryId" defaultValue={params.categoryId ?? ""} className="rounded-md border px-3 py-2 text-sm">
+        <select
+          name="categoryId"
+          defaultValue={params.categoryId ?? ""}
+          className={panelSelectClass}
+        >
           <option value="">Todas las categorias</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
@@ -46,7 +55,7 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
             </option>
           ))}
         </select>
-        <select name="supplierId" defaultValue={params.supplierId ?? ""} className="rounded-md border px-3 py-2 text-sm">
+        <select name="supplierId" defaultValue={params.supplierId ?? ""} className={panelSelectClass}>
           <option value="">Todos los proveedores</option>
           {suppliers.map((supplier) => (
             <option key={supplier.id} value={supplier.id}>
@@ -54,12 +63,16 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
             </option>
           ))}
         </select>
-        <select name="status" defaultValue={params.status ?? "all"} className="rounded-md border px-3 py-2 text-sm">
+        <select name="status" defaultValue={params.status ?? "all"} className={panelSelectClass}>
           <option value="all">Todos</option>
           <option value="active">Activos</option>
           <option value="inactive">Inactivos</option>
         </select>
-        <select name="focus" defaultValue={params.focus ?? "all"} className="rounded-md border px-3 py-2 text-sm sm:col-span-2">
+        <select
+          name="focus"
+          defaultValue={params.focus ?? "all"}
+          className={cn(panelSelectClass, "sm:col-span-2")}
+        >
           {getProductFocusFilterOptions(business.business_type).map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}

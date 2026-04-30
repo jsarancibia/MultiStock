@@ -1,10 +1,18 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import type { BusinessType } from "@/config/business-types";
 import type { ProductActionState } from "@/modules/core/products/actions";
-import { ProductRubroFields } from "@/components/productos/product-rubro-fields";
+import { ProductBasicSection } from "@/components/productos/product-basic-section";
+import { ProductPricingSection } from "@/components/productos/product-pricing-section";
+import { ProductBusinessFields } from "@/components/productos/product-business-fields";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  formMutedSectionClass,
+  formShellClass,
+} from "@/components/ui/form-field-styles";
+import { FormMessage } from "@/components/ui/form-message";
 
 type Option = { id: string; name: string };
 type ProductLike = {
@@ -48,135 +56,108 @@ export function ProductForm({
   allowInitialStockEdit = true,
 }: ProductFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  const isEditing = Boolean(initialProduct?.id);
+  const [quickMode, setQuickMode] = useState(!isEditing);
   const metadata =
     initialProduct?.metadata && typeof initialProduct.metadata === "object"
       ? (initialProduct.metadata as Record<string, unknown>)
       : null;
 
+  const showAdvanced = !quickMode || isEditing;
+  const defaultUnitType = initialProduct?.unit_type ?? "unit";
+  const defaultCostPrice = initialProduct?.cost_price ?? "0";
+  const defaultMinStock = initialProduct?.min_stock ?? "0";
+  const quickSummary = useMemo(
+    () =>
+      quickMode
+        ? "Modo rápido: nombre, código opcional, precio de venta y stock inicial."
+        : "Modo completo: incluye datos comerciales y técnicos.",
+    [quickMode]
+  );
+
   return (
-    <form action={formAction} className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="space-y-1">
-          <label htmlFor="name" className="text-sm font-medium">
-            Nombre
+    <form action={formAction} className={formShellClass}>
+      {!isEditing ? (
+        <div className={cn("flex items-center justify-between", formMutedSectionClass)}>
+          <div>
+            <p className="text-sm font-medium text-foreground">Modo de carga</p>
+            <p className="text-xs text-muted-foreground">{quickSummary}</p>
+          </div>
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={quickMode}
+              onChange={(event) => setQuickMode(event.target.checked)}
+            />
+            Rápido
           </label>
-          <input id="name" name="name" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialProduct?.name ?? ""} required />
         </div>
+      ) : null}
 
-        <div className="space-y-1">
-          <label htmlFor="unitType" className="text-sm font-medium">
-            Unidad
-          </label>
-          <select id="unitType" name="unitType" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialProduct?.unit_type ?? "unit"}>
-            <option value="unit">Unidad</option>
-            <option value="kg">Kg</option>
-            <option value="g">Gramo</option>
-            <option value="box">Caja</option>
-            <option value="liter">Litro</option>
-            <option value="meter">Metro</option>
-          </select>
-        </div>
+      <ProductBasicSection
+        showAdvanced={showAdvanced}
+        nameDefault={initialProduct?.name ?? ""}
+        nameError={state?.errors?.name?.[0]}
+        unitTypeDefault={defaultUnitType}
+        categoryIdDefault={initialProduct?.category_id ?? ""}
+        supplierIdDefault={initialProduct?.supplier_id ?? ""}
+        skuDefault={initialProduct?.sku ?? ""}
+        barcodeDefault={initialProduct?.barcode ?? ""}
+        productInstanceKey={initialProduct?.id ?? "create"}
+        categories={categories}
+        suppliers={suppliers}
+      />
 
-        <div className="space-y-1">
-          <label htmlFor="categoryId" className="text-sm font-medium">
-            Categoria
-          </label>
-          <select id="categoryId" name="categoryId" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialProduct?.category_id ?? ""}>
-            <option value="">Sin categoria</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <ProductPricingSection
+        showAdvanced={showAdvanced}
+        salePriceDefault={initialProduct?.sale_price ?? "0"}
+        currentStockDefault={initialProduct?.current_stock ?? "0"}
+        costPriceDefault={defaultCostPrice}
+        minStockDefault={defaultMinStock}
+        allowInitialStockEdit={allowInitialStockEdit}
+        salePriceError={state?.errors?.salePrice?.[0]}
+        currentStockError={state?.errors?.currentStock?.[0]}
+      />
 
-        <div className="space-y-1">
-          <label htmlFor="supplierId" className="text-sm font-medium">
-            Proveedor
-          </label>
-          <select id="supplierId" name="supplierId" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialProduct?.supplier_id ?? ""}>
-            <option value="">Sin proveedor</option>
-            {suppliers.map((supplier) => (
-              <option key={supplier.id} value={supplier.id}>
-                {supplier.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <ProductBusinessFields
+        businessType={businessType}
+        metadata={metadata}
+        show={showAdvanced}
+      />
 
-        <div className="space-y-1">
-          <label htmlFor="sku" className="text-sm font-medium">
-            SKU
-          </label>
-          <input id="sku" name="sku" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialProduct?.sku ?? ""} />
-        </div>
-
-        <div className="space-y-1">
-          <label htmlFor="barcode" className="text-sm font-medium">
-            Codigo de barras
-          </label>
-          <input id="barcode" name="barcode" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialProduct?.barcode ?? ""} />
-        </div>
-
-        <div className="space-y-1">
-          <label htmlFor="costPrice" className="text-sm font-medium">
-            Precio de costo
-          </label>
-          <input id="costPrice" name="costPrice" type="number" step="0.0001" min="0" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialProduct?.cost_price ?? "0"} />
-          <p className="text-xs text-muted-foreground">Lo que te cuesta adquirir o producir la unidad (referencia interna).</p>
-        </div>
-
-        <div className="space-y-1">
-          <label htmlFor="salePrice" className="text-sm font-medium">
-            Precio de venta
-          </label>
-          <input id="salePrice" name="salePrice" type="number" step="0.0001" min="0" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialProduct?.sale_price ?? "0"} />
-          <p className="text-xs text-muted-foreground">Precio al público o de lista. Se usa en ventas y márgenes.</p>
-        </div>
-
-        <div className="space-y-1">
-          <label htmlFor="minStock" className="text-sm font-medium">
-            Stock mínimo
-          </label>
-          <input id="minStock" name="minStock" type="number" step="0.0001" min="0" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialProduct?.min_stock ?? "0"} />
-          <p className="text-xs text-muted-foreground">Umbral para alertas: cuando el stock actual sea igual o inferior, se marca como bajo.</p>
-        </div>
-
-        <div className="space-y-1">
-          <label htmlFor="currentStock" className="text-sm font-medium">
-            Stock actual
-          </label>
-          <input
-            id="currentStock"
-            name="currentStock"
-            type="number"
-            step="0.0001"
-            min="0"
-            className="w-full rounded-md border px-3 py-2 text-sm"
-            defaultValue={initialProduct?.current_stock ?? "0"}
-            readOnly={!allowInitialStockEdit}
-          />
-          {allowInitialStockEdit ? (
-            <p className="text-xs text-muted-foreground">Stock inicial o primer carga. Después, actualizá con movimientos de inventario.</p>
-          ) : (
-            <p className="text-xs text-muted-foreground">El stock se actualiza desde Inventario — Movimientos (compras, ajustes, mermas).</p>
-          )}
-        </div>
+      <div className={formMutedSectionClass}>
+        <h2 className="mb-2 text-sm font-semibold text-foreground">4) Confirmar</h2>
+        <p className="text-xs text-muted-foreground">
+          Revisa nombre, precio de venta y stock inicial.
+        </p>
+        <label className="mt-3 flex items-center gap-2 text-sm text-foreground">
+          <input type="checkbox" name="active" defaultChecked={initialProduct?.active ?? true} />
+          Producto activo
+        </label>
       </div>
 
-      <ProductRubroFields businessType={businessType} metadata={metadata} />
+      <FormMessage message={state?.errors?.unitType?.[0]} />
+      <FormMessage message={state?.errors?.costPrice?.[0]} />
+      <FormMessage message={state?.errors?.minStock?.[0]} />
+      <FormMessage message={state?.errors?.barcode?.[0]} />
+      <FormMessage message={state?.message} />
 
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="active" defaultChecked={initialProduct?.active ?? true} />
-        Producto activo
-      </label>
-
-      {state?.message ? <p className="text-sm text-destructive">{state.message}</p> : null}
-
-      <Button type="submit" disabled={pending}>
-        {pending ? "Guardando..." : submitLabel}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" disabled={pending}>
+          {pending ? "Guardando..." : submitLabel}
+        </Button>
+        {!isEditing ? (
+          <Button
+            type="submit"
+            variant="outline"
+            name="intent"
+            value="create_another"
+            disabled={pending}
+          >
+            {pending ? "Guardando..." : "Guardar y crear otro"}
+          </Button>
+        ) : null}
+      </div>
     </form>
   );
 }

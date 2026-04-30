@@ -1,0 +1,433 @@
+{
+  "scene": {
+    "description": "An abstract isometric illustration depicting a central, dark blue 'T' shaped pillar, acting as a core, surrounded by a hexagonal arrangement of six interconnected, gradient-colored 3D cubes. The structure is further embellished with smaller blue cubes and dynamic, flowing lines and dots, suggesting data flow, connections, or modular systems against a dark background. NO cast shadow on the background, NO soft dark halo or glow under the cluster, NO ground contact shadow. The dark background is perfectly uniform. Keep only inherent colored gradients on 3D cube faces.",
+    "type": "illustration"
+  },
+  "background": {
+    "type": "solid",
+    "colors": [
+      "#10141e"
+    ],
+    "description": "A deep, dark charcoal blue-black solid background."
+  },
+  "elements": [
+    {
+      "id": 1,
+      "type": "shape",
+      "description": "The central 'T' shaped pillar, a large isometric 3D structure.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "large",
+      "colors": [
+        "#2c78e8",
+        "#225faf",
+        "#1a4687"
+      ],
+      "style": "3d",
+      "details": "Composed of bright blue for the top surfaces, a medium blue for front faces, and a darker blue for shaded side faces. Forms the core of the arrangement."
+    },
+    {
+      "id": 2,
+      "type": "shape",
+      "description": "A small isometric blue cube placed directly on top of the central 'T' pillar.",
+      "position": {
+        "x": "center",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#2c78e8",
+        "#225faf",
+        "#1a4687"
+      ],
+      "style": "3d",
+      "details": "Part of the central blue structure, connecting upwards. Top face is brighter blue."
+    },
+    {
+      "id": 3,
+      "type": "shape",
+      "description": "A small isometric blue cube placed directly below the central 'T' pillar.",
+      "position": {
+        "x": "center",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#2c78e8",
+        "#225faf",
+        "#1a4687"
+      ],
+      "style": "3d",
+      "details": "Part of the central blue structure, connecting downwards. Top face is brighter blue."
+    },
+    {
+      "id": 4,
+      "type": "shape",
+      "description": "An isometric cube with an orange to pink gradient, positioned at the top-left of the central structure.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#ffaa63",
+        "#ff5a80",
+        "#ff8c51",
+        "#ff2f74",
+        "#ee694e",
+        "#b02f66"
+      ],
+      "style": "3d",
+      "details": "Top face: orange to pink gradient (`#ffaa63` to `#ff5a80`). Front face: brighter orange to deep pink gradient (`#ff8c51` to `#ff2f74`). Right face: darker orange to purple-pink gradient (`#ee694e` to `#b02f66`)."
+    },
+    {
+      "id": 5,
+      "type": "icon",
+      "description": "White outline of a short-sleeved t-shirt.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#ffffff"
+      ],
+      "style": "outlined",
+      "details": "Located on the top face of the top-left orange-pink cube."
+    },
+    {
+      "id": 6,
+      "type": "shape",
+      "description": "An isometric cube with an orange to pink gradient, positioned at the top-right of the central structure.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#ffaa63",
+        "#ff5a80",
+        "#ff8c51",
+        "#ff2f74",
+        "#ee694e",
+        "#b02f66"
+      ],
+      "style": "3d",
+      "details": "Top face: orange to pink gradient (`#ffaa63` to `#ff5a80`). Front face: brighter orange to deep pink gradient (`#ff8c51` to `#ff2f74`). Left face: darker orange to purple-pink gradient (`#ee694e` to `#b02f66`)."
+    },
+    {
+      "id": 7,
+      "type": "icon",
+      "description": "White outline of an open book.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#ffffff"
+      ],
+      "style": "outlined",
+      "details": "Located on the top face of the top-right orange-pink cube."
+    },
+    {
+      "id": 8,
+      "type": "shape",
+      "description": "An isometric cube with an orange to pink gradient, positioned at the bottom-right of the central structure.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#ffaa63",
+        "#ff5a80",
+        "#ff8c51",
+        "#ff2f74",
+        "#ee694e",
+        "#b02f66"
+      ],
+      "style": "3d",
+      "details": "Top face: orange to pink gradient (`#ffaa63` to `#ff5a80`). Front face: brighter orange to deep pink gradient (`#ff8c51` to `#ff2f74`). Left face: darker orange to purple-pink gradient (`#ee694e` to `#b02f66`)."
+    },
+    {
+      "id": 9,
+      "type": "icon",
+      "description": "White outline of a cogwheel (gear).",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#ffffff"
+      ],
+      "style": "outlined",
+      "details": "Located on the top face of the bottom-right orange-pink cube."
+    },
+    {
+      "id": 10,
+      "type": "shape",
+      "description": "An isometric cube with a green to teal gradient, positioned at the bottom-left of the central structure.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#7ed9a8",
+        "#4dd0bc",
+        "#5dbe9a",
+        "#2eb5b0",
+        "#449e7b",
+        "#24949b"
+      ],
+      "style": "3d",
+      "details": "Top face: light green to teal gradient (`#7ed9a8` to `#4dd0bc`). Front face: medium green to medium teal gradient (`#5dbe9a` to `#2eb5b0`). Right face: darker green to darker teal gradient (`#449e7b` to `#24949b`)."
+    },
+    {
+      "id": 11,
+      "type": "icon",
+      "description": "White outline of a beverage bottle.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#ffffff"
+      ],
+      "style": "outlined",
+      "details": "Located on the top face of the bottom-left green-teal cube."
+    },
+    {
+      "id": 12,
+      "type": "shape",
+      "description": "An isometric cube with a green to teal gradient, positioned to the left-center, behind the top-left orange cube.",
+      "position": {
+        "x": "left",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#7ed9a8",
+        "#4dd0bc",
+        "#5dbe9a",
+        "#2eb5b0",
+        "#449e7b",
+        "#24949b"
+      ],
+      "style": "3d",
+      "details": "Top face: light green to teal gradient (`#7ed9a8` to `#4dd0bc`). Front face: medium green to medium teal gradient (`#5dbe9a` to `#2eb5b0`). Right face: darker green to darker teal gradient (`#449e7b` to `#24949b`)."
+    },
+    {
+      "id": 13,
+      "type": "shape",
+      "description": "An isometric cube with a green to teal gradient, positioned to the right-center, behind the top-right orange cube.",
+      "position": {
+        "x": "right",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#7ed9a8",
+        "#4dd0bc",
+        "#5dbe9a",
+        "#2eb5b0",
+        "#449e7b",
+        "#24949b"
+      ],
+      "style": "3d",
+      "details": "Top face: light green to teal gradient (`#7ed9a8` to `#4dd0bc`). Front face: medium green to medium teal gradient (`#5dbe9a` to `#2eb5b0`). Left face: darker green to darker teal gradient (`#449e7b` to `#24949b`)."
+    },
+    {
+      "id": 14,
+      "type": "shape",
+      "description": "A triangular prism shape with an orange to pink gradient, acting as a connector between the upper-left orange cube and the central 'T' pillar.",
+      "position": {
+        "x": "left",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#e06b4d",
+        "#ff2f74"
+      ],
+      "style": "3d",
+      "details": "Its visible face shows a gradient from a muted orange to a deep pink."
+    },
+    {
+      "id": 15,
+      "type": "shape",
+      "description": "A triangular prism shape with a green to teal gradient, acting as a connector between the upper-right orange cube and the central 'T' pillar.",
+      "position": {
+        "x": "right",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#4dd0bc",
+        "#2eb5b0"
+      ],
+      "style": "3d",
+      "details": "Its visible face shows a gradient from teal to a darker teal."
+    },
+    {
+      "id": 16,
+      "type": "shape",
+      "description": "A cluster of four small isometric blue cubes arranged in a cross shape, extending from the top of the central structure.",
+      "position": {
+        "x": "center",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#2c78e8",
+        "#225faf",
+        "#1a4687"
+      ],
+      "style": "3d",
+      "details": "Each cube shows bright, medium, and dark blue faces, indicating light source from top-left."
+    },
+    {
+      "id": 17,
+      "type": "shape",
+      "description": "A small isometric blue cube extending downwards and left from the main structure's bottom-left connection point.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#2c78e8",
+        "#225faf",
+        "#1a4687"
+      ],
+      "style": "3d",
+      "details": "Shows bright, medium, and dark blue faces."
+    },
+    {
+      "id": 18,
+      "type": "shape",
+      "description": "A small isometric blue cube extending downwards and right from the main structure's bottom-right connection point.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#2c78e8",
+        "#225faf",
+        "#1a4687"
+      ],
+      "style": "3d",
+      "details": "Shows bright, medium, and dark blue faces."
+    },
+    {
+      "id": 19,
+      "type": "decoration",
+      "description": "A thin, wavy line with two small circular dots at its ends, in green and teal colors.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#4dd0bc",
+        "#7ed9a8"
+      ],
+      "style": "outlined",
+      "details": "Emanates from the top-left area of the central structure."
+    },
+    {
+      "id": 20,
+      "type": "decoration",
+      "description": "A thin, wavy line with two small circular dots at its ends, in orange and pink colors.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#ffaa63",
+        "#ff8c51"
+      ],
+      "style": "outlined",
+      "details": "Emanates from the top-right area of the central structure."
+    },
+    {
+      "id": 21,
+      "type": "decoration",
+      "description": "A thin, wavy line with three small circular dots at its ends and along its path, in blue and teal colors.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#2c78e8",
+        "#4dd0bc",
+        "#2eb5b0"
+      ],
+      "style": "outlined",
+      "details": "Emanates from the bottom-left area of the central structure."
+    },
+    {
+      "id": 22,
+      "type": "decoration",
+      "description": "A thin, wavy line with two small circular dots at its ends, in orange and pink colors.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#ffaa63",
+        "#ff8c51"
+      ],
+      "style": "outlined",
+      "details": "Emanates from the bottom-right area of the central structure."
+    },
+    {
+      "id": 23,
+      "type": "decoration",
+      "description": "A very small, thin, solitary wavy line in a teal color.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#4dd0bc"
+      ],
+      "style": "outlined",
+      "details": "Located near the bottom-left corner of the image, detached from the main structure."
+    }
+  ],
+  "text_content": [],
+  "style": {
+    "art_style": "vector",
+    "color_scheme": "vibrant",
+    "mood": "modern",
+    "effects": [
+      "gradient",
+      "rounded_corners"
+    ]
+  },
+  "colors": {
+    "palette": [
+      "#10141e",
+      "#2c78e8",
+      "#1a4687",
+      "#7ed9a8",
+      "#2eb5b0",
+      "#ffaa63",
+      "#ff2f74",
+      "#ffffff"
+    ],
+    "dominant": "#10141e",
+    "accent": "#ff2f74"
+  }
+}

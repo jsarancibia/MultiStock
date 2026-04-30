@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
+import { panelInputClass } from "@/components/ui/form-field-styles";
+import { FormMessage } from "@/components/ui/form-message";
 import type { SupplierActionState } from "@/modules/core/suppliers/actions";
 
 const initialState: SupplierActionState = {};
@@ -28,32 +30,38 @@ export function SupplierForm({ action, submitLabel, initialSupplier }: SupplierF
   return (
     <form action={formAction} className="space-y-4">
       <div className="space-y-1">
-        <label htmlFor="name" className="text-sm font-medium">
+        <label htmlFor="name" className="text-sm font-medium text-foreground">
           Nombre
         </label>
-        <input id="name" name="name" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialSupplier?.name ?? ""} required />
+        <input
+          id="name"
+          name="name"
+          className={panelInputClass}
+          defaultValue={initialSupplier?.name ?? ""}
+          required
+        />
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1">
-          <label htmlFor="phone" className="text-sm font-medium">
+          <label htmlFor="phone" className="text-sm font-medium text-foreground">
             Telefono
           </label>
-          <input id="phone" name="phone" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialSupplier?.phone ?? ""} />
+          <input id="phone" name="phone" className={panelInputClass} defaultValue={initialSupplier?.phone ?? ""} />
         </div>
         <div className="space-y-1">
-          <label htmlFor="email" className="text-sm font-medium">
+          <label htmlFor="email" className="text-sm font-medium text-foreground">
             Email
           </label>
-          <input id="email" name="email" type="email" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialSupplier?.email ?? ""} />
+          <input id="email" name="email" type="email" className={panelInputClass} defaultValue={initialSupplier?.email ?? ""} />
         </div>
       </div>
       <div className="space-y-1">
-        <label htmlFor="address" className="text-sm font-medium">
+        <label htmlFor="address" className="text-sm font-medium text-foreground">
           Direccion
         </label>
-        <input id="address" name="address" className="w-full rounded-md border px-3 py-2 text-sm" defaultValue={initialSupplier?.address ?? ""} />
+        <input id="address" name="address" className={panelInputClass} defaultValue={initialSupplier?.address ?? ""} />
       </div>
-      {state?.message ? <p className="text-sm text-destructive">{state.message}</p> : null}
+      <FormMessage message={state?.message} />
       <Button type="submit" disabled={pending}>
         {pending ? "Guardando..." : submitLabel}
       </Button>

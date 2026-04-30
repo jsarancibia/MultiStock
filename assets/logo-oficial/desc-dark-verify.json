@@ -1,0 +1,356 @@
+{
+  "scene": {
+    "description": "An isometric illustration depicting a central, prominent 'T' shape, composed of multiple blue blocks, surrounded by four large, gradient-colored cubes. Various smaller blue cubes and abstract, colorful lines with dots float around the main structure, suggesting data flow, connections, or technological integration. The overall composition is dynamic and balanced, set against a dark background.",
+    "type": "illustration"
+  },
+  "background": {
+    "type": "solid",
+    "colors": [
+      "#0F1422"
+    ],
+    "description": "A deep, uniform dark blue-gray background that provides high contrast for the vibrant foreground elements."
+  },
+  "elements": [
+    {
+      "id": 1,
+      "type": "shape",
+      "description": "A large, three-dimensional 'T' shape formed by interconnected isometric blocks, serving as the central anchor of the composition.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "large",
+      "colors": [
+        "#0D80E8",
+        "#0A6AD3"
+      ],
+      "style": "3d",
+      "details": "Composed of two main rectangular prism blocks: a vertical base and a horizontal crossbar on top, both rendered with a subtle gradient from brighter blue on top surfaces to darker blue on side surfaces, indicating lighting from above."
+    },
+    {
+      "id": 2,
+      "type": "object",
+      "description": "A large isometric cube positioned to the top-left of the central 'T' shape. Its top surface has an orange-to-pink gradient, and its visible front surface has a pink-to-purple gradient with an abstract alphanumeric pattern.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#F58F2C",
+        "#F2309C",
+        "#8A2BE2"
+      ],
+      "style": "3d",
+      "details": "Top surface gradients from orange (#F58F2C) to pink (#F2309C). Front surface gradients from pink (#F2309C) to purple (#8A2BE2). The front surface is covered with a grid-like pattern of abstract light pink characters/numbers (#FFDBF0), giving a 'data' or 'code' appearance. A thin, darker border subtly defines its edges."
+    },
+    {
+      "id": 3,
+      "type": "icon",
+      "description": "A simple outline icon of a T-shirt, centered on the top face of the top-left cube (Element 2).",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Clean white line art, minimalistic style."
+    },
+    {
+      "id": 4,
+      "type": "object",
+      "description": "A large isometric cube positioned to the bottom-left of the central 'T' shape. Its top surface has a green-to-turquoise gradient, and its visible front surface has a turquoise-to-dark teal gradient with an abstract alphanumeric pattern.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#34C759",
+        "#30D1BF",
+        "#00A7A1"
+      ],
+      "style": "3d",
+      "details": "Top surface gradients from green (#34C759) to turquoise (#30D1BF). Front surface gradients from turquoise (#30D1BF) to dark teal (#00A7A1). The front surface is covered with a grid-like pattern of abstract light turquoise characters/numbers (#CDF8F5). A thin, darker border subtly defines its edges."
+    },
+    {
+      "id": 5,
+      "type": "icon",
+      "description": "A simple outline icon of a bottle, specifically a soda or beverage bottle, centered on the top face of the bottom-left cube (Element 4).",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Clean white line art, minimalistic style, depicting a bottle with a slightly tapered body and a narrow neck."
+    },
+    {
+      "id": 6,
+      "type": "object",
+      "description": "A large isometric cube positioned to the top-right of the central 'T' shape. Its top surface has an orange-to-pink gradient, and its visible front surface has a pink-to-purple gradient with an abstract alphanumeric pattern.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "medium",
+      "colors": [
+        "#F58F2C",
+        "#F2309C",
+        "#8A2BE2"
+      ],
+      "style": "3d",
+      "details": "Top surface gradients from orange (#F58F2C) to pink (#F2309C). Front surface gradients from pink (#F2309C) to purple (#8A2BE2). The front surface is covered with a grid-like pattern of abstract light pink characters/numbers (#FFDBF0). A thin, darker border subtly defines its edges."
+    },
+    {
+      "id": 7,
+      "type": "icon",
+      "description": "A simple outline icon of an open book, showing two pages, centered on the top face of the top-right cube (Element 6).",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Clean white line art, minimalistic style, depicting an open book with visible pages."
+    },
+    {
+      "id": 8,
+      "type": "object",
+      "description": "A large isometric cube positioned to the bottom-right of the central 'T' shape. Its top surface has an orange-to-pink gradient, and its visible front surface has a pink-to-purple gradient with an abstract alphanumeric pattern.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#F58F2C",
+        "#F2309C",
+        "#8A2BE2"
+      ],
+      "style": "3d",
+      "details": "Top surface gradients from orange (#F58F2C) to pink (#F2309C). Front surface gradients from pink (#F2309C) to purple (#8A2BE2). The front surface is covered with a grid-like pattern of abstract light pink characters/numbers (#FFDBF0). A thin, darker border subtly defines its edges."
+    },
+    {
+      "id": 9,
+      "type": "icon",
+      "description": "A simple outline icon of a cogwheel or gear, centered on the top face of the bottom-right cube (Element 8).",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Clean white line art, minimalistic style, depicting a circular gear with teeth around its perimeter."
+    },
+    {
+      "id": 10,
+      "type": "shape",
+      "description": "Four small isometric cubes floating in an arc above the central 'T' shape.",
+      "position": {
+        "x": "center",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#0D80E8"
+      ],
+      "style": "3d",
+      "details": "Uniform blue cubes, arranged in a shallow arch or cross-like pattern, casting subtle shadows."
+    },
+    {
+      "id": 11,
+      "type": "shape",
+      "description": "A small isometric cube floating to the bottom-left of the central structure.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#0D80E8"
+      ],
+      "style": "3d",
+      "details": "Uniform blue cube, casting a subtle shadow."
+    },
+    {
+      "id": 12,
+      "type": "shape",
+      "description": "A small isometric cube floating to the bottom-right of the central structure.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#0D80E8"
+      ],
+      "style": "3d",
+      "details": "Uniform blue cube, casting a subtle shadow."
+    },
+    {
+      "id": 13,
+      "type": "decoration",
+      "description": "A decorative wavy line emanating from the top-left area, with a dot at its end.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#3BE085"
+      ],
+      "style": "flat",
+      "details": "Thin green line, with an initial dash, a wavy segment, and ending in a solid circle."
+    },
+    {
+      "id": 14,
+      "type": "decoration",
+      "description": "A decorative straight line segment with two small circles at its beginning, near the top-left cube.",
+      "position": {
+        "x": "left",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#3BE085"
+      ],
+      "style": "flat",
+      "details": "Thin green line, with two small dots at its start, running diagonally downwards."
+    },
+    {
+      "id": 15,
+      "type": "decoration",
+      "description": "A decorative wavy line segment near the bottom-left edge of the image.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#3CC6B5"
+      ],
+      "style": "flat",
+      "details": "Thin light-green/turquoise wavy line."
+    },
+    {
+      "id": 16,
+      "type": "decoration",
+      "description": "A series of progressively larger green dots forming a curved line, near the bottom-left.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#3BE085"
+      ],
+      "style": "flat",
+      "details": "A large solid circle, followed by smaller dots decreasing in size, forming an arc."
+    },
+    {
+      "id": 17,
+      "type": "decoration",
+      "description": "A decorative straight line segment with a small solid circle at its start, near the bottom-left.",
+      "position": {
+        "x": "left",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#0D80E8"
+      ],
+      "style": "flat",
+      "details": "Thin blue line, extending diagonally from a small solid blue circle."
+    },
+    {
+      "id": 18,
+      "type": "decoration",
+      "description": "A decorative wavy line emanating from the top-right area, with a small circle at its end.",
+      "position": {
+        "x": "right",
+        "y": "top"
+      },
+      "size": "small",
+      "colors": [
+        "#F79447"
+      ],
+      "style": "flat",
+      "details": "Thin orange line, with an initial dash, a wavy segment, and ending in a solid circle."
+    },
+    {
+      "id": 19,
+      "type": "decoration",
+      "description": "A decorative wavy line segment near the bottom-right edge of the image, with a small circle.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#F9779D"
+      ],
+      "style": "flat",
+      "details": "Thin pinkish-orange wavy line, with a small solid circle at its beginning."
+    },
+    {
+      "id": 20,
+      "type": "decoration",
+      "description": "A straight dashed line segment near the bottom-right, below the bottom-right cube.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#F79447"
+      ],
+      "style": "flat",
+      "details": "Short, thin dashed orange line."
+    }
+  ],
+  "text_content": [],
+  "style": {
+    "art_style": "vector",
+    "color_scheme": "vibrant",
+    "mood": "modern|technological|dynamic|professional",
+    "effects": [
+      "shadow",
+      "gradient"
+    ]
+  },
+  "colors": {
+    "palette": [
+      "#0F1422",
+      "#0D80E8",
+      "#0A6AD3",
+      "#F58F2C",
+      "#F2309C",
+      "#8A2BE2",
+      "#34C759",
+      "#30D1BF",
+      "#00A7A1",
+      "#FFFFFF",
+      "#FFDBF0",
+      "#CDF8F5",
+      "#3BE085",
+      "#3CC6B5",
+      "#F79447",
+      "#F9779D"
+    ],
+    "dominant": "#0F1422",
+    "accent": "#0D80E8"
+  }
+}

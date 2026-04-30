@@ -1,6 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
@@ -60,15 +62,37 @@ export async function createSupplierAction(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("suppliers").insert({
-    business_id: business.id,
-    name: parsed.data.name,
-    phone: parsed.data.phone || null,
-    email: parsed.data.email || null,
-    address: parsed.data.address || null,
+  const { data: created, error } = await supabase
+    .from("suppliers")
+    .insert({
+      business_id: business.id,
+      name: parsed.data.name,
+      phone: parsed.data.phone || null,
+      email: parsed.data.email || null,
+      address: parsed.data.address || null,
+    })
+    .select("id")
+    .single();
+
+  if (error || !created) {
+    return {
+      message: humanizeActionError(
+        error?.message,
+        "No se pudo crear el proveedor."
+      ),
+    };
+  }
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "supplier",
+    entityId: created.id,
+    action: "created",
+    summary: `Proveedor creado: ${parsed.data.name}`,
+    afterData: { name: parsed.data.name },
   });
 
-  if (error) return { message: error.message };
   redirect("/proveedores");
 }
 
@@ -102,6 +126,21 @@ export async function updateSupplierAction(
     .eq("id", supplierId)
     .eq("business_id", business.id);
 
-  if (error) return { message: error.message };
+  if (error) return { message: humanizeActionError(error.message, "No se pudo actualizar el proveedor.") };
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "supplier",
+    entityId: supplierId,
+    action: "updated",
+    summary: `Proveedor actualizado: ${parsed.data.name}`,
+    afterData: {
+      name: parsed.data.name,
+      phone: parsed.data.phone ?? null,
+      email: parsed.data.email ?? null,
+    },
+  });
+
   redirect("/proveedores");
 }

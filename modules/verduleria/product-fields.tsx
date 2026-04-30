@@ -1,3 +1,5 @@
+import { panelInputClass } from "@/components/ui/form-field-styles";
+
 type VerduleriaProductFieldsProps = {
   metadata?: Record<string, unknown> | null;
 };
@@ -14,13 +16,13 @@ function checkedOf(metadata: Record<string, unknown> | null | undefined, key: st
 
 export function VerduleriaProductFields({ metadata }: VerduleriaProductFieldsProps) {
   return (
-    <div className="grid gap-3 rounded-lg border p-4 sm:grid-cols-2">
-      <label className="flex items-center gap-2 text-sm">
+    <div className="grid gap-3 rounded-lg border border-border bg-muted/40 p-4 sm:grid-cols-2">
+      <label className="flex items-center gap-2 text-sm text-foreground">
         <input type="checkbox" name="is_perishable" defaultChecked={checkedOf(metadata, "is_perishable")} />
         Perecible
       </label>
       <div className="space-y-1 sm:col-span-2">
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-sm text-foreground">
           <input
             type="checkbox"
             name="allows_weight_sale"
@@ -32,12 +34,12 @@ export function VerduleriaProductFields({ metadata }: VerduleriaProductFieldsPro
           Al activarla, en ventas podrás vender en decimales (kg, litros) con pasos de 0,5 o según unidad.
         </p>
       </div>
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm text-foreground">
         <input type="checkbox" name="waste_tracking" defaultChecked={checkedOf(metadata, "waste_tracking")} />
         Control de merma
       </label>
       <div className="space-y-1">
-        <label htmlFor="expiration_days" className="text-sm font-medium">
+        <label htmlFor="expiration_days" className="text-sm font-medium text-foreground">
           Dias de vida util
         </label>
         <input
@@ -45,7 +47,7 @@ export function VerduleriaProductFields({ metadata }: VerduleriaProductFieldsPro
           name="expiration_days"
           type="number"
           min="0"
-          className="w-full rounded-md border px-3 py-2 text-sm"
+          className={panelInputClass}
           defaultValue={valueOf(metadata, "expiration_days")}
         />
       </div>

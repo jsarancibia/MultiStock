@@ -72,7 +72,7 @@ export default function FeaturesPage() {
         <header className="mb-10 max-w-2xl sm:mb-12">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Características</h1>
           <p className="mt-3 text-lg text-muted-foreground">
-            Esto es lo que MultiStock ofrece hoy: un núcleo operativo completo para comercios chicos, sin
+            Esto es lo que MultiStock ofrece hoy: un núcleo operativo completo para pequeños comercios en Chile, sin
             módulos de caja, facturación o multi-sucursal (aún).
           </p>
         </header>

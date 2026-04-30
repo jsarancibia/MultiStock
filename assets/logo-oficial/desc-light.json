@@ -1,0 +1,390 @@
+{
+  "scene": {
+    "description": "A vibrant and modern logo prominently featuring a central 'i' character formed by interconnected 3D cuboid shapes, surrounded by four other gradient-colored cuboids containing white outline icons. Decorative lines and dots extend dynamically from the cuboid cluster, creating a sense of connectivity. Below the graphic, the word 'MULTISTOCK' is displayed in a two-toned font, all set against a clean white background.",
+    "type": "logo"
+  },
+  "background": {
+    "type": "solid",
+    "colors": [
+      "#FFFFFF"
+    ],
+    "description": "A plain, solid white background providing a clean canvas for the logo."
+  },
+  "elements": [
+    {
+      "id": 1,
+      "type": "shape",
+      "description": "The main vertical body of the 'i' character, rendered as a faceted 3D rectangular prism. It exhibits a blue gradient from darker shades at the bottom to lighter shades at the top-right face.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "large",
+      "colors": [
+        "#007BFF",
+        "#0056B3",
+        "#42A5F5"
+      ],
+      "style": "gradient",
+      "details": "Composed of multiple planar surfaces creating an isometric 3D effect, forming the base and stem of the 'i'."
+    },
+    {
+      "id": 2,
+      "type": "shape",
+      "description": "The 'dot' of the 'i' character, a small 3D cube positioned directly above and slightly connected to the central vertical bar. It features a blue gradient.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#007BFF",
+        "#0056B3",
+        "#42A5F5"
+      ],
+      "style": "gradient",
+      "details": "A small isometric cuboid, serving as the dot of the 'i'."
+    },
+    {
+      "id": 3,
+      "type": "shape",
+      "description": "An isometric 3D cuboid positioned above and slightly behind the 'i' dot, connecting to the central blue structure. It features a blue gradient.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#007BFF",
+        "#0056B3",
+        "#42A5F5"
+      ],
+      "style": "gradient",
+      "details": "One of the six cuboids forming the hexagonal cluster around the 'i', integrated into the central blue element."
+    },
+    {
+      "id": 4,
+      "type": "shape",
+      "description": "An isometric 3D cuboid positioned below and slightly behind the base of the 'i' vertical bar, connecting to the central blue structure. It features a blue gradient.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#007BFF",
+        "#0056B3",
+        "#42A5F5"
+      ],
+      "style": "gradient",
+      "details": "One of the six cuboids forming the hexagonal cluster around the 'i', integrated into the central blue element."
+    },
+    {
+      "id": 5,
+      "type": "shape",
+      "description": "An isometric 3D cuboid positioned to the top-left of the central blue structure. It displays a warm gradient from orange to pinkish-red.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#FF8C00",
+        "#FF6347",
+        "#FF1493",
+        "#FFA07A"
+      ],
+      "style": "gradient",
+      "details": "Part of the outer cluster of cuboids, exhibiting multiple colored facets."
+    },
+    {
+      "id": 6,
+      "type": "shape",
+      "description": "An isometric 3D cuboid positioned to the top-right of the central blue structure. It displays a warm gradient from orange to pinkish-red.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#FF8C00",
+        "#FF6347",
+        "#FF1493",
+        "#FFA07A"
+      ],
+      "style": "gradient",
+      "details": "Part of the outer cluster of cuboids, exhibiting multiple colored facets."
+    },
+    {
+      "id": 7,
+      "type": "shape",
+      "description": "An isometric 3D cuboid positioned to the bottom-left of the central blue structure. It displays a cool gradient from teal to lime green.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#008080",
+        "#00CED1",
+        "#32CD32"
+      ],
+      "style": "gradient",
+      "details": "Part of the outer cluster of cuboids, exhibiting multiple colored facets."
+    },
+    {
+      "id": 8,
+      "type": "shape",
+      "description": "An isometric 3D cuboid positioned to the bottom-right of the central blue structure. It displays a warm gradient from orange to pinkish-red.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "medium",
+      "colors": [
+        "#FF8C00",
+        "#FF6347",
+        "#FF1493",
+        "#FFA07A"
+      ],
+      "style": "gradient",
+      "details": "Part of the outer cluster of cuboids, exhibiting multiple colored facets."
+    },
+    {
+      "id": 9,
+      "type": "icon",
+      "description": "White outline icon of a T-shirt, positioned centrally on the visible front face of the top-left cuboid (id 5).",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Simple, clean line art representing clothing or apparel."
+    },
+    {
+      "id": 10,
+      "type": "icon",
+      "description": "White outline icon of an open book, positioned centrally on the visible front face of the top-right cuboid (id 6).",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Simple, clean line art depicting two open pages, representing knowledge or information."
+    },
+    {
+      "id": 11,
+      "type": "icon",
+      "description": "White outline icon of a classic milk bottle with a cap, positioned centrally on the visible front face of the bottom-left cuboid (id 7).",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Simple, clean line art representing liquids or dairy products."
+    },
+    {
+      "id": 12,
+      "type": "icon",
+      "description": "White outline icon of a gear or cogwheel, positioned centrally on the visible front face of the bottom-right cuboid (id 8).",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FFFFFF"
+      ],
+      "style": "outlined",
+      "details": "Simple, clean line art representing settings, mechanics, or industry."
+    },
+    {
+      "id": 13,
+      "type": "decoration",
+      "description": "Two dynamic, wavy dashed lines in shades of green extending from the left side of the cuboid cluster.",
+      "position": {
+        "x": "left",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#00CED1",
+        "#32CD32"
+      ],
+      "style": "flat",
+      "details": "Thin lines with rounded ends, suggesting connectivity, data flow, or dynamism."
+    },
+    {
+      "id": 14,
+      "type": "decoration",
+      "description": "Two dynamic, wavy dashed lines in shades of orange extending from the right side of the cuboid cluster.",
+      "position": {
+        "x": "right",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FF8C00",
+        "#FFA07A"
+      ],
+      "style": "flat",
+      "details": "Thin lines with rounded ends, suggesting connectivity, data flow, or dynamism."
+    },
+    {
+      "id": 15,
+      "type": "decoration",
+      "description": "Two dynamic, wavy dashed lines in shades of blue extending from the bottom-right side of the cuboid cluster.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#007BFF",
+        "#42A5F5"
+      ],
+      "style": "flat",
+      "details": "Thin lines with rounded ends, suggesting connectivity, data flow, or dynamism."
+    },
+    {
+      "id": 16,
+      "type": "decoration",
+      "description": "Three small, solid circular dots in green, accompanying the green wavy lines on the left.",
+      "position": {
+        "x": "left",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#00CED1",
+        "#32CD32"
+      ],
+      "style": "filled",
+      "details": "Small, uniform circles."
+    },
+    {
+      "id": 17,
+      "type": "decoration",
+      "description": "Two small, solid circular dots in orange, accompanying the orange wavy lines on the right.",
+      "position": {
+        "x": "right",
+        "y": "center"
+      },
+      "size": "small",
+      "colors": [
+        "#FF8C00"
+      ],
+      "style": "filled",
+      "details": "Small, uniform circles."
+    },
+    {
+      "id": 18,
+      "type": "decoration",
+      "description": "Two small, solid circular dots in blue, accompanying the blue wavy lines on the bottom-right.",
+      "position": {
+        "x": "right",
+        "y": "bottom"
+      },
+      "size": "small",
+      "colors": [
+        "#007BFF"
+      ],
+      "style": "filled",
+      "details": "Small, uniform circles."
+    },
+    {
+      "id": 19,
+      "type": "decoration",
+      "description": "A soft, diffused drop shadow beneath the entire cuboid graphic cluster, adding depth.",
+      "position": {
+        "x": "center",
+        "y": "center"
+      },
+      "size": "large",
+      "colors": [
+        "#E0E0E0"
+      ],
+      "style": "flat",
+      "details": "Subtle light grey shadow extending to the bottom and right."
+    },
+    {
+      "id": 20,
+      "type": "decoration",
+      "description": "A soft, diffused drop shadow beneath the 'MULTISTOCK' text, adding depth.",
+      "position": {
+        "x": "center",
+        "y": "bottom"
+      },
+      "size": "medium",
+      "colors": [
+        "#E0E0E0"
+      ],
+      "style": "flat",
+      "details": "Subtle light grey shadow extending to the bottom and right of the text."
+    }
+  ],
+  "text_content": [
+    {
+      "text": "MULTI",
+      "font": "sans-serif",
+      "weight": "bold",
+      "color": "#007BFF",
+      "position": {
+        "x": "center",
+        "y": "bottom"
+      },
+      "size": "xl"
+    },
+    {
+      "text": "STOCK",
+      "font": "sans-serif",
+      "weight": "bold",
+      "color": "#FF8C00",
+      "position": {
+        "x": "center",
+        "y": "bottom"
+      },
+      "size": "xl"
+    }
+  ],
+  "style": {
+    "art_style": "vector|3d",
+    "color_scheme": "vibrant",
+    "mood": "modern|professional|dynamic|technological|corporate",
+    "effects": [
+      "shadow",
+      "gradient",
+      "rounded_corners"
+    ]
+  },
+  "colors": {
+    "palette": [
+      "#FFFFFF",
+      "#007BFF",
+      "#0056B3",
+      "#42A5F5",
+      "#FF8C00",
+      "#FF6347",
+      "#FF1493",
+      "#FFA07A",
+      "#008080",
+      "#00CED1",
+      "#32CD32",
+      "#E0E0E0"
+    ],
+    "dominant": "#FFFFFF",
+    "accent": "#007BFF"
+  }
+}
