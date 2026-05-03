@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "db:wipe:business": "node scripts/supabase-db-wipe.cjs --mode=business",
+    "db:wipe:full": "node scripts/supabase-db-wipe.cjs --mode=full",
+    "db:reset:local": "npx supabase db reset --local --yes",
     "db:push": "node scripts/supabase-db-push.cjs",
     "db:push:link": "npx supabase db push --yes",
     "db:start": "npx supabase start"

@@ -4,6 +4,7 @@ import { BrandLogo } from "@/components/brand/brand-logo";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getActiveBusiness } from "@/lib/business/get-active-business";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const navLinkClass =
   "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground";
@@ -33,6 +34,7 @@ export async function MarketingNav() {
           </nav>
         </div>
         <div className="flex min-h-10 items-center justify-end gap-2 sm:gap-3">
+          <ThemeToggle className="h-9 w-9 shrink-0 rounded-xl border border-transparent text-muted-foreground hover:border-border/70 hover:bg-muted/40 hover:text-foreground" />
           {user ? (
             <Link
               href={panelHref}
