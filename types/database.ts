@@ -424,8 +424,8 @@ export type Database = {
         Args: {
           p_business_id: string;
           p_created_by: string;
-          p_payment_method: string;
           p_items: Json;
+          p_payment_method: string;
         };
         Returns: string;
       };

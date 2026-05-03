@@ -147,11 +147,12 @@ export async function createSaleAction(
     unit_price: item.unitPrice,
   }));
 
+  // Orden alfabético de claves = orden de tipos que PostgREST usa para resolver la RPC (uuid, uuid, jsonb, text).
   const { data: saleId, error: rpcError } = await supabase.rpc("create_sale_with_items", {
     p_business_id: business.id,
     p_created_by: user.id,
-    p_payment_method: parsed.data.paymentMethod,
     p_items: payloadItems,
+    p_payment_method: parsed.data.paymentMethod,
   });
 
   if (rpcError || !saleId) {

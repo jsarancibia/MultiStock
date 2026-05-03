@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { BrowserCodeReader, BrowserMultiFormatReader } from "@zxing/browser";
 import { isValidBarcodeFormat, normalizeBarcode } from "@/lib/barcode/normalize";
 
@@ -32,6 +33,9 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
     if (!open) {
       return;
     }
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     hasDetectedRef.current = false;
 
@@ -97,6 +101,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
     return () => {
       cancelled = true;
       cancelAnimationFrame(startId);
+      document.body.style.overflow = prevOverflow;
       try {
         controlsRef.current?.stop();
       } catch {
@@ -110,6 +115,8 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
 
   if (!open) return null;
 
+  if (typeof document === "undefined") return null;
+
   const statusLabel: Record<ScanStatus, string> = {
     idle: "",
     preparing: "Preparando cámara…",
@@ -118,18 +125,18 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
     error: errorMessage ?? "Error",
   };
 
-  return (
+  const overlay = (
     <div
-      className="fixed inset-0 z-[100] flex flex-col bg-black/90"
+      className="fixed inset-0 z-[200] flex flex-col bg-black/95 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
       role="dialog"
       aria-modal="true"
       aria-label="Escanear código de barras"
     >
-      <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-3 text-white">
-        <p className="text-sm font-medium">Escanear código</p>
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/10 px-3 py-3 text-white">
+        <p className="min-w-0 flex-1 truncate text-sm font-medium">Escanear código</p>
         <button
           type="button"
-          className="rounded-md border border-white/30 px-3 py-1.5 text-sm hover:bg-white/10"
+          className="shrink-0 rounded-md border border-white/30 px-3 py-1.5 text-sm hover:bg-white/10"
           onClick={() => {
             try {
               controlsRef.current?.stop();
@@ -144,17 +151,19 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
         </button>
       </div>
 
-      <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center p-3">
+      <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-3 py-4">
         <video
           ref={videoRef}
-          className="max-h-[min(70vh,560px)] w-full max-w-lg rounded-lg object-cover"
+          className="aspect-video w-full max-w-lg rounded-lg bg-black object-cover shadow-lg ring-1 ring-white/10"
           muted
           playsInline
         />
-        <p className="mt-3 max-w-md text-center text-sm text-white/90">
+        <p className="max-w-lg px-1 text-center text-sm leading-snug text-white/90">
           {status === "error" ? errorMessage : statusLabel[status]}
         </p>
       </div>
     </div>
   );
+
+  return createPortal(overlay, document.body);
 }

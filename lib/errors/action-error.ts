@@ -5,6 +5,9 @@ export function humanizeActionError(raw: unknown, fallback: string = DEFAULT_MES
   if (!message.trim()) return fallback;
 
   const m = message.toLowerCase();
+  if (m.includes("could not find the function") || m.includes("pgrst202")) {
+    return "No se encontró la función de ventas en la base de datos. Aplicá las migraciones más recientes (npm run db:push) o contactá soporte.";
+  }
   if (m.includes("network") || m.includes("fetch")) {
     return "Error de red. Revisa tu conexión e intenta de nuevo.";
   }

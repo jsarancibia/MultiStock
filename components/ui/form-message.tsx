@@ -12,7 +12,7 @@ export function FormMessage({ message, tone = "error", className }: FormMessageP
     <p
       role={tone === "error" ? "alert" : "status"}
       className={cn(
-        "text-sm",
+        "text-sm break-words",
         tone === "error" && "text-destructive",
         tone === "success" && "text-emerald-600 dark:text-emerald-400",
         tone === "info" && "text-muted-foreground",

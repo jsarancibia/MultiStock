@@ -196,35 +196,37 @@ export function ProductSearch({ businessType, products, onAddProduct }: ProductS
         </p>
       ) : null}
       <div className="max-h-72 overflow-auto rounded-md border border-border bg-background">
-        <table className="w-full text-sm">
+        <table className="w-full table-fixed text-xs sm:text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
-              <th className="px-3 py-2 font-medium">Producto</th>
-              <th className="px-3 py-2 font-medium">Stock</th>
-              <th className="px-3 py-2 font-medium">Precio</th>
-              <th className="px-3 py-2 font-medium" />
+              <th className="w-[48%] px-2 py-2 font-medium sm:px-3">Producto</th>
+              <th className="w-[18%] px-2 py-2 font-medium sm:px-3">Stock</th>
+              <th className="w-[18%] px-2 py-2 font-medium sm:px-3">Precio</th>
+              <th className="w-[16%] px-2 py-2 font-medium sm:px-3" />
             </tr>
           </thead>
           <tbody>
             {filteredProducts.map((product) => (
               <tr key={product.id} className="border-t">
-                <td className="px-3 py-2">
-                  <p className="font-medium">{product.name}</p>
-                  <p className="text-xs text-muted-foreground">
+                <td className="px-2 py-2 align-top sm:px-3">
+                  <p className="break-words font-medium leading-snug">{product.name}</p>
+                  <p className="mt-0.5 break-all text-[11px] text-muted-foreground sm:text-xs">
                     {businessType === "ferreteria"
                       ? ferreteriaDetailLine(product)
                       : product.barcode || product.sku || "Sin codigo"}
                   </p>
                 </td>
-                <td className="px-3 py-2">
-                  {formatQuantity(product.current_stock)} {product.unit_type}
+                <td className="px-2 py-2 align-top text-[11px] sm:px-3 sm:text-sm">
+                  <span className="break-words">
+                    {formatQuantity(product.current_stock)} {product.unit_type}
+                  </span>
                 </td>
-                <td className="px-3 py-2">{formatCurrency(product.sale_price)}</td>
-                <td className="px-3 py-2 text-right">
+                <td className="px-2 py-2 align-top text-[11px] sm:px-3 sm:text-sm">{formatCurrency(product.sale_price)}</td>
+                <td className="px-2 py-2 align-top text-right sm:px-3">
                   <button
                     type="button"
                     onClick={() => onAddProduct(product)}
-                    className="rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground hover:bg-muted"
+                    className="rounded-md border border-input bg-background px-1.5 py-1 text-[11px] text-foreground hover:bg-muted sm:px-2 sm:text-xs"
                   >
                     Agregar
                   </button>
