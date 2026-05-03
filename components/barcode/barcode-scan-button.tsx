@@ -9,6 +9,8 @@ export type BarcodeScanButtonProps = {
   disabled?: boolean;
   className?: string;
   label?: string;
+  /** Modo ventas: varias lecturas seguidas sin cerrar la cámara hasta «Terminado». */
+  continuousScan?: boolean;
 };
 
 export function BarcodeScanButton({
@@ -16,6 +18,7 @@ export function BarcodeScanButton({
   disabled,
   className,
   label = "Escanear código",
+  continuousScan = false,
 }: BarcodeScanButtonProps) {
   const [open, setOpen] = useState(false);
 
@@ -31,9 +34,12 @@ export function BarcodeScanButton({
       </button>
       <BarcodeScanner
         open={open}
+        continuous={continuousScan}
         onClose={() => setOpen(false)}
         onDetected={(code) => {
-          setOpen(false);
+          if (!continuousScan) {
+            setOpen(false);
+          }
           onDetected(code);
         }}
       />

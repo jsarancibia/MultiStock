@@ -173,6 +173,7 @@ export function ProductSearch({ businessType, products, onAddProduct }: ProductS
         />
         <BarcodeScanButton
           className={formSecondaryButtonClass}
+          continuousScan
           disabled={isScanPending}
           label={isScanPending ? "Buscando..." : "Escanear código"}
           onDetected={(code) => {

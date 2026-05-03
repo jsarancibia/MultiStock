@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BrowserCodeReader, BrowserMultiFormatReader } from "@zxing/browser";
 import { isValidBarcodeFormat, normalizeBarcode } from "@/lib/barcode/normalize";
@@ -9,25 +9,38 @@ export type BarcodeScannerProps = {
   open: boolean;
   onClose: () => void;
   onDetected: (barcode: string) => void;
+  /** Si es true, no cierra tras cada lectura: permite escanear varios códigos seguidos hasta «Terminado». */
+  continuous?: boolean;
 };
 
 type ScanStatus = "idle" | "preparing" | "scanning" | "invalid_read" | "error";
 
-export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProps) {
+const DEDUPE_MS = 900;
+const REARM_MS = 450;
+
+export function BarcodeScanner({ open, onClose, onDetected, continuous = false }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
   const controlsRef = useRef<{ stop: () => void } | null>(null);
   const hasDetectedRef = useRef(false);
+  const lastEmittedRef = useRef<{ code: string; at: number } | null>(null);
+  const rearmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const continuousRef = useRef(continuous);
   const onDetectedRef = useRef(onDetected);
   const onCloseRef = useRef(onClose);
 
   const [status, setStatus] = useState<ScanStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [lastOkRead, setLastOkRead] = useState<string | null>(null);
 
   useEffect(() => {
     onDetectedRef.current = onDetected;
     onCloseRef.current = onClose;
   }, [onDetected, onClose]);
+
+  useEffect(() => {
+    continuousRef.current = continuous;
+  }, [continuous]);
 
   useEffect(() => {
     if (!open) {
@@ -38,6 +51,12 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
     document.body.style.overflow = "hidden";
 
     hasDetectedRef.current = false;
+    lastEmittedRef.current = null;
+    startTransition(() => setLastOkRead(null));
+    if (rearmTimerRef.current) {
+      clearTimeout(rearmTimerRef.current);
+      rearmTimerRef.current = null;
+    }
 
     const reader = new BrowserMultiFormatReader();
     readerRef.current = reader;
@@ -65,7 +84,31 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
             setStatus("invalid_read");
             return;
           }
+
+          if (continuousRef.current) {
+            const now = Date.now();
+            const prev = lastEmittedRef.current;
+            if (prev && prev.code === normalized && now - prev.at < DEDUPE_MS) {
+              return;
+            }
+            lastEmittedRef.current = { code: normalized, at: now };
+          }
+
           hasDetectedRef.current = true;
+
+          if (continuousRef.current) {
+            onDetectedRef.current(normalized);
+            setLastOkRead(normalized);
+            setStatus("scanning");
+            if (rearmTimerRef.current) clearTimeout(rearmTimerRef.current);
+            rearmTimerRef.current = setTimeout(() => {
+              if (!cancelled) {
+                hasDetectedRef.current = false;
+              }
+            }, REARM_MS);
+            return;
+          }
+
           try {
             controls.stop();
           } catch {
@@ -102,6 +145,10 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
       cancelled = true;
       cancelAnimationFrame(startId);
       document.body.style.overflow = prevOverflow;
+      if (rearmTimerRef.current) {
+        clearTimeout(rearmTimerRef.current);
+        rearmTimerRef.current = null;
+      }
       try {
         controlsRef.current?.stop();
       } catch {
@@ -111,7 +158,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
       readerRef.current = null;
       BrowserCodeReader.releaseAllStreams();
     };
-  }, [open]);
+  }, [open, continuous]);
 
   if (!open) return null;
 
@@ -120,32 +167,43 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
   const statusLabel: Record<ScanStatus, string> = {
     idle: "",
     preparing: "Preparando cámara…",
-    scanning: "Escaneando… apunta al código",
+    scanning: continuous
+      ? "Escaneando… leé varios códigos seguidos. Tocá «Terminado» abajo cuando termines."
+      : "Escaneando… apunta al código",
     invalid_read: "Código no válido, sigue intentando…",
     error: errorMessage ?? "Error",
   };
 
+  function stopScannerAndClose() {
+    if (rearmTimerRef.current) {
+      clearTimeout(rearmTimerRef.current);
+      rearmTimerRef.current = null;
+    }
+    try {
+      controlsRef.current?.stop();
+    } catch {
+      /* ignore */
+    }
+    BrowserCodeReader.releaseAllStreams();
+    controlsRef.current = null;
+    onClose();
+  }
+
   const overlay = (
     <div
-      className="fixed inset-0 z-[200] flex flex-col bg-black/95 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-0 z-[200] flex flex-col bg-black/95 pt-[env(safe-area-inset-top)]"
       role="dialog"
       aria-modal="true"
-      aria-label="Escanear código de barras"
+      aria-label={continuous ? "Escanear varios códigos de barras" : "Escanear código de barras"}
     >
       <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/10 px-3 py-3 text-white">
-        <p className="min-w-0 flex-1 truncate text-sm font-medium">Escanear código</p>
+        <p className="min-w-0 flex-1 truncate text-sm font-medium">
+          {continuous ? "Escanear productos" : "Escanear código"}
+        </p>
         <button
           type="button"
           className="shrink-0 rounded-md border border-white/30 px-3 py-1.5 text-sm hover:bg-white/10"
-          onClick={() => {
-            try {
-              controlsRef.current?.stop();
-            } catch {
-              /* ignore */
-            }
-            BrowserCodeReader.releaseAllStreams();
-            onClose();
-          }}
+          onClick={stopScannerAndClose}
         >
           Cerrar
         </button>
@@ -161,7 +219,29 @@ export function BarcodeScanner({ open, onClose, onDetected }: BarcodeScannerProp
         <p className="max-w-lg px-1 text-center text-sm leading-snug text-white/90">
           {status === "error" ? errorMessage : statusLabel[status]}
         </p>
+        {continuous && lastOkRead && status !== "error" ? (
+          <p className="max-w-lg px-1 text-center text-xs text-emerald-300/90">
+            Último código: <span className="font-mono">{lastOkRead}</span>
+          </p>
+        ) : null}
       </div>
+
+      {continuous ? (
+        <div className="shrink-0 border-t border-white/10 bg-black/50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+          <button
+            type="button"
+            className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-900/40 transition hover:bg-emerald-400 active:scale-[0.99]"
+            onClick={stopScannerAndClose}
+          >
+            Terminado
+          </button>
+          <p className="mt-2 text-center text-[11px] leading-snug text-white/55">
+            Los productos ya quedaron en la venta. Este botón solo cierra la cámara.
+          </p>
+        </div>
+      ) : (
+        <div className="shrink-0 pb-[env(safe-area-inset-bottom)]" aria-hidden />
+      )}
     </div>
   );
 
