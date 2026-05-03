@@ -357,7 +357,11 @@ export async function createProductAction(
     .select("id")
     .single();
 
-  if (error || !product) return { message: error?.message ?? "No se pudo crear el producto." };
+  if (error || !product) {
+    return {
+      message: humanizeActionError(error?.message, "No se pudo crear el producto."),
+    };
+  }
 
   await syncPerishableProductAlert(
     supabase,

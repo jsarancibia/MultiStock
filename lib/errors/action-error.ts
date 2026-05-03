@@ -8,7 +8,12 @@ export function humanizeActionError(raw: unknown, fallback: string = DEFAULT_MES
   if (m.includes("network") || m.includes("fetch")) {
     return "Error de red. Revisa tu conexión e intenta de nuevo.";
   }
-  if (m.includes("permission") || m.includes("policy")) {
+  if (
+    m.includes("permission") ||
+    m.includes("policy") ||
+    m.includes("row-level security") ||
+    m.includes("rls")
+  ) {
     return "No tienes permisos para esta operación en el negocio activo.";
   }
   if (m.includes("duplicate") || m.includes("unique")) {

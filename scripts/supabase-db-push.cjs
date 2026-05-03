@@ -76,13 +76,17 @@ try {
 const npx = process.platform === "win32" ? "npx.cmd" : "npx";
 const result = spawnSync(
   npx,
-  ["supabase", "db", "push", "--yes", "--db-url", dbUrl],
+  ["--yes", "supabase", "db", "push", "--yes", "--db-url", dbUrl],
   {
     cwd: root,
     stdio: "inherit",
     env: envExampleMerge,
-    shell: false,
+    shell: process.platform === "win32",
   }
 );
+
+if (result.error) {
+  console.error(result.error.message);
+}
 
 process.exit(result.status === 0 ? 0 : result.status ?? 1);
