@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { BusinessType } from "@/config/business-types";
 import { BarcodeScanButton } from "@/components/barcode/barcode-scan-button";
+import { MobileBarcodeLink } from "@/components/barcode/mobile-barcode-link";
 import {
   formSecondaryButtonClass,
   panelInputClass,
@@ -96,6 +97,22 @@ export function ProductSearch({ businessType, products, onAddProduct }: ProductS
     inputRef.current?.focus();
   }, []);
 
+  const applyScannedBarcode = useCallback(
+    (code: string) => {
+      startTransition(async () => {
+        setScanMessage(null);
+        const result = await findActiveProductByBarcode(code);
+        if (result.ok) {
+          onAddProduct(saleFormProductToOption(result.product));
+          setQuery("");
+        } else {
+          setScanMessage(result.message);
+        }
+      });
+    },
+    [onAddProduct]
+  );
+
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
@@ -176,18 +193,12 @@ export function ProductSearch({ businessType, products, onAddProduct }: ProductS
           continuousScan
           disabled={isScanPending}
           label={isScanPending ? "Buscando..." : "Escanear código"}
-          onDetected={(code) => {
-            startTransition(async () => {
-              setScanMessage(null);
-              const result = await findActiveProductByBarcode(code);
-              if (result.ok) {
-                onAddProduct(saleFormProductToOption(result.product));
-                setQuery("");
-              } else {
-                setScanMessage(result.message);
-              }
-            });
-          }}
+          onDetected={applyScannedBarcode}
+        />
+        <MobileBarcodeLink
+          className={formSecondaryButtonClass}
+          disabled={isScanPending}
+          onDetected={applyScannedBarcode}
         />
       </div>
       {scanMessage ? <p className="text-xs text-rose-600">{scanMessage}</p> : null}

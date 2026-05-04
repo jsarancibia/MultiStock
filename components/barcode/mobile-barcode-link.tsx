@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 type MobileBarcodeLinkProps = {
   onDetected: (barcode: string) => void;
   className?: string;
+  disabled?: boolean;
 };
 
 type LinkStatus = "idle" | "opening" | "ready" | "connected" | "received" | "error";
@@ -27,7 +28,7 @@ function createRandomToken() {
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-export function MobileBarcodeLink({ onDetected, className }: MobileBarcodeLinkProps) {
+export function MobileBarcodeLink({ onDetected, className, disabled }: MobileBarcodeLinkProps) {
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
   const tokenRef = useRef<string>("");
@@ -59,7 +60,7 @@ export function MobileBarcodeLink({ onDetected, className }: MobileBarcodeLinkPr
   }, [cleanupChannel]);
 
   const startLink = useCallback(async () => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || disabled) return;
 
     cleanupChannel();
     setOpen(true);
@@ -124,7 +125,7 @@ export function MobileBarcodeLink({ onDetected, className }: MobileBarcodeLinkPr
       setStatus("error");
       setError("No se pudo generar el QR para enlazar el celular.");
     }
-  }, [cleanupChannel]);
+  }, [cleanupChannel, disabled]);
 
   useEffect(() => cleanupChannel, [cleanupChannel]);
 
@@ -215,7 +216,7 @@ export function MobileBarcodeLink({ onDetected, className }: MobileBarcodeLinkPr
 
   return (
     <>
-      <button type="button" onClick={startLink} className={className}>
+      <button type="button" disabled={disabled} onClick={startLink} className={className}>
         Enlace con celular
       </button>
       {modal}
