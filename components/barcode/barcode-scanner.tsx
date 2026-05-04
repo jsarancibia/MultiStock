@@ -168,9 +168,9 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
     idle: "",
     preparing: "Preparando cámara…",
     scanning: continuous
-      ? "Escaneando… leé varios códigos seguidos. Tocá «Terminado» abajo cuando termines."
-      : "Escaneando… apunta al código",
-    invalid_read: "Código no válido, sigue intentando…",
+      ? "Escaneá varios códigos seguidos. Cuando termines, tocá el botón verde «Terminado» abajo."
+      : "Apuntá al código de barras dentro del recuadro.",
+    invalid_read: "Ese código no es válido. Probá de nuevo.",
     error: errorMessage ?? "Error",
   };
 
@@ -191,56 +191,75 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
 
   const overlay = (
     <div
-      className="fixed inset-0 z-[200] flex flex-col bg-black/95 pt-[env(safe-area-inset-top)]"
+      className="fixed inset-0 z-[200] flex flex-col bg-zinc-950 pt-[env(safe-area-inset-top)] antialiased"
       role="dialog"
       aria-modal="true"
       aria-label={continuous ? "Escanear varios códigos de barras" : "Escanear código de barras"}
     >
-      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-white/10 px-3 py-3 text-white">
-        <p className="min-w-0 flex-1 truncate text-sm font-medium">
-          {continuous ? "Escanear productos" : "Escanear código"}
-        </p>
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-zinc-950 px-4 py-3.5">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-base font-semibold tracking-tight text-white">
+            {continuous ? "Escanear productos" : "Escanear código"}
+          </p>
+          {continuous ? (
+            <p className="mt-0.5 truncate text-xs font-medium text-zinc-400">Modo varios códigos</p>
+          ) : null}
+        </div>
         <button
           type="button"
-          className="shrink-0 rounded-md border border-white/30 px-3 py-1.5 text-sm hover:bg-white/10"
+          className="shrink-0 rounded-lg border border-white/20 bg-white/5 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-white/10"
           onClick={stopScannerAndClose}
         >
           Cerrar
         </button>
-      </div>
+      </header>
 
-      <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-3 py-4">
-        <video
-          ref={videoRef}
-          className="aspect-video w-full max-w-lg rounded-lg bg-black object-cover shadow-lg ring-1 ring-white/10"
-          muted
-          playsInline
-        />
-        <p className="max-w-lg px-1 text-center text-sm leading-snug text-white/90">
-          {status === "error" ? errorMessage : statusLabel[status]}
-        </p>
-        {continuous && lastOkRead && status !== "error" ? (
-          <p className="max-w-lg px-1 text-center text-xs text-emerald-300/90">
-            Último código: <span className="font-mono">{lastOkRead}</span>
-          </p>
-        ) : null}
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-zinc-950">
+        <div className="mx-auto flex w-full max-w-lg flex-1 flex-col items-stretch gap-4 px-4 py-5">
+          <video
+            ref={videoRef}
+            className="aspect-video w-full shrink-0 rounded-2xl bg-black object-cover shadow-xl ring-1 ring-white/10"
+            muted
+            playsInline
+          />
+
+          <div className="rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3.5 shadow-lg shadow-black/40">
+            <p className="text-center text-[15px] font-normal leading-relaxed text-zinc-100">
+              {status === "error" ? (
+                <span className="text-red-300">{errorMessage}</span>
+              ) : (
+                statusLabel[status]
+              )}
+            </p>
+            {continuous && lastOkRead && status !== "error" ? (
+              <div className="mt-3 rounded-xl border border-emerald-500/25 bg-emerald-950/60 px-3 py-2.5">
+                <p className="text-center text-[11px] font-medium uppercase tracking-wide text-emerald-400/90">
+                  Último leído
+                </p>
+                <p className="mt-1 break-all text-center font-mono text-sm font-semibold tracking-wide text-emerald-100">
+                  {lastOkRead}
+                </p>
+              </div>
+            ) : null}
+          </div>
+        </div>
       </div>
 
       {continuous ? (
-        <div className="shrink-0 border-t border-white/10 bg-black/50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+        <footer className="shrink-0 border-t border-white/10 bg-zinc-950 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4">
           <button
             type="button"
-            className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white shadow-md shadow-emerald-900/40 transition hover:bg-emerald-400 active:scale-[0.99]"
+            className="w-full rounded-xl bg-emerald-600 py-3.5 text-base font-semibold text-white shadow-lg shadow-emerald-950/50 transition hover:bg-emerald-500 active:scale-[0.99]"
             onClick={stopScannerAndClose}
           >
             Terminado
           </button>
-          <p className="mt-2 text-center text-[11px] leading-snug text-white/55">
-            Los productos ya quedaron en la venta. Este botón solo cierra la cámara.
+          <p className="mt-2.5 text-center text-xs leading-relaxed text-zinc-400">
+            Cierra la cámara. Los productos que leíste ya quedaron en la venta.
           </p>
-        </div>
+        </footer>
       ) : (
-        <div className="shrink-0 pb-[env(safe-area-inset-bottom)]" aria-hidden />
+        <footer className="shrink-0 bg-zinc-950 pb-[env(safe-area-inset-bottom)]" aria-hidden />
       )}
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BarcodeScanButton } from "@/components/barcode/barcode-scan-button";
+import { MobileBarcodeLink } from "@/components/barcode/mobile-barcode-link";
 import {
   formSecondaryButtonClass,
   panelInputClass,
@@ -57,6 +58,10 @@ function ProductBarcodeFieldInner({
         </p>
       </div>
       <BarcodeScanButton
+        className={formSecondaryButtonClass}
+        onDetected={(code) => setValue(code)}
+      />
+      <MobileBarcodeLink
         className={formSecondaryButtonClass}
         onDetected={(code) => setValue(code)}
       />

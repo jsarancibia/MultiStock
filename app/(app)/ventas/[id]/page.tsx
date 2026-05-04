@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
+import { buttonVariants } from "@/components/ui/button";
 import { paymentMethodLabels } from "@/lib/validations/sale";
-import { APP_LOCALE, formatCurrency, formatQuantity } from "@/lib/utils";
+import { APP_LOCALE, cn, formatCurrency, formatQuantity } from "@/lib/utils";
 import { getSaleById } from "@/modules/core/sales/actions";
 
 type VentaDetallePageProps = {
@@ -34,6 +36,27 @@ export default async function VentaDetallePage({ params }: VentaDetallePageProps
         <p className="font-medium">{paymentLabel}</p>
         <p className="mt-2 text-sm text-muted-foreground">Total</p>
         <p className="text-lg font-semibold">{formatCurrency(sale.total)}</p>
+      </div>
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <Link
+          href="/ventas/nueva"
+          className={cn(
+            buttonVariants({ size: "lg" }),
+            "min-h-11 w-full justify-center px-4 text-base font-semibold shadow-md shadow-primary/25 sm:w-auto sm:min-w-[220px]"
+          )}
+        >
+          Nueva venta
+        </Link>
+        <Link
+          href="/ventas"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "min-h-11 w-full justify-center px-4 text-base font-medium sm:w-auto sm:min-w-[220px]"
+          )}
+        >
+          Ver historial de ventas
+        </Link>
       </div>
 
       <div className="overflow-x-auto rounded-lg border">
