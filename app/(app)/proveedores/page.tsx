@@ -1,12 +1,24 @@
 import Link from "next/link";
 import { Building2 } from "lucide-react";
+import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import { PageHeader } from "@/components/layout/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { getPlanModuleAccess } from "@/lib/billing/require-plan-module";
 import { cn } from "@/lib/utils";
 import { listSuppliers } from "@/modules/core/suppliers/actions";
 
 export default async function ProveedoresPage() {
+  const access = await getPlanModuleAccess("suppliers");
+  if (!access.allowed) {
+    return (
+      <UpgradeRequired
+        title="Proveedores disponibles desde Pro"
+        description="El plan Gratis se enfoca en productos, inventario y ventas básicas. Actualiza a Pro para organizar proveedores."
+      />
+    );
+  }
+
   const suppliers = await listSuppliers();
 
   return (

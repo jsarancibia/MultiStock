@@ -40,6 +40,7 @@ export async function createBusinessAction(
       name: parsed.data.name,
       business_type: parsed.data.businessType,
       owner_id: user.id,
+      subscription_plan: "free",
     })
     .select("id")
     .single();

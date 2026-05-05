@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { assertProductLimit } from "@/lib/billing/plan-guards";
 import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
@@ -328,6 +329,9 @@ export async function createProductAction(
   const createAnother = String(formData.get("intent") ?? "") === "create_another";
 
   const supabase = await createClient();
+  const limitMessage = await assertProductLimit(supabase, business);
+  if (limitMessage) return { message: limitMessage };
+
   if (parsed.data.barcode) {
     const barcodeTaken = await findProductUsingBarcode(supabase, business.id, parsed.data.barcode);
     if (barcodeTaken) {

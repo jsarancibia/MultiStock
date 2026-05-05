@@ -14,6 +14,7 @@ type ProductBarcodeFieldProps = {
   defaultValue: string;
   /** Se usa como key para resetear estado al cambiar de producto en edición */
   instanceKey?: string;
+  allowMobileLink?: boolean;
 };
 
 export function ProductBarcodeField({
@@ -21,6 +22,7 @@ export function ProductBarcodeField({
   id = "barcode",
   defaultValue,
   instanceKey = "",
+  allowMobileLink = true,
 }: ProductBarcodeFieldProps) {
   return (
     <ProductBarcodeFieldInner
@@ -28,6 +30,7 @@ export function ProductBarcodeField({
       name={name}
       id={id}
       defaultValue={defaultValue}
+      allowMobileLink={allowMobileLink}
     />
   );
 }
@@ -36,7 +39,8 @@ function ProductBarcodeFieldInner({
   name,
   id,
   defaultValue,
-}: Required<Pick<ProductBarcodeFieldProps, "name" | "id" | "defaultValue">>) {
+  allowMobileLink,
+}: Required<Pick<ProductBarcodeFieldProps, "name" | "id" | "defaultValue" | "allowMobileLink">>) {
   const [value, setValue] = useState(defaultValue);
 
   return (
@@ -61,10 +65,12 @@ function ProductBarcodeFieldInner({
         className={formSecondaryButtonClass}
         onDetected={(code) => setValue(code)}
       />
-      <MobileBarcodeLink
-        className={formSecondaryButtonClass}
-        onDetected={(code) => setValue(code)}
-      />
+      {allowMobileLink ? (
+        <MobileBarcodeLink
+          className={formSecondaryButtonClass}
+          onDetected={(code) => setValue(code)}
+        />
+      ) : null}
     </div>
   );
 }

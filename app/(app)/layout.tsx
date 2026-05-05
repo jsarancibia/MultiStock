@@ -21,7 +21,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
   const businesses = await listUserBusinesses(user.id);
   const business = await requireActiveBusiness(user.id);
   const businessType = businessTypes[business.business_type];
-  const navigation = getNavigationForBusinessType(business.business_type);
+  const navigation = getNavigationForBusinessType(business.business_type, business.subscription_plan);
 
   async function switchBusinessAction(
     _state: { ok?: boolean } | undefined,

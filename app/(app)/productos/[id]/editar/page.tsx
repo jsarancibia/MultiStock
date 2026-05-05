@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProductForm } from "@/components/productos/product-form";
+import { canUseMobileScanner } from "@/config/plans";
 import { getProductById, getProductFormData, updateProductAction } from "@/modules/core/products/actions";
 
 type EditarProductoPageProps = {
@@ -23,6 +24,7 @@ export default async function EditarProductoPage({ params }: EditarProductoPageP
         allowInitialStockEdit={false}
         action={updateProductAction.bind(null, product.id)}
         submitLabel="Guardar cambios"
+        allowMobileBarcodeLink={canUseMobileScanner(formData.business.subscription_plan)}
       />
     </section>
   );

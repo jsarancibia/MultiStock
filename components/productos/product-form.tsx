@@ -42,6 +42,7 @@ type ProductFormProps = {
   submitLabel: string;
   initialProduct?: ProductLike | null;
   allowInitialStockEdit?: boolean;
+  allowMobileBarcodeLink?: boolean;
 };
 
 const initialState: ProductActionState = {};
@@ -54,6 +55,7 @@ export function ProductForm({
   submitLabel,
   initialProduct,
   allowInitialStockEdit = true,
+  allowMobileBarcodeLink = true,
 }: ProductFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const isEditing = Boolean(initialProduct?.id);
@@ -106,6 +108,7 @@ export function ProductForm({
         productInstanceKey={initialProduct?.id ?? "create"}
         categories={categories}
         suppliers={suppliers}
+        allowMobileBarcodeLink={allowMobileBarcodeLink}
       />
 
       <ProductPricingSection

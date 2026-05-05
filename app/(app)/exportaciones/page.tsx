@@ -1,3 +1,5 @@
+import { UpgradeRequired } from "@/components/billing/upgrade-required";
+import { getPlanModuleAccess } from "@/lib/billing/require-plan-module";
 import { getCsvExports } from "@/modules/core/reports/actions";
 
 function toDownloadHref(content: string) {
@@ -5,6 +7,16 @@ function toDownloadHref(content: string) {
 }
 
 export default async function ExportacionesPage() {
+  const access = await getPlanModuleAccess("exports");
+  if (!access.allowed) {
+    return (
+      <UpgradeRequired
+        title="Exportaciones disponibles desde Pro"
+        description="El plan Gratis no incluye descargas CSV. Actualiza a Pro para exportar productos, inventario, movimientos, ventas y alertas."
+      />
+    );
+  }
+
   const csv = await getCsvExports();
 
   const files = [

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { BusinessType } from "@/config/business-types";
+import { normalizePlan, type SubscriptionPlan } from "@/config/plans";
 import { requireUser } from "@/lib/auth/session";
 import {
   getActiveBusinessIdFromCookie,
@@ -12,7 +13,16 @@ export type ActiveBusiness = {
   name: string;
   business_type: BusinessType;
   owner_id: string;
+  subscription_plan: SubscriptionPlan;
 };
+
+function normalizeBusiness(row: ActiveBusiness | null): ActiveBusiness | null {
+  if (!row) return null;
+  return {
+    ...row,
+    subscription_plan: normalizePlan(row.subscription_plan),
+  };
+}
 
 export async function listUserBusinesses(userId: string): Promise<ActiveBusiness[]> {
   const supabase = await createClient();
@@ -27,13 +37,13 @@ export async function listUserBusinesses(userId: string): Promise<ActiveBusiness
     membershipBusinessIds.length > 0
       ? await supabase
           .from("businesses")
-          .select("id,name,business_type,owner_id")
+          .select("id,name,business_type,owner_id,subscription_plan")
           .in("id", membershipBusinessIds)
       : { data: [] as ActiveBusiness[] };
 
   const { data: ownerRows } = await supabase
     .from("businesses")
-    .select("id,name,business_type,owner_id")
+    .select("id,name,business_type,owner_id,subscription_plan")
     .eq("owner_id", userId)
     .order("created_at", { ascending: true });
 
@@ -43,7 +53,10 @@ export async function listUserBusinesses(userId: string): Promise<ActiveBusiness
     ...((ownerRows as ActiveBusiness[] | null) ?? []),
   ];
   const deduped = new Map<string, ActiveBusiness>();
-  for (const business of merged) deduped.set(business.id, business);
+  for (const business of merged) {
+    const normalized = normalizeBusiness(business);
+    if (normalized) deduped.set(normalized.id, normalized);
+  }
   return [...deduped.values()];
 }
 
@@ -74,24 +87,24 @@ export async function getActiveBusiness(userId: string): Promise<ActiveBusiness 
   if (!membershipError && membership?.business_id) {
     const { data: businessByMembership } = await supabase
       .from("businesses")
-      .select("id,name,business_type,owner_id")
+      .select("id,name,business_type,owner_id,subscription_plan")
       .eq("id", membership.business_id)
       .maybeSingle();
 
     if (businessByMembership) {
-      return businessByMembership as ActiveBusiness;
+      return normalizeBusiness(businessByMembership as ActiveBusiness);
     }
   }
 
   const { data: businessByOwner } = await supabase
     .from("businesses")
-    .select("id,name,business_type,owner_id")
+    .select("id,name,business_type,owner_id,subscription_plan")
     .eq("owner_id", userId)
     .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();
 
-  return (businessByOwner as ActiveBusiness | null) ?? null;
+  return normalizeBusiness((businessByOwner as ActiveBusiness | null) ?? null);
 }
 
 export async function requireActiveBusiness(userId: string) {

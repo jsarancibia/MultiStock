@@ -30,6 +30,7 @@ type ProductSearchProps = {
   businessType: BusinessType;
   products: SaleProductOption[];
   onAddProduct: (product: SaleProductOption) => void;
+  allowMobileBarcodeLink?: boolean;
 };
 
 function almacenSearchScore(product: SaleProductOption, q: string): number {
@@ -86,7 +87,12 @@ function saleFormProductToOption(p: SaleFormProduct): SaleProductOption {
   };
 }
 
-export function ProductSearch({ businessType, products, onAddProduct }: ProductSearchProps) {
+export function ProductSearch({
+  businessType,
+  products,
+  onAddProduct,
+  allowMobileBarcodeLink = true,
+}: ProductSearchProps) {
   const [query, setQuery] = useState("");
   const [scanMessage, setScanMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -195,11 +201,13 @@ export function ProductSearch({ businessType, products, onAddProduct }: ProductS
           label={isScanPending ? "Buscando..." : "Escanear código"}
           onDetected={applyScannedBarcode}
         />
-        <MobileBarcodeLink
-          className={formSecondaryButtonClass}
-          disabled={isScanPending}
-          onDetected={applyScannedBarcode}
-        />
+        {allowMobileBarcodeLink ? (
+          <MobileBarcodeLink
+            className={formSecondaryButtonClass}
+            disabled={isScanPending}
+            onDetected={applyScannedBarcode}
+          />
+        ) : null}
       </div>
       {scanMessage ? <p className="text-xs text-rose-600">{scanMessage}</p> : null}
       {exactBarcodeMatch ? (

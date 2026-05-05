@@ -1,5 +1,6 @@
 import type { BusinessType } from "@/config/business-types";
 import { businessTypes } from "@/config/business-types";
+import { canUseModule, type SubscriptionPlan } from "@/config/plans";
 
 export type AppModule =
   | "dashboard"
@@ -85,8 +86,11 @@ export function getEnabledModules(businessType: BusinessType): Set<AppModule> {
 }
 
 export function getNavigationForBusinessType(
-  businessType: BusinessType
+  businessType: BusinessType,
+  subscriptionPlan: SubscriptionPlan = "free"
 ): NavigationItem[] {
   const enabledModules = getEnabledModules(businessType);
-  return navigationItems.filter((item) => enabledModules.has(item.module));
+  return navigationItems.filter(
+    (item) => enabledModules.has(item.module) && canUseModule(subscriptionPlan, item.module)
+  );
 }

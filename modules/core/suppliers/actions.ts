@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { canBusinessUseModule, getModuleUpgradeMessage } from "@/lib/billing/plan-guards";
 import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
@@ -50,6 +51,10 @@ export async function createSupplierAction(
 ): Promise<SupplierActionState | undefined> {
   const user = await requireUser();
   const business = await requireActiveBusiness(user.id);
+  if (!canBusinessUseModule(business, "suppliers")) {
+    return { message: getModuleUpgradeMessage("Proveedores") };
+  }
+
   const parsed = supplierSchema.safeParse({
     name: formData.get("name"),
     phone: formData.get("phone"),
@@ -103,6 +108,10 @@ export async function updateSupplierAction(
 ): Promise<SupplierActionState | undefined> {
   const user = await requireUser();
   const business = await requireActiveBusiness(user.id);
+  if (!canBusinessUseModule(business, "suppliers")) {
+    return { message: getModuleUpgradeMessage("Proveedores") };
+  }
+
   const parsed = supplierSchema.safeParse({
     name: formData.get("name"),
     phone: formData.get("phone"),

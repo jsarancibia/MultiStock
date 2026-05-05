@@ -13,6 +13,7 @@ import type { SaleActionState } from "@/modules/core/sales/actions";
 type SaleFormProps = {
   businessType: BusinessType;
   products: SaleProductOption[];
+  allowMobileBarcodeLink?: boolean;
   action: (
     prevState: SaleActionState | undefined,
     formData: FormData
@@ -22,7 +23,12 @@ type SaleFormProps = {
 const initialState: SaleActionState = {};
 const DECIMAL_UNITS = new Set(["kg", "g", "liter", "meter"]);
 
-export function SaleForm({ businessType, products, action }: SaleFormProps) {
+export function SaleForm({
+  businessType,
+  products,
+  allowMobileBarcodeLink = true,
+  action,
+}: SaleFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "debit" | "credit" | "transfer" | "other">("cash");
   const [items, setItems] = useState<SaleCartItem[]>([]);
@@ -139,7 +145,12 @@ export function SaleForm({ businessType, products, action }: SaleFormProps) {
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <ProductSearch businessType={businessType} products={products} onAddProduct={addProduct} />
+          <ProductSearch
+            businessType={businessType}
+            products={products}
+            onAddProduct={addProduct}
+            allowMobileBarcodeLink={allowMobileBarcodeLink}
+          />
           <SaleItemsTable
             items={items}
             onUpdateQuantity={updateQuantity}

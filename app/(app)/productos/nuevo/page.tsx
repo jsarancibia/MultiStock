@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { ProductForm } from "@/components/productos/product-form";
+import { canUseMobileScanner } from "@/config/plans";
 import { createProductAction, getProductFormData } from "@/modules/core/products/actions";
 
 export default async function NuevoProductoPage() {
@@ -14,6 +15,7 @@ export default async function NuevoProductoPage() {
         suppliers={suppliers}
         action={createProductAction}
         submitLabel="Crear producto"
+        allowMobileBarcodeLink={canUseMobileScanner(business.subscription_plan)}
       />
     </section>
   );

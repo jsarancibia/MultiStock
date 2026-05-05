@@ -23,6 +23,7 @@ type ProductBasicSectionProps = {
   productInstanceKey?: string;
   categories: Option[];
   suppliers: Option[];
+  allowMobileBarcodeLink?: boolean;
 };
 
 export function ProductBasicSection({
@@ -37,6 +38,7 @@ export function ProductBasicSection({
   productInstanceKey,
   categories,
   suppliers,
+  allowMobileBarcodeLink = true,
 }: ProductBasicSectionProps) {
   return (
     <div className={formSectionClass}>
@@ -134,6 +136,7 @@ export function ProductBasicSection({
             <ProductBarcodeField
               defaultValue={barcodeDefault}
               instanceKey={productInstanceKey ?? ""}
+              allowMobileLink={allowMobileBarcodeLink}
             />
           </>
         ) : (
@@ -144,6 +147,7 @@ export function ProductBasicSection({
             <ProductBarcodeField
               defaultValue={barcodeDefault}
               instanceKey={productInstanceKey ?? ""}
+              allowMobileLink={allowMobileBarcodeLink}
             />
           </>
         )}

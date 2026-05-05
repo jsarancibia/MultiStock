@@ -1,53 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, Info } from "lucide-react";
+import { Check, Info, X } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { PLAN_DEFINITIONS } from "@/config/plans";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Precios",
-  description: "Planes orientativos. El cobro in-app aún no está activo.",
+  description: "Planes mensuales de MultiStock para negocios pequeños en Chile.",
 };
 
-const plans = [
-  {
-    name: "Starter",
-    tag: "Un negocio chico",
-    price: "Gratis*",
-    detail: "Alta, inventario, ventas y alertas básicas.",
-    highlights: [
-      "Un comercio / espacio de trabajo",
-      "Productos, stock e inventario",
-      "Movimientos y ventas",
-      "Panel y alertas",
-    ],
-    emphasized: false,
-  },
-  {
-    name: "Pro",
-    tag: "Comercio en crecimiento",
-    price: "Próximamente",
-    detail: "Límites amplios y mejores reportes (roadmap).",
-    highlights: [
-      "Más historial y exportaciones",
-      "Funciones de equipo y roles (futuro)",
-      "Soporte preferencial (futuro)",
-    ],
-    emphasized: true,
-  },
-  {
-    name: "Business",
-    tag: "Varios usuarios o sucursales (futuro)",
-    price: "A definir",
-    detail: "Pensado para cuándo MultiStock sume multi-sucursal real.",
-    highlights: [
-      "Varios perfiles o locales",
-      "Operación coordinada (roadmap)",
-      "Contacto comercial (roadmap)",
-    ],
-    emphasized: false,
-  },
-] as const;
+const plans = [PLAN_DEFINITIONS.free, PLAN_DEFINITIONS.pro, PLAN_DEFINITIONS.business] as const;
 
 export default function PricingPage() {
   return (
@@ -56,8 +19,8 @@ export default function PricingPage() {
         <header className="mb-8 text-center sm:mb-10">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Precios</h1>
           <p className="mt-3 text-lg text-muted-foreground">
-            Propuesta orientativa para validar con usuarios.{" "}
-            <strong className="font-medium text-foreground">No hay checkout ni suscripción en la app aún.</strong>
+            Planes mensuales para controlar inventario y ventas sin sistemas rígidos.{" "}
+            <strong className="font-medium text-foreground">Todo negocio nuevo parte en Gratis.</strong>
           </p>
         </header>
 
@@ -67,8 +30,9 @@ export default function PricingPage() {
         >
           <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
           <p>
-            Los importes o límites definitivos se definirán más adelante. Hoy el foco es uso real del
-            producto y feedback: registra una cuenta y prueba el panel sin costo in-app.
+            MultiStock todavía no incluye facturación electrónica/DTE ni integración SII. Por eso los
+            precios se enfocan en inventario, ventas simples y soporte cercano para almacenes,
+            verdulerías y ferreterías.
           </p>
         </div>
 
@@ -78,7 +42,7 @@ export default function PricingPage() {
               key={plan.name}
               className={cn(
                 "flex flex-col rounded-2xl border p-6 shadow-sm",
-                plan.emphasized
+                plan.highlighted
                   ? "border-primary/40 bg-primary/[0.04] ring-1 ring-primary/20"
                   : "border-border/80 bg-card/50"
               )}
@@ -88,20 +52,44 @@ export default function PricingPage() {
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">{plan.tag}</p>
               <p className="mt-4 text-3xl font-semibold tracking-tight">{plan.price}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{plan.detail}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
               <ul className="mt-6 space-y-2.5 text-sm text-foreground/90">
-                {plan.highlights.map((h) => (
-                  <li key={h} className="flex gap-2">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex gap-2">
                     <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-                    {h}
+                    {feature}
                   </li>
                 ))}
               </ul>
-              {plan.name === "Starter" ? (
-                <p className="mt-3 text-xs text-muted-foreground">* Gratis mientras dure la fase de validación del producto.</p>
+
+              {plan.limitations?.length ? (
+                <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
+                  {plan.limitations.map((limitation) => (
+                    <li key={limitation} className="flex gap-2">
+                      <X className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
+                      {limitation}
+                    </li>
+                  ))}
+                </ul>
               ) : null}
+
+              <div className="mt-6 rounded-xl border border-border/80 bg-background/60 p-3 text-sm">
+                <p className="font-medium">Soporte incluido</p>
+                <ul className="mt-2 space-y-1.5 text-muted-foreground">
+                  {plan.support.map((item) => (
+                    <li key={item}>- {item}</li>
+                  ))}
+                </ul>
+              </div>
             </article>
           ))}
+        </div>
+
+        <div className="mt-8 rounded-2xl border border-border bg-card/60 px-4 py-3 text-sm text-muted-foreground">
+          <p>
+            Por ahora no hay checkout automático: si necesitas Pro o Business, el cambio de plan se
+            gestiona manualmente. Mientras tanto, cada cuenta nueva queda asociada al plan Gratis.
+          </p>
         </div>
 
         <div className="mt-10 flex flex-wrap justify-center gap-3">

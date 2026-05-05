@@ -1,7 +1,19 @@
+import { UpgradeRequired } from "@/components/billing/upgrade-required";
+import { getPlanModuleAccess } from "@/lib/billing/require-plan-module";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 import { getSimpleReports } from "@/modules/core/reports/actions";
 
 export default async function ReportesPage() {
+  const access = await getPlanModuleAccess("reports");
+  if (!access.allowed) {
+    return (
+      <UpgradeRequired
+        title="Reportes disponibles desde Pro"
+        description="El plan Gratis incluye dashboard básico. Actualiza a Pro para ver reportes de ventas, productos más vendidos, stock bajo y movimientos."
+      />
+    );
+  }
+
   const reports = await getSimpleReports();
 
   return (

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { assertMonthlyStockMovementLimit } from "@/lib/billing/plan-guards";
 import { movementTypeLabel } from "@/lib/business/movement-type-labels";
 import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
@@ -69,6 +70,9 @@ export async function createStockMovement(input: StockMovementInput) {
   const user = await requireUser();
   const business = await requireActiveBusiness(user.id);
   const supabase = await createClient();
+
+  const limitMessage = await assertMonthlyStockMovementLimit(supabase, business);
+  if (limitMessage) return { ok: false as const, message: limitMessage };
 
   const { data: product, error: productError } = await supabase
     .from("products")

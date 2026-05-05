@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import { assertMonthlySalesLimit } from "@/lib/billing/plan-guards";
 import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/utils";
@@ -111,6 +112,9 @@ export async function createSaleAction(
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
+
+  const limitMessage = await assertMonthlySalesLimit(supabase, business);
+  if (limitMessage) return { message: limitMessage };
 
   const productIds = parsed.data.items.map((item) => item.productId);
   const { data: products, error: productsError } = await supabase
