@@ -10,6 +10,7 @@ import {
   ClipboardList,
   LayoutDashboard,
   Receipt,
+  Shield,
   Store,
   Truck,
 } from "lucide-react";
@@ -33,6 +34,7 @@ export function AppSidebar({ items }: AppSidebarProps) {
     audit: BarChart3,
     reports: BarChart3,
     exports: Store,
+    admin: Shield,
   };
 
   return (

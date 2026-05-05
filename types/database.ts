@@ -6,6 +6,7 @@
 
 export type BusinessType = "verduleria" | "almacen" | "ferreteria";
 export type BusinessRole = "owner" | "admin" | "staff";
+export type GlobalRole = "admin" | "user";
 export type SubscriptionPlan = "free" | "pro" | "business";
 export type UnitType = "unit" | "kg" | "g" | "box" | "liter" | "meter";
 export type StockMovementType =
@@ -37,6 +38,8 @@ export type Database = {
           id: string;
           full_name: string | null;
           email: string | null;
+          role: GlobalRole;
+          plan: SubscriptionPlan;
           created_at: string;
           updated_at: string;
         };
@@ -44,6 +47,8 @@ export type Database = {
           id: string;
           full_name?: string | null;
           email?: string | null;
+          role?: GlobalRole;
+          plan?: SubscriptionPlan;
           created_at?: string;
           updated_at?: string;
         };
@@ -51,6 +56,8 @@ export type Database = {
           id?: string;
           full_name?: string | null;
           email?: string | null;
+          role?: GlobalRole;
+          plan?: SubscriptionPlan;
           created_at?: string;
           updated_at?: string;
         };

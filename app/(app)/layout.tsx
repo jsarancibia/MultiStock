@@ -4,7 +4,8 @@ import { AppShell } from "@/components/layout/app-shell";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { BusinessSwitcher } from "@/components/layout/business-switcher";
 import { businessTypes } from "@/config/business-types";
-import { getNavigationForBusinessType } from "@/config/navigation";
+import { getNavigationForBusinessType, type NavigationItem } from "@/config/navigation";
+import { isAdmin } from "@/lib/auth/is-admin";
 import { requireUser } from "@/lib/auth/session";
 import {
   listUserBusinesses,
@@ -18,10 +19,17 @@ type PrivateLayoutProps = {
 
 export default async function PrivateLayout({ children }: PrivateLayoutProps) {
   const user = await requireUser();
+  const userIsAdmin = await isAdmin(user);
   const businesses = await listUserBusinesses(user.id);
   const business = await requireActiveBusiness(user.id);
   const businessType = businessTypes[business.business_type];
-  const navigation = getNavigationForBusinessType(business.business_type, business.subscription_plan);
+  const baseNavigation = getNavigationForBusinessType(
+    business.business_type,
+    business.subscription_plan
+  );
+  const navigation: NavigationItem[] = userIsAdmin
+    ? [...baseNavigation, { label: "Admin Panel", href: "/admin", module: "admin" }]
+    : baseNavigation;
 
   async function switchBusinessAction(
     _state: { ok?: boolean } | undefined,

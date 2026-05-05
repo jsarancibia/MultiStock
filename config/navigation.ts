@@ -11,7 +11,8 @@ export type AppModule =
   | "alerts"
   | "audit"
   | "reports"
-  | "exports";
+  | "exports"
+  | "admin";
 
 export type NavigationItem = {
   label: string;
