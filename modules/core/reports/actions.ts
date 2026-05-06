@@ -13,6 +13,13 @@ function csvEscape(value: string | number | boolean | null | undefined) {
   return `"${text.replaceAll('"', '""')}"`;
 }
 
+function toExcelCsv(headers: string[], rows: Array<Array<string | number | boolean | null | undefined>>) {
+  const delimiter = ";";
+  const body = [headers, ...rows].map((row) => row.map(csvEscape).join(delimiter)).join("\r\n");
+  // BOM + sep=; evita que Excel en configuración ES deje todo en una sola celda.
+  return `\uFEFFsep=;\r\n${body}`;
+}
+
 type ProductRelation = { name: string | null } | { name: string | null }[] | null;
 
 type SaleItemReport = {
@@ -128,11 +135,8 @@ export async function getCsvExports() {
   const supabase = await createClient();
   const src = await loadExportSourceRows(supabase, business.id);
 
-  const toCsv = (headers: string[], rows: Array<Array<string | number | boolean | null | undefined>>) =>
-    [headers.map(csvEscape).join(","), ...rows.map((row) => row.map(csvEscape).join(","))].join("\n");
-
   return {
-    productos: toCsv(
+    productos: toExcelCsv(
       ["codigo", "descripcion", "unidad", "categoria", "precio_venta", "estado", "sku", "codigo_barras"],
       src.products.map((p) => [
         typeof p.sku === "string" && p.sku.trim() ? p.sku.trim() : typeof p.barcode === "string" && p.barcode.trim() ? p.barcode.trim() : "—",
@@ -145,7 +149,7 @@ export async function getCsvExports() {
         p.barcode ?? "",
       ])
     ),
-    inventario: toCsv(
+    inventario: toExcelCsv(
       [
         "nombre",
         "sku",
@@ -176,11 +180,11 @@ export async function getCsvExports() {
         ];
       })
     ),
-    movimientos: toCsv(
+    movimientos: toExcelCsv(
       ["fecha", "tipo", "cantidad", "motivo"],
       src.movements.map((m) => [m.created_at, movementTypeLabel(m.type), m.quantity, m.reason])
     ),
-    ventas: toCsv(
+    ventas: toExcelCsv(
       ["fecha", "total", "metodo_pago"],
       src.sales.map((s) => [
         s.created_at,
@@ -190,7 +194,7 @@ export async function getCsvExports() {
           : s.payment_method,
       ])
     ),
-    alertas: toCsv(
+    alertas: toExcelCsv(
       ["fecha", "tipo", "mensaje", "estado"],
       src.alerts.map((a) => [a.created_at, a.type, a.message, a.resolved ? "Resuelta" : "Pendiente"])
     ),

@@ -22,44 +22,76 @@ export default async function ExportacionesPage() {
   const csv = await getCsvExports();
 
   const files = [
-    { key: "productos", label: "Productos", content: csv.productos },
-    { key: "inventario", label: "Inventario", content: csv.inventario },
-    { key: "movimientos", label: "Movimientos", content: csv.movimientos },
-    { key: "ventas", label: "Ventas", content: csv.ventas },
-    { key: "alertas", label: "Alertas", content: csv.alertas },
+    {
+      key: "productos",
+      label: "Productos",
+      description: "Catálogo con código, unidad, categoría, precio y estado.",
+      content: csv.productos,
+    },
+    {
+      key: "inventario",
+      label: "Inventario",
+      description: "Control de stock con estado calculado y columna solicitar.",
+      content: csv.inventario,
+    },
+    {
+      key: "movimientos",
+      label: "Movimientos",
+      description: "Entradas, salidas y ajustes de stock con motivo.",
+      content: csv.movimientos,
+    },
+    {
+      key: "ventas",
+      label: "Ventas",
+      description: "Ventas registradas con total y método de pago.",
+      content: csv.ventas,
+    },
+    {
+      key: "alertas",
+      label: "Alertas",
+      description: "Alertas operativas con estado pendiente o resuelta.",
+      content: csv.alertas,
+    },
   ] as const;
 
   return (
     <div className="space-y-6">
-      <header className="space-y-4">
+      <header>
         <div>
           <h1 className="text-2xl font-semibold">Exportaciones</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Libro Excel con portada (logo, negocio, ID), misma plantilla para todos los rubros, y datos del negocio activo en cada pestaña (encabezado + totales).
-            También podés usar CSV mejorado por apartado para integraciones rápidas.
+            Descarga un Excel por categoría, con estructura tipo ERP, logo, encabezado MultiStock, totales y formato ajustado al negocio activo.
+            También podés usar CSV compatible con Excel para integraciones rápidas.
           </p>
         </div>
-        <a
-          href="/api/exportaciones/excel"
-          className={cn(buttonVariants({ variant: "default", size: "lg" }), "w-full sm:w-auto text-center")}
-        >
-          Descargar libro Excel completo (.xlsx)
-        </a>
       </header>
 
       <div>
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">CSV por categoría</h2>
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Reportes por categoría</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {files.map((file) => (
-            <a
+            <article
               key={file.key}
-              href={toDownloadHref(file.content)}
-              download={`${file.key}.csv`}
-              className="rounded-lg border border-border bg-card p-4 text-card-foreground text-sm shadow-sm transition hover:bg-muted"
+              className="space-y-3 rounded-lg border border-border bg-card p-4 text-card-foreground text-sm shadow-sm"
             >
               <p className="font-medium">{file.label}</p>
-              <p className="mt-1 text-xs text-muted-foreground">Descargar {file.key}.csv</p>
-            </a>
+              <p className="text-xs text-muted-foreground">{file.description}</p>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <a
+                  href={`/api/exportaciones/${file.key}/excel`}
+                  className={cn(buttonVariants({ size: "sm" }), "w-full text-center sm:w-auto")}
+                >
+                  Descargar Excel
+                </a>
+                <a
+                  href={toDownloadHref(file.content)}
+                  download={`${file.key}.csv`}
+                  className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full text-center sm:w-auto")}
+                >
+                  CSV
+                </a>
+              </div>
+            </article>
           ))}
         </div>
       </div>
