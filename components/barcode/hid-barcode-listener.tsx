@@ -9,6 +9,8 @@ import { useHidBarcodeScanner } from "@/lib/barcode/use-hid-scanner";
 type HidBarcodeListenerProps = {
   onDetected: (code: string) => void;
   className?: string;
+  /** Contenedor (útil para ocupar toda la celda en grillas responsive). */
+  containerClassName?: string;
   disabled?: boolean;
   /** Mantiene el lector activo después de cada lectura (útil en ventas). */
   continuous?: boolean;
@@ -19,6 +21,7 @@ type HidBarcodeListenerProps = {
 export function HidBarcodeListener({
   onDetected,
   className,
+  containerClassName,
   disabled,
   continuous = false,
   label = "Lector USB",
@@ -52,7 +55,7 @@ export function HidBarcodeListener({
   const buttonClass = className ?? formSecondaryButtonClass;
 
   return (
-    <div className="flex w-full flex-col gap-1 sm:w-auto">
+    <div className={cn("flex min-w-0 w-full flex-col gap-1", containerClassName)}>
       <button
         type="button"
         disabled={disabled}

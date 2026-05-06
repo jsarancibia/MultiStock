@@ -288,41 +288,63 @@ function applyTopLayout(ws: ExcelJS.Worksheet, report: ReportDefinition, ctx: Ex
   ws.properties.defaultRowHeight = 18;
   ws.views = [{ state: "frozen", ySplit: 9 }];
 
+  // Fila 1: Banda superior "MultiStock"
   ws.mergeCells(1, 1, 1, endCol);
   const top = ws.getCell(1, 1);
   top.value = "MultiStock";
-  top.font = { bold: true, size: 14, color: { argb: "FF222222" } };
+  top.font = { bold: true, size: 13, color: { argb: "FF222222" } };
   top.alignment = { horizontal: "center", vertical: "middle" };
   top.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFD9D9D9" } };
-  ws.getRow(1).height = 22;
+  ws.getRow(1).height = 20;
 
+  // Filas 2-4: Área de marca con logo
   ws.mergeCells(2, 1, 4, endCol);
   const brand = ws.getCell(2, 1);
   brand.value = "MultiStock";
-  brand.font = { bold: true, italic: true, size: 16, color: { argb: "FF888888" } };
+  brand.font = { bold: true, italic: true, size: 18, color: { argb: "FF888888" } };
   brand.alignment = { horizontal: "center", vertical: "middle" };
-  brand.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF2F2F2" } };
+  brand.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF5F5F5" } };
+  ws.getRow(2).height = 20;
+  ws.getRow(3).height = 20;
+  ws.getRow(4).height = 20;
 
   if (logoId != null) {
-    ws.addImage(logoId, { tl: { col: 0.1, row: 1.35 }, ext: { width: 86, height: 48 } });
+    ws.addImage(logoId, { tl: { col: 0.15, row: 1.2 }, ext: { width: 90, height: 52 } });
   }
 
-  ws.getCell(6, 2).value = report.title;
-  ws.getCell(6, 2).font = { bold: true, size: 16 };
-  ws.getCell(6, 2).alignment = { horizontal: "left", vertical: "middle" };
+  // Fila 5: Separador delgado
+  ws.getRow(5).height = 6;
 
-  const metaStart = Math.max(2, endCol - 2);
-  ws.mergeCells(6, metaStart, 6, endCol);
-  const meta = ws.getCell(6, metaStart);
-  meta.value = `${ctx.businessName} · ${ctx.businessTypeLabel}`;
-  meta.font = { size: 10, color: { argb: "FF595959" } };
-  meta.alignment = { horizontal: "right", vertical: "middle" };
+  // Fila 6: Título (cols 1..midCol) + negocio/tipo (cols midCol+1..endCol)
+  const midCol = Math.max(2, Math.ceil(endCol * 0.6));
+  ws.mergeCells(6, 1, 6, midCol);
+  const titleCell = ws.getCell(6, 1);
+  titleCell.value = report.title;
+  titleCell.font = { bold: true, size: 15 };
+  titleCell.alignment = { horizontal: "left", vertical: "middle" };
+  ws.getRow(6).height = 24;
 
-  ws.getCell(7, 2).value = report.subtitle;
-  ws.getCell(7, 2).font = { italic: true, size: 10, color: { argb: "FF595959" } };
+  if (midCol < endCol) {
+    ws.mergeCells(6, midCol + 1, 6, endCol);
+    const meta = ws.getCell(6, midCol + 1);
+    meta.value = `${ctx.businessName} · ${ctx.businessTypeLabel}`;
+    meta.font = { size: 10, color: { argb: "FF595959" } };
+    meta.alignment = { horizontal: "right", vertical: "middle" };
+  }
 
-  ws.getCell(8, 2).value = `Exportado: ${humanDate(ctx.exportedAt)}`;
-  ws.getCell(8, 2).font = { size: 9, color: { argb: "FF777777" } };
+  // Fila 7: Descripción del reporte (listLabel)
+  ws.mergeCells(7, 1, 7, endCol);
+  const listCell = ws.getCell(7, 1);
+  listCell.value = report.listLabel;
+  listCell.font = { italic: true, size: 10, color: { argb: "FF595959" } };
+  listCell.alignment = { horizontal: "left", vertical: "middle" };
+
+  // Fila 8: Fecha de exportación
+  ws.mergeCells(8, 1, 8, endCol);
+  const exportCell = ws.getCell(8, 1);
+  exportCell.value = `Exportado: ${humanDate(ctx.exportedAt)}`;
+  exportCell.font = { size: 9, color: { argb: "FF777777" } };
+  exportCell.alignment = { horizontal: "left", vertical: "middle" };
 }
 
 function applyHeaderRow(ws: ExcelJS.Worksheet, report: ReportDefinition, rowNumber: number) {

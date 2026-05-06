@@ -133,22 +133,26 @@ export function ProductBasicSection({
               />
             </div>
 
-            <ProductBarcodeField
-              defaultValue={barcodeDefault}
-              instanceKey={productInstanceKey ?? ""}
-              allowMobileLink={allowMobileBarcodeLink}
-            />
+            <div className="min-w-0 sm:col-span-2">
+              <ProductBarcodeField
+                defaultValue={barcodeDefault}
+                instanceKey={productInstanceKey ?? ""}
+                allowMobileLink={allowMobileBarcodeLink}
+              />
+            </div>
           </>
         ) : (
           <>
             <input type="hidden" name="categoryId" value={categoryIdDefault} />
             <input type="hidden" name="supplierId" value={supplierIdDefault} />
             <input type="hidden" name="sku" value={skuDefault} />
-            <ProductBarcodeField
-              defaultValue={barcodeDefault}
-              instanceKey={productInstanceKey ?? ""}
-              allowMobileLink={allowMobileBarcodeLink}
-            />
+            <div className="min-w-0 sm:col-span-2">
+              <ProductBarcodeField
+                defaultValue={barcodeDefault}
+                instanceKey={productInstanceKey ?? ""}
+                allowMobileLink={allowMobileBarcodeLink}
+              />
+            </div>
           </>
         )}
       </div>

@@ -190,7 +190,7 @@ export function ProductSearch({
       {businessType === "ferreteria" ? (
         <p className="text-xs text-muted-foreground">Se muestran marca, medida y SKU para evitar confusiones.</p>
       ) : null}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+      <div className="flex flex-col gap-3">
         <input
           ref={inputRef}
           autoFocus={searchAutoFocus}
@@ -200,28 +200,39 @@ export function ProductSearch({
             setScanMessage(null);
             lastExactHitRef.current = null;
           }}
-          className={cn(panelInputClass, "min-w-0 flex-1")}
+          className={cn(panelInputClass, "min-h-10 min-w-0 w-full")}
           placeholder={placeholder}
         />
-        <BarcodeScanButton
-          className={formSecondaryButtonClass}
-          continuousScan
-          disabled={isScanPending}
-          label={isScanPending ? "Buscando..." : "Escanear código"}
-          onDetected={applyScannedBarcode}
-        />
-        {allowMobileBarcodeLink ? (
-          <MobileBarcodeLink
-            className={formSecondaryButtonClass}
+        <div
+          className={cn(
+            "grid min-w-0 gap-2",
+            allowMobileBarcodeLink
+              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+              : "grid-cols-1 sm:grid-cols-2"
+          )}
+        >
+          <BarcodeScanButton
+            className={cn(formSecondaryButtonClass, "min-h-10 w-full justify-center sm:w-full")}
+            continuousScan
+            disabled={isScanPending}
+            label={isScanPending ? "Buscando..." : "Escanear código"}
+            onDetected={applyScannedBarcode}
+          />
+          {allowMobileBarcodeLink ? (
+            <MobileBarcodeLink
+              className={cn(formSecondaryButtonClass, "min-h-10 w-full justify-center sm:w-full")}
+              disabled={isScanPending}
+              onDetected={applyScannedBarcode}
+            />
+          ) : null}
+          <HidBarcodeListener
+            containerClassName="min-w-0"
+            className={cn(formSecondaryButtonClass, "min-h-10 w-full justify-center sm:w-full")}
+            continuous
             disabled={isScanPending}
             onDetected={applyScannedBarcode}
           />
-        ) : null}
-        <HidBarcodeListener
-          continuous
-          disabled={isScanPending}
-          onDetected={applyScannedBarcode}
-        />
+        </div>
       </div>
       {scanMessage ? <p className="text-xs text-rose-600">{scanMessage}</p> : null}
       {exactBarcodeMatch ? (

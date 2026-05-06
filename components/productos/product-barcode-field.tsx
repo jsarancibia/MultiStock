@@ -8,6 +8,7 @@ import {
   formSecondaryButtonClass,
   panelInputClass,
 } from "@/components/ui/form-field-styles";
+import { cn } from "@/lib/utils";
 
 type ProductBarcodeFieldProps = {
   name?: string;
@@ -44,36 +45,42 @@ function ProductBarcodeFieldInner({
 }: Required<Pick<ProductBarcodeFieldProps, "name" | "id" | "defaultValue" | "allowMobileLink">>) {
   const [value, setValue] = useState(defaultValue);
 
+  const actionBtn = cn(
+    formSecondaryButtonClass,
+    "min-h-10 w-full justify-center sm:w-full lg:min-h-9"
+  );
+
   return (
-    <div className="space-y-2">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-2">
-        <div className="min-w-0 flex-1 space-y-1">
-          <label htmlFor={id} className="text-sm font-medium text-foreground">
-            Código de barras (opcional)
-          </label>
-          <input
-            id={id}
-            name={name}
-            value={value}
-            onChange={(event) => setValue(event.target.value)}
-            className={panelInputClass}
-            autoComplete="off"
-          />
-          <p className="text-xs text-muted-foreground">
-            Si se repite en este negocio, te diremos qué producto lo está usando.
-          </p>
-        </div>
-        <BarcodeScanButton
-          className={formSecondaryButtonClass}
-          onDetected={(code) => setValue(code)}
+    <div className="min-w-0 space-y-3">
+      <div className="min-w-0 space-y-1">
+        <label htmlFor={id} className="text-sm font-medium text-foreground">
+          Código de barras (opcional)
+        </label>
+        <input
+          id={id}
+          name={name}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          className={panelInputClass}
+          autoComplete="off"
         />
+        <p className="text-xs text-muted-foreground">
+          Si se repite en este negocio, te diremos qué producto lo está usando.
+        </p>
+      </div>
+      <div
+        className={cn(
+          "grid min-w-0 gap-2",
+          allowMobileLink
+            ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            : "grid-cols-1 sm:grid-cols-2"
+        )}
+      >
+        <BarcodeScanButton className={actionBtn} onDetected={(code) => setValue(code)} />
         {allowMobileLink ? (
-          <MobileBarcodeLink
-            className={formSecondaryButtonClass}
-            onDetected={(code) => setValue(code)}
-          />
+          <MobileBarcodeLink className={actionBtn} onDetected={(code) => setValue(code)} />
         ) : null}
-        <HidBarcodeListener onDetected={(code) => setValue(code)} />
+        <HidBarcodeListener containerClassName="min-w-0" className={actionBtn} onDetected={(code) => setValue(code)} />
       </div>
     </div>
   );
