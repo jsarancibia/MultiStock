@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { panelInputCompactClass } from "@/components/ui/form-field-styles";
 import {
   allowsDecimalQuantity,
@@ -34,6 +35,44 @@ export function SaleItemsTable({
   onUpdateUnitPrice,
   onRemove,
 }: SaleItemsTableProps) {
+  const [quantityDrafts, setQuantityDrafts] = useState<Record<string, string>>({});
+
+  function setQuantityDraft(productId: string, value: string) {
+    setQuantityDrafts((prev) => ({ ...prev, [productId]: value }));
+  }
+
+  function clearQuantityDraft(productId: string) {
+    setQuantityDrafts((prev) => {
+      const next = { ...prev };
+      delete next[productId];
+      return next;
+    });
+  }
+
+  function quantityInputValue(productId: string, quantity: number, unitType: string): string | number {
+    const draft = quantityDrafts[productId];
+    if (draft !== undefined) return draft;
+    return stabilizeQuantityInputValue(quantity, unitType);
+  }
+
+  function onQuantityChange(productId: string, raw: string) {
+    setQuantityDraft(productId, raw);
+    if (!raw.trim()) return;
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed)) return;
+    onUpdateQuantity(productId, parsed);
+  }
+
+  function onQuantityBlur(productId: string) {
+    const raw = quantityDrafts[productId];
+    if (raw === undefined) return;
+    const parsed = Number(raw);
+    if (raw.trim() && Number.isFinite(parsed)) {
+      onUpdateQuantity(productId, parsed);
+    }
+    clearQuantityDraft(productId);
+  }
+
   const emptyRow = (
     <tr>
       <td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">
@@ -55,7 +94,7 @@ export function SaleItemsTable({
               const subtotal = item.quantity * item.unitPrice;
               const qAttrs = quantityInputConstraints(item.unitType);
               const unitAbbr = quantityUnitAbbrev(item.unitType);
-              const qtyDisplay = stabilizeQuantityInputValue(item.quantity, item.unitType);
+              const qtyDisplay = quantityInputValue(item.productId, item.quantity, item.unitType);
               return (
                 <li
                   key={item.productId}
@@ -88,7 +127,8 @@ export function SaleItemsTable({
                         min={qAttrs.min}
                         step={qAttrs.step}
                         value={qtyDisplay}
-                        onChange={(event) => onUpdateQuantity(item.productId, Number(event.target.value))}
+                        onChange={(event) => onQuantityChange(item.productId, event.target.value)}
+                        onBlur={() => onQuantityBlur(item.productId)}
                         className={mobileNumericClass}
                       />
                     </div>
@@ -134,7 +174,7 @@ export function SaleItemsTable({
               const subtotal = item.quantity * item.unitPrice;
               const qAttrs = quantityInputConstraints(item.unitType);
               const unitAbbr = quantityUnitAbbrev(item.unitType);
-              const qtyDisplay = stabilizeQuantityInputValue(item.quantity, item.unitType);
+              const qtyDisplay = quantityInputValue(item.productId, item.quantity, item.unitType);
               const priceLabel = unitPriceFieldLabel(item.unitType);
               return (
                 <tr key={item.productId} className="border-t">
@@ -152,7 +192,8 @@ export function SaleItemsTable({
                       min={qAttrs.min}
                       step={qAttrs.step}
                       value={qtyDisplay}
-                      onChange={(event) => onUpdateQuantity(item.productId, Number(event.target.value))}
+                      onChange={(event) => onQuantityChange(item.productId, event.target.value)}
+                      onBlur={() => onQuantityBlur(item.productId)}
                       className={panelInputCompactClass}
                     />
                   </td>

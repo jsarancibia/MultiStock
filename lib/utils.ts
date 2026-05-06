@@ -38,3 +38,15 @@ export function formatQuantity(
     maximumFractionDigits: maxDecimals,
   }).format(n)
 }
+
+/** Nombre de archivo seguro (ASCII) sin espacios ni tildes para descargas. */
+export function asciiFileSlug(raw: string, max = 48): string {
+  const s = raw
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, max)
+  return s || "negocio"
+}

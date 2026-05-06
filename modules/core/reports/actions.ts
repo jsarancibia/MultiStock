@@ -1,8 +1,12 @@
 "use server";
 
+import { movementTypeLabel } from "@/lib/business/movement-type-labels";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
 import { createClient } from "@/lib/supabase/server";
+import { categoryLabel, loadExportSourceRows } from "@/lib/reports/export-queries";
+import { inventarioEstadoCalculado, inventarioSolicitarEtiqueta } from "@/lib/reports/inventory-stock-status";
+import { paymentMethodLabels } from "@/lib/validations/sale";
 
 function csvEscape(value: string | number | boolean | null | undefined) {
   const text = value == null ? "" : String(value);
@@ -122,38 +126,73 @@ export async function getCsvExports() {
   const user = await requireUser();
   const business = await requireActiveBusiness(user.id);
   const supabase = await createClient();
-
-  const [products, inventory, movements, sales, alerts] = await Promise.all([
-    supabase.from("products").select("name,sku,barcode,unit_type,sale_price,active").eq("business_id", business.id),
-    supabase.from("products").select("name,current_stock,min_stock,unit_type").eq("business_id", business.id),
-    supabase.from("stock_movements").select("created_at,type,quantity,reason").eq("business_id", business.id).order("created_at", { ascending: false }).limit(1000),
-    supabase.from("sales").select("created_at,total,payment_method").eq("business_id", business.id).order("created_at", { ascending: false }).limit(1000),
-    supabase.from("stock_alerts").select("created_at,type,message,resolved").eq("business_id", business.id).order("created_at", { ascending: false }).limit(1000),
-  ]);
+  const src = await loadExportSourceRows(supabase, business.id);
 
   const toCsv = (headers: string[], rows: Array<Array<string | number | boolean | null | undefined>>) =>
     [headers.map(csvEscape).join(","), ...rows.map((row) => row.map(csvEscape).join(","))].join("\n");
 
   return {
     productos: toCsv(
-      ["nombre", "sku", "barcode", "unidad", "precio_venta", "activo"],
-      (products.data ?? []).map((p) => [p.name, p.sku, p.barcode, p.unit_type, p.sale_price, p.active])
+      ["codigo", "descripcion", "unidad", "categoria", "precio_venta", "estado", "sku", "codigo_barras"],
+      src.products.map((p) => [
+        typeof p.sku === "string" && p.sku.trim() ? p.sku.trim() : typeof p.barcode === "string" && p.barcode.trim() ? p.barcode.trim() : "—",
+        p.name,
+        p.unit_type,
+        categoryLabel(p),
+        p.sale_price,
+        p.active ? "activo" : "inactivo",
+        p.sku ?? "",
+        p.barcode ?? "",
+      ])
     ),
     inventario: toCsv(
-      ["nombre", "stock_actual", "stock_minimo", "unidad"],
-      (inventory.data ?? []).map((p) => [p.name, p.current_stock, p.min_stock, p.unit_type])
+      [
+        "nombre",
+        "sku",
+        "codigo_barras",
+        "stock_actual",
+        "stock_minimo",
+        "unidad",
+        "estado_stock",
+        "solicitar",
+        "categoria",
+        "almacen",
+      ],
+      src.inventoryProducts.map((p) => {
+        const stk = typeof p.current_stock === "string" ? Number(p.current_stock) : Number(p.current_stock);
+        const mín =
+          typeof p.min_stock === "string" ? Number(p.min_stock) : Number(p.min_stock);
+        return [
+          p.name,
+          p.sku ?? "",
+          p.barcode ?? "",
+          Number.isFinite(stk) ? stk : "",
+          Number.isFinite(mín) ? mín : "",
+          p.unit_type,
+          inventarioEstadoCalculado(stk, mín),
+          inventarioSolicitarEtiqueta(stk, mín),
+          categoryLabel(p),
+          business.name,
+        ];
+      })
     ),
     movimientos: toCsv(
       ["fecha", "tipo", "cantidad", "motivo"],
-      (movements.data ?? []).map((m) => [m.created_at, m.type, m.quantity, m.reason])
+      src.movements.map((m) => [m.created_at, movementTypeLabel(m.type), m.quantity, m.reason])
     ),
     ventas: toCsv(
       ["fecha", "total", "metodo_pago"],
-      (sales.data ?? []).map((s) => [s.created_at, s.total, s.payment_method])
+      src.sales.map((s) => [
+        s.created_at,
+        s.total,
+        s.payment_method && s.payment_method in paymentMethodLabels
+          ? paymentMethodLabels[s.payment_method as keyof typeof paymentMethodLabels]
+          : s.payment_method,
+      ])
     ),
     alertas: toCsv(
-      ["fecha", "tipo", "mensaje", "resuelta"],
-      (alerts.data ?? []).map((a) => [a.created_at, a.type, a.message, a.resolved])
+      ["fecha", "tipo", "mensaje", "estado"],
+      src.alerts.map((a) => [a.created_at, a.type, a.message, a.resolved ? "Resuelta" : "Pendiente"])
     ),
   };
 }
