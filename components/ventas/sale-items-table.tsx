@@ -1,16 +1,16 @@
 "use client";
 
 import { panelInputCompactClass } from "@/components/ui/form-field-styles";
+import {
+  allowsDecimalQuantity,
+  quantityInputConstraints,
+  quantityUnitAbbrev,
+  stabilizeQuantityInputValue,
+  unitPriceFieldLabel,
+} from "@/lib/business/unit-quantity";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 
-const DECIMAL_UNITS = new Set(["kg", "g", "liter", "meter"]);
-
-function quantityInputAttrs(unitType: string) {
-  if (DECIMAL_UNITS.has(unitType)) {
-    return { min: 0.01, step: 0.01 } as const;
-  }
-  return { min: 1, step: 1 } as const;
-}
+const mobileNumericClass = `${panelInputCompactClass} min-h-11 touch-manipulation text-base md:text-sm`;
 
 export type SaleCartItem = {
   productId: string;
@@ -53,7 +53,9 @@ export function SaleItemsTable({
           <ul className="space-y-2">
             {items.map((item) => {
               const subtotal = item.quantity * item.unitPrice;
-              const qAttrs = quantityInputAttrs(item.unitType);
+              const qAttrs = quantityInputConstraints(item.unitType);
+              const unitAbbr = quantityUnitAbbrev(item.unitType);
+              const qtyDisplay = stabilizeQuantityInputValue(item.quantity, item.unitType);
               return (
                 <li
                   key={item.productId}
@@ -63,7 +65,7 @@ export function SaleItemsTable({
                     <div className="min-w-0 flex-1">
                       <p className="font-medium leading-snug">{item.name}</p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
-                        Stock: {formatQuantity(item.stock)} {item.unitType}
+                        Stock: {formatQuantity(item.stock, 2)} {unitAbbr}
                       </p>
                     </div>
                     <button
@@ -77,27 +79,31 @@ export function SaleItemsTable({
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-muted-foreground">Cantidad</label>
+                      <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                        Cantidad{allowsDecimalQuantity(item.unitType) ? ` (${unitAbbr})` : ""}
+                      </label>
                       <input
                         type="number"
-                        aria-label={`Cantidad de ${item.name}`}
+                        aria-label={`Cantidad en ${unitAbbr} para ${item.name}`}
                         min={qAttrs.min}
                         step={qAttrs.step}
-                        value={item.quantity}
+                        value={qtyDisplay}
                         onChange={(event) => onUpdateQuantity(item.productId, Number(event.target.value))}
-                        className={panelInputCompactClass}
+                        className={mobileNumericClass}
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-muted-foreground">Precio unit.</label>
+                      <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                        {unitPriceFieldLabel(item.unitType)}
+                      </label>
                       <input
                         type="number"
-                        aria-label={`Precio unitario de ${item.name}`}
+                        aria-label={`${unitPriceFieldLabel(item.unitType)} de ${item.name}`}
                         min="0"
                         step="0.0001"
                         value={item.unitPrice}
                         onChange={(event) => onUpdateUnitPrice(item.productId, Number(event.target.value))}
-                        className={panelInputCompactClass}
+                        className={mobileNumericClass}
                       />
                     </div>
                   </div>
@@ -110,12 +116,15 @@ export function SaleItemsTable({
       </div>
 
       <div className="hidden overflow-x-auto rounded-lg border border-border bg-card md:block">
+        <p className="border-b bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+          Para productos por kg, L o m podés usar decimales; unidades y cajas solo enteros.
+        </p>
         <table className="w-full min-w-[520px] text-sm">
           <thead className="bg-muted/50 text-left">
             <tr>
               <th className="px-3 py-2 font-medium">Producto</th>
               <th className="px-3 py-2 font-medium">Cantidad</th>
-              <th className="px-3 py-2 font-medium">Precio unit.</th>
+              <th className="px-3 py-2 font-medium">Precio</th>
               <th className="px-3 py-2 font-medium">Subtotal</th>
               <th className="px-3 py-2 font-medium" />
             </tr>
@@ -123,30 +132,35 @@ export function SaleItemsTable({
           <tbody>
             {items.map((item) => {
               const subtotal = item.quantity * item.unitPrice;
-              const qAttrs = quantityInputAttrs(item.unitType);
+              const qAttrs = quantityInputConstraints(item.unitType);
+              const unitAbbr = quantityUnitAbbrev(item.unitType);
+              const qtyDisplay = stabilizeQuantityInputValue(item.quantity, item.unitType);
+              const priceLabel = unitPriceFieldLabel(item.unitType);
               return (
                 <tr key={item.productId} className="border-t">
                   <td className="px-3 py-2">
                     <p className="font-medium">{item.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      Stock: {formatQuantity(item.stock)} {item.unitType}
+                      Stock: {formatQuantity(item.stock, 2)} {unitAbbr}
                     </p>
                   </td>
                   <td className="px-3 py-2">
+                    <p className="mb-1 text-[11px] text-muted-foreground">{unitAbbr}</p>
                     <input
                       type="number"
-                      aria-label={`Cantidad de ${item.name}`}
+                      aria-label={`Cantidad en ${unitAbbr} para ${item.name}`}
                       min={qAttrs.min}
                       step={qAttrs.step}
-                      value={item.quantity}
+                      value={qtyDisplay}
                       onChange={(event) => onUpdateQuantity(item.productId, Number(event.target.value))}
                       className={panelInputCompactClass}
                     />
                   </td>
                   <td className="px-3 py-2">
+                    <p className="mb-1 text-[11px] text-muted-foreground">{priceLabel}</p>
                     <input
                       type="number"
-                      aria-label={`Precio unitario de ${item.name}`}
+                      aria-label={`${priceLabel} de ${item.name}`}
                       min="0"
                       step="0.0001"
                       value={item.unitPrice}

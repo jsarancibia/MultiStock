@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BarcodeScanButton } from "@/components/barcode/barcode-scan-button";
+import { HidBarcodeListener } from "@/components/barcode/hid-barcode-listener";
 import { MobileBarcodeLink } from "@/components/barcode/mobile-barcode-link";
 import {
   formSecondaryButtonClass,
@@ -44,33 +45,36 @@ function ProductBarcodeFieldInner({
   const [value, setValue] = useState(defaultValue);
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-2">
-      <div className="min-w-0 flex-1 space-y-1">
-        <label htmlFor={id} className="text-sm font-medium text-foreground">
-          Código de barras (opcional)
-        </label>
-        <input
-          id={id}
-          name={name}
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          className={panelInputClass}
-          autoComplete="off"
-        />
-        <p className="text-xs text-muted-foreground">
-          Si se repite en este negocio, te diremos qué producto lo está usando.
-        </p>
-      </div>
-      <BarcodeScanButton
-        className={formSecondaryButtonClass}
-        onDetected={(code) => setValue(code)}
-      />
-      {allowMobileLink ? (
-        <MobileBarcodeLink
+    <div className="space-y-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-2">
+        <div className="min-w-0 flex-1 space-y-1">
+          <label htmlFor={id} className="text-sm font-medium text-foreground">
+            Código de barras (opcional)
+          </label>
+          <input
+            id={id}
+            name={name}
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            className={panelInputClass}
+            autoComplete="off"
+          />
+          <p className="text-xs text-muted-foreground">
+            Si se repite en este negocio, te diremos qué producto lo está usando.
+          </p>
+        </div>
+        <BarcodeScanButton
           className={formSecondaryButtonClass}
           onDetected={(code) => setValue(code)}
         />
-      ) : null}
+        {allowMobileLink ? (
+          <MobileBarcodeLink
+            className={formSecondaryButtonClass}
+            onDetected={(code) => setValue(code)}
+          />
+        ) : null}
+        <HidBarcodeListener onDetected={(code) => setValue(code)} />
+      </div>
     </div>
   );
 }

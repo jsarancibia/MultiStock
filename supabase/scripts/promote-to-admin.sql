@@ -4,9 +4,9 @@
 
 update public.profiles
 set role = 'admin'
-where lower(trim(email)) = lower(trim('multistock@gmail.com'));
+where lower(trim(email)) = lower(trim('multistock.dev@gmail.com'));
 
 -- Verificar resultado:
 select id, email, role, plan, created_at
 from public.profiles
-where lower(trim(email)) = lower(trim('multistock@gmail.com'));
+where lower(trim(email)) = lower(trim('multistock.dev@gmail.com'));

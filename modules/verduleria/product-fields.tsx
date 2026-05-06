@@ -51,6 +51,15 @@ export function VerduleriaProductFields({ metadata }: VerduleriaProductFieldsPro
           defaultValue={valueOf(metadata, "expiration_days")}
         />
       </div>
+      <div className="space-y-1 sm:col-span-2">
+        <label className="flex items-center gap-2 text-sm text-foreground">
+          <input type="checkbox" name="pinned" defaultChecked={checkedOf(metadata, "pinned")} />
+          Acceso rápido en ventas
+        </label>
+        <p className="text-xs text-muted-foreground pl-6">
+          Aparece como botón directo en la pantalla de venta. Ideal para tus productos más vendidos.
+        </p>
+      </div>
     </div>
   );
 }

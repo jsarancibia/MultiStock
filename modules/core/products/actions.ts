@@ -75,6 +75,7 @@ function buildMetadataFromFormData(formData: FormData, businessType: BusinessTyp
       expiration_days: Number(formData.get("expiration_days") || 0),
       allows_weight_sale: formData.get("allows_weight_sale") === "on",
       waste_tracking: formData.get("waste_tracking") === "on",
+      pinned: formData.get("pinned") === "on",
     };
   }
 
@@ -83,6 +84,7 @@ function buildMetadataFromFormData(formData: FormData, businessType: BusinessTyp
       fast_rotation: formData.get("fast_rotation") === "on",
       suggested_margin: Number(formData.get("suggested_margin") || 0),
       commercial_category: String(formData.get("commercial_category") || ""),
+      pinned: formData.get("pinned") === "on",
     };
   }
 

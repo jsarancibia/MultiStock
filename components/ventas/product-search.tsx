@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { BusinessType } from "@/config/business-types";
 import { BarcodeScanButton } from "@/components/barcode/barcode-scan-button";
+import { HidBarcodeListener } from "@/components/barcode/hid-barcode-listener";
 import { MobileBarcodeLink } from "@/components/barcode/mobile-barcode-link";
 import {
   formSecondaryButtonClass,
@@ -24,6 +25,7 @@ export type SaleProductOption = {
   brand?: string | null;
   model?: string | null;
   measure?: string | null;
+  pinned?: boolean;
 };
 
 type ProductSearchProps = {
@@ -31,6 +33,9 @@ type ProductSearchProps = {
   products: SaleProductOption[];
   onAddProduct: (product: SaleProductOption) => void;
   allowMobileBarcodeLink?: boolean;
+  searchPlaceholder?: string;
+  quantityHint?: string | null;
+  searchAutoFocus?: boolean;
 };
 
 function almacenSearchScore(product: SaleProductOption, q: string): number {
@@ -84,6 +89,7 @@ function saleFormProductToOption(p: SaleFormProduct): SaleProductOption {
     brand: p.brand ?? undefined,
     model: p.model ?? undefined,
     measure: p.measure ?? undefined,
+    pinned: p.pinned,
   };
 }
 
@@ -92,6 +98,9 @@ export function ProductSearch({
   products,
   onAddProduct,
   allowMobileBarcodeLink = true,
+  searchPlaceholder,
+  quantityHint,
+  searchAutoFocus = true,
 }: ProductSearchProps) {
   const [query, setQuery] = useState("");
   const [scanMessage, setScanMessage] = useState<string | null>(null);
@@ -100,8 +109,10 @@ export function ProductSearch({
   const [isScanPending, startTransition] = useTransition();
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    if (searchAutoFocus) {
+      inputRef.current?.focus();
+    }
+  }, [searchAutoFocus]);
 
   const applyScannedBarcode = useCallback(
     (code: string) => {
@@ -131,11 +142,12 @@ export function ProductSearch({
   }, []);
 
   const placeholder =
-    businessType === "almacen"
+    searchPlaceholder ??
+    (businessType === "almacen"
       ? "Codigo de barras, SKU o nombre (prioridad codigo)"
       : businessType === "ferreteria"
         ? "SKU, marca, medida o nombre"
-        : "Nombre o identificador";
+        : "Nombre o identificador");
 
   const filteredProducts = useMemo(() => {
     const n = query.trim();
@@ -174,17 +186,14 @@ export function ProductSearch({
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card p-4 text-card-foreground">
       <h2 className="font-medium text-foreground">Buscar productos</h2>
-      {businessType === "verduleria" ? (
-        <p className="text-xs text-muted-foreground">
-          En kg o g puedes vender con decimales (ej. 0,5 o 1,25). Otras unidades son enteras.
-        </p>
-      ) : null}
+      {quantityHint ? <p className="text-xs text-muted-foreground">{quantityHint}</p> : null}
       {businessType === "ferreteria" ? (
         <p className="text-xs text-muted-foreground">Se muestran marca, medida y SKU para evitar confusiones.</p>
       ) : null}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
         <input
           ref={inputRef}
+          autoFocus={searchAutoFocus}
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
@@ -208,6 +217,11 @@ export function ProductSearch({
             onDetected={applyScannedBarcode}
           />
         ) : null}
+        <HidBarcodeListener
+          continuous
+          disabled={isScanPending}
+          onDetected={applyScannedBarcode}
+        />
       </div>
       {scanMessage ? <p className="text-xs text-rose-600">{scanMessage}</p> : null}
       {exactBarcodeMatch ? (

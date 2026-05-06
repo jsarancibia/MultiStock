@@ -12,7 +12,13 @@ export const paymentMethodLabels: Record<(typeof paymentMethodValues)[number], s
 
 export const saleItemSchema = z.object({
   productId: z.string().uuid("Producto invalido."),
-  quantity: z.coerce.number().positive("La cantidad debe ser mayor a cero."),
+  quantity: z.coerce
+    .number({ message: "Cantidad invalida." })
+    .positive("La cantidad debe ser mayor a cero.")
+    .refine(
+      (q) => Number.isFinite(q) && Math.abs(q - Number(q.toFixed(4))) < 1e-9,
+      "La cantidad admite como maximo 4 decimales."
+    ),
   unitPrice: z.coerce.number().min(0, "El precio unitario no puede ser negativo."),
 });
 

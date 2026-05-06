@@ -7,10 +7,16 @@ import { PageSurface } from "@/components/ui/page-surface";
 import { canUseMobileScanner } from "@/config/plans";
 import { cn } from "@/lib/utils";
 import { SaleForm } from "@/components/ventas/sale-form";
+import { getSaleConfig } from "@/lib/business/sale-config";
 import { createSaleAction, getSaleFormData } from "@/modules/core/sales/actions";
 
 export default async function NuevaVentaPage() {
   const { business, products } = await getSaleFormData();
+  const saleConfig = getSaleConfig(business.business_type);
+
+  const pinnedProducts = saleConfig.showQuickButtons
+    ? products.filter((product) => product.pinned)
+    : [];
 
   if (!products.length) {
     return (
@@ -43,6 +49,8 @@ export default async function NuevaVentaPage() {
         <SaleForm
           businessType={business.business_type}
           products={products}
+          saleConfig={saleConfig}
+          pinnedProducts={pinnedProducts}
           action={createSaleAction}
           allowMobileBarcodeLink={canUseMobileScanner(business.subscription_plan)}
         />

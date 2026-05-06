@@ -46,6 +46,15 @@ export function AlmacenProductFields({ metadata }: AlmacenProductFieldsProps) {
           defaultValue={valueOf(metadata, "commercial_category")}
         />
       </div>
+      <div className="space-y-1 sm:col-span-2">
+        <label className="flex items-center gap-2 text-sm text-foreground">
+          <input type="checkbox" name="pinned" defaultChecked={checkedOf(metadata, "pinned")} />
+          Acceso rápido en ventas
+        </label>
+        <p className="text-xs text-muted-foreground pl-6">
+          Útil para productos muy vendidos. En almacenes el modo principal sigue siendo por código de barras.
+        </p>
+      </div>
     </div>
   );
 }

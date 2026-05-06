@@ -8,14 +8,13 @@ import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
+import { allowsDecimalQuantity } from "@/lib/business/unit-quantity";
 import { stockMovementSchema, type StockMovementInput } from "@/lib/validations/stock-movement";
 
 export type StockMovementActionState = {
   message?: string;
   errors?: Record<string, string[]>;
 };
-
-const DECIMAL_UNITS = new Set(["kg", "g", "liter", "meter"]);
 const INCREASE_TYPES = new Set(["initial_stock", "purchase", "return"]);
 const DECREASE_TYPES = new Set(["waste"]);
 
@@ -27,7 +26,7 @@ function normalizeDelta(type: StockMovementInput["type"], quantity: number) {
 }
 
 function validateQuantityByUnit(unitType: string, quantity: number) {
-  if (DECIMAL_UNITS.has(unitType)) return true;
+  if (allowsDecimalQuantity(unitType)) return true;
   return Number.isInteger(quantity);
 }
 

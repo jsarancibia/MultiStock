@@ -5,14 +5,19 @@ import { useActionState } from "react";
 import type { BusinessType } from "@/config/business-types";
 import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
+import { QuickProductButtons } from "@/components/ventas/quick-product-buttons";
 import { ProductSearch, type SaleProductOption } from "@/components/ventas/product-search";
 import { SaleItemsTable, type SaleCartItem } from "@/components/ventas/sale-items-table";
 import { SaleSummary } from "@/components/ventas/sale-summary";
+import type { SaleConfig } from "@/lib/business/sale-config";
+import { allowsDecimalQuantity, exceedsStock } from "@/lib/business/unit-quantity";
 import type { SaleActionState } from "@/modules/core/sales/actions";
 
 type SaleFormProps = {
   businessType: BusinessType;
   products: SaleProductOption[];
+  saleConfig: SaleConfig;
+  pinnedProducts?: SaleProductOption[];
   allowMobileBarcodeLink?: boolean;
   action: (
     prevState: SaleActionState | undefined,
@@ -21,11 +26,19 @@ type SaleFormProps = {
 };
 
 const initialState: SaleActionState = {};
-const DECIMAL_UNITS = new Set(["kg", "g", "liter", "meter"]);
+
+function initialSaleQuantity(product: SaleProductOption, saleConfig: SaleConfig): number {
+  if (!allowsDecimalQuantity(product.unit_type)) return 1;
+  const weightish = product.unit_type === "kg" || product.unit_type === "g";
+  if (weightish) return Math.max(saleConfig.weightStep, 0.0001);
+  return 1;
+}
 
 export function SaleForm({
   businessType,
   products,
+  saleConfig,
+  pinnedProducts = [],
   allowMobileBarcodeLink = true,
   action,
 }: SaleFormProps) {
@@ -44,10 +57,8 @@ export function SaleForm({
     setItems((prev) => {
       const existing = prev.find((item) => item.productId === product.id);
       if (existing) {
-        const step =
-          businessType === "verduleria" && (product.unit_type === "kg" || product.unit_type === "g")
-            ? 0.5
-            : 1;
+        const isWeightUnit = product.unit_type === "kg" || product.unit_type === "g";
+        const step = isWeightUnit ? saleConfig.weightStep : 1;
         return prev.map((item) =>
           item.productId === product.id
             ? { ...item, quantity: item.quantity + step }
@@ -61,7 +72,7 @@ export function SaleForm({
           name: product.name,
           unitType: product.unit_type,
           stock: Number(product.current_stock),
-          quantity: 1,
+          quantity: initialSaleQuantity(product, saleConfig),
           unitPrice: Number(product.sale_price),
         },
       ];
@@ -104,11 +115,11 @@ export function SaleForm({
         setClientError(`Cantidad invalida para ${item.name}.`);
         return false;
       }
-      if (!DECIMAL_UNITS.has(item.unitType) && !Number.isInteger(item.quantity)) {
+      if (!allowsDecimalQuantity(item.unitType) && !Number.isInteger(item.quantity)) {
         setClientError(`${item.name} solo admite cantidades enteras.`);
         return false;
       }
-      if (item.quantity > item.stock) {
+      if (exceedsStock(item.quantity, item.stock)) {
         setClientError(`Stock insuficiente para ${item.name}.`);
         return false;
       }
@@ -145,11 +156,28 @@ export function SaleForm({
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
+          {saleConfig.showQuickButtons ? (
+            pinnedProducts.length > 0 ? (
+              <QuickProductButtons products={pinnedProducts} onAdd={addProduct} />
+            ) : (
+              <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-5 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground">Sin accesos rápidos configurados</p>
+                <p className="mt-1 text-xs">
+                  En la ficha de cada producto podés activar{" "}
+                  <span className="font-medium text-foreground">Acceso rápido en ventas</span> para que
+                  aparezca aquí como botón directo.
+                </p>
+              </div>
+            )
+          ) : null}
           <ProductSearch
             businessType={businessType}
             products={products}
             onAddProduct={addProduct}
             allowMobileBarcodeLink={allowMobileBarcodeLink}
+            searchPlaceholder={saleConfig.searchPlaceholder}
+            searchAutoFocus={saleConfig.searchAutoFocus}
+            quantityHint={saleConfig.quantityHint}
           />
           <SaleItemsTable
             items={items}

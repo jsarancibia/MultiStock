@@ -9,14 +9,13 @@ import { formatCurrency } from "@/lib/utils";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
 import { createSaleSchema } from "@/lib/validations/sale";
+import { allowsDecimalQuantity, exceedsStock } from "@/lib/business/unit-quantity";
 import { mapProductForSale, type ProductFromDb, type SaleFormProduct } from "@/lib/products/map-product-for-sale";
 
 export type SaleActionState = {
   message?: string;
   errors?: Record<string, string[]>;
 };
-
-const DECIMAL_UNITS = new Set(["kg", "g", "liter", "meter"]);
 
 function sortProductsForAlmacen(products: ProductFromDb[]): ProductFromDb[] {
   return [...products].sort((a, b) => {
@@ -137,10 +136,10 @@ export async function createSaleAction(
     if (!product.active) {
       return { message: `El producto ${product.name} esta inactivo y no puede venderse.` };
     }
-    if (!DECIMAL_UNITS.has(product.unit_type) && !Number.isInteger(item.quantity)) {
+    if (!allowsDecimalQuantity(product.unit_type) && !Number.isInteger(item.quantity)) {
       return { message: `El producto ${product.name} solo admite cantidades enteras.` };
     }
-    if (item.quantity > Number(product.current_stock)) {
+    if (exceedsStock(item.quantity, Number(product.current_stock))) {
       return { message: `Stock insuficiente para ${product.name}.` };
     }
   }
