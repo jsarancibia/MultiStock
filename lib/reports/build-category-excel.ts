@@ -81,6 +81,61 @@ function isoLocalDateTime(value: Date): string {
   return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())} ${pad(value.getHours())}:${pad(value.getMinutes())}`;
 }
 
+function cellValueIsRichText(value: unknown): value is { richText: ExcelJS.RichText[] } {
+  return Boolean(value && typeof value === "object" && value !== null && "richText" in value);
+}
+
+/** Resalta la primera palabra (útil en subtítulos de alcance). */
+function richTextEmphasizeFirstWord(phrase: string, accentArgb = "FF1F5582"): ExcelJS.CellRichTextValue {
+  const t = phrase.trim();
+  const i = t.indexOf(" ");
+  if (i === -1) {
+    return {
+      richText: [{ text: t, font: { bold: true, italic: true, size: 10, color: { argb: accentArgb } } }],
+    };
+  }
+  return {
+    richText: [
+      { text: t.slice(0, i), font: { bold: true, italic: true, size: 10, color: { argb: accentArgb } } },
+      { text: t.slice(i), font: { italic: true, size: 10, color: { argb: "FF595959" } } },
+    ],
+  };
+}
+
+/** Resalta la última palabra del título del informe. */
+function richTextEmphasizeTitleTail(title: string): ExcelJS.CellRichTextValue {
+  const trimmed = title.trim();
+  const lastSpace = trimmed.lastIndexOf(" ");
+  if (lastSpace <= 0) {
+    return { richText: [{ text: trimmed, font: { bold: true, size: 15, color: { argb: "FF1A1A1A" } } }] };
+  }
+  return {
+    richText: [
+      { text: trimmed.slice(0, lastSpace + 1), font: { size: 15, color: { argb: "FF333333" } } },
+      { text: trimmed.slice(lastSpace + 1), font: { bold: true, size: 15, color: { argb: "FF1F5582" } } },
+    ],
+  };
+}
+
+function buildExportRichText(ctx: ExportWorkbookContext): ExcelJS.CellRichTextValue {
+  const isoLine = isoLocalDateTime(ctx.exportedAt);
+  const parts: ExcelJS.RichText[] = [
+    { text: "Exportado: ", font: { bold: true, size: 9, color: { argb: "FF333333" } } },
+    { text: humanDate(ctx.exportedAt), font: { size: 9, color: { argb: "FF666666" } } },
+    { text: "  ·  ", font: { size: 9, color: { argb: "FFAAAAAA" } } },
+    { text: "ISO ", font: { bold: true, size: 9, color: { argb: "FF1F5582" } } },
+    { text: isoLine, font: { size: 9, color: { argb: "FF444444" } } },
+  ];
+  if (ctx.exporterEmail) {
+    parts.push(
+      { text: "  ·  ", font: { size: 9 } },
+      { text: "Por: ", font: { bold: true, size: 9, color: { argb: "FF333333" } } },
+      { text: ctx.exporterEmail, font: { size: 9, color: { argb: "FF555555" } } },
+    );
+  }
+  return { richText: parts };
+}
+
 function productCode(row: Pick<ProductExportSource, "sku" | "barcode">): string {
   const sku = typeof row.sku === "string" ? row.sku.trim() : "";
   if (sku) return sku;
@@ -305,11 +360,10 @@ function applyTopLayout(ws: ExcelJS.Worksheet, report: ReportDefinition, ctx: Ex
   top.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFD9D9D9" } };
   ws.getRow(1).height = 20;
 
-  // Filas 2-3: Marca (compacto; una fila menos que antes)
+  // Filas 2-3: Franja para logo (sin repetir el texto "MultiStock"; la fila 1 ya identifica la app)
   ws.mergeCells(2, 1, 3, endCol);
   const brand = ws.getCell(2, 1);
-  brand.value = "MultiStock";
-  brand.font = { bold: true, italic: true, size: 17, color: { argb: "FF888888" } };
+  brand.value = "";
   brand.alignment = { horizontal: "center", vertical: "middle" };
   brand.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF5F5F5" } };
   ws.getRow(2).height = 22;
@@ -326,37 +380,35 @@ function applyTopLayout(ws: ExcelJS.Worksheet, report: ReportDefinition, ctx: Ex
   const midCol = Math.max(2, Math.ceil(endCol * 0.58));
   ws.mergeCells(5, 1, 5, midCol);
   const titleCell = ws.getCell(5, 1);
-  titleCell.value = report.title;
-  titleCell.font = { bold: true, size: 15 };
-  titleCell.alignment = { horizontal: "left", vertical: "middle" };
+  titleCell.value = richTextEmphasizeTitleTail(report.title);
+  titleCell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
   ws.getRow(5).height = 24;
 
   if (midCol < endCol) {
     ws.mergeCells(5, midCol + 1, 5, endCol);
     const meta = ws.getCell(5, midCol + 1);
-    meta.value = `${ctx.businessName} · ${ctx.businessTypeLabel}`;
-    meta.font = { size: 10, color: { argb: "FF595959" } };
-    meta.alignment = { horizontal: "right", vertical: "middle" };
+    meta.value = {
+      richText: [
+        { text: "Negocio: ", font: { bold: true, size: 10, color: { argb: "FF444444" } } },
+        {
+          text: `${ctx.businessName} · ${ctx.businessTypeLabel}`,
+          font: { size: 10, color: { argb: "FF666666" } },
+        },
+      ],
+    };
+    meta.alignment = { horizontal: "right", vertical: "middle", wrapText: true };
   }
 
   // Fila 6: Alcance del listado (listLabel)
   ws.mergeCells(6, 1, 6, endCol);
   const listCell = ws.getCell(6, 1);
-  listCell.value = report.listLabel;
-  listCell.font = { italic: true, size: 10, color: { argb: "FF595959" } };
-  listCell.alignment = { horizontal: "left", vertical: "middle" };
+  listCell.value = richTextEmphasizeFirstWord(report.listLabel);
+  listCell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
 
-  // Fila 7: Exportación — legible local + sello ISO para automatización
+  // Fila 7: Exportación — texto enriquecido (etiquetas en negrita)
   ws.mergeCells(7, 1, 7, endCol);
   const exportCell = ws.getCell(7, 1);
-  const isoLine = isoLocalDateTime(ctx.exportedAt);
-  const exportBits = [
-    `Exportado: ${humanDate(ctx.exportedAt)}`,
-    `ISO ${isoLine}`,
-    ctx.exporterEmail ? `Por: ${ctx.exporterEmail}` : null,
-  ].filter(Boolean);
-  exportCell.value = exportBits.join("  ·  ");
-  exportCell.font = { size: 9, color: { argb: "FF666666" } };
+  exportCell.value = buildExportRichText(ctx);
   exportCell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
   ws.getRow(7).height = ctx.exporterEmail ? 30 : 22;
 
@@ -444,38 +496,97 @@ function applyCategoryHighlights(ws: ExcelJS.Worksheet, report: ReportDefinition
   }
 }
 
-function addSummary(ws: ExcelJS.Worksheet, report: ReportDefinition, startRow: number) {
-  const endCol = report.columns.length;
-  const summaryRow = startRow + report.rows.length + 2;
+/**
+ * KPIs y totales en hoja aparte: la hoja de datos queda solo con encabezado + tabla rectangular
+ * (adecuado para filtros, tablas dinámicas y automatización sin huecos “fantasma”).
+ */
+function addSummaryWorksheet(workbook: ExcelJS.Workbook, report: ReportDefinition, ctx: ExportWorkbookContext) {
+  const sw = workbook.addWorksheet("Resumen", {
+    properties: { tabColor: { argb: report.tabColor } },
+    pageSetup: {
+      orientation: "landscape",
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      paperSize: 9,
+      showGridLines: false,
+    },
+  });
+  sw.views = [{ showGridLines: false }];
+  sw.properties.defaultRowHeight = 19;
   const edge = { argb: "FFCCD6E0" };
 
-  const titleMergeEnd = Math.min(4, endCol);
-  ws.mergeCells(summaryRow, 1, summaryRow, titleMergeEnd);
-  const titleCell = ws.getCell(summaryRow, 1);
-  titleCell.value = "RESUMEN";
-  titleCell.font = { bold: true, size: 11, color: { argb: "FF1F5582" } };
-  titleCell.alignment = { horizontal: "left", vertical: "middle" };
-  titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: SUMMARY_FILL } };
-  titleCell.border = {
+  sw.mergeCells(1, 1, 1, 4);
+  sw.getCell(1, 1).value = {
+    richText: [
+      { text: "RESUMEN", font: { bold: true, size: 14, color: { argb: "FF1F5582" } } },
+      { text: " — ", font: { size: 11, color: { argb: "FFBBBBBB" } } },
+      { text: report.title, font: { bold: true, size: 12, color: { argb: "FF222222" } } },
+    ],
+  };
+  sw.getCell(1, 1).alignment = { vertical: "middle", wrapText: true };
+  sw.getRow(1).height = 28;
+
+  sw.mergeCells(2, 1, 2, 4);
+  sw.getCell(2, 1).value = {
+    richText: [
+      { text: "Negocio: ", font: { bold: true, size: 10, color: { argb: "FF444444" } } },
+      {
+        text: `${ctx.businessName} · ${ctx.businessTypeLabel}`,
+        font: { size: 10, color: { argb: "FF666666" } },
+      },
+    ],
+  };
+  sw.getCell(2, 1).alignment = { vertical: "middle", wrapText: true };
+
+  sw.mergeCells(3, 1, 3, 4);
+  sw.getCell(3, 1).value = buildExportRichText(ctx);
+  sw.getCell(3, 1).alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+  sw.getRow(3).height = ctx.exporterEmail ? 28 : 22;
+
+  sw.getRow(4).height = 8;
+
+  const tableStart = 5;
+  const hdrMetric = sw.getCell(tableStart, 1);
+  hdrMetric.value = "Métrica";
+  hdrMetric.font = { bold: true, size: 10, color: { argb: WHITE } };
+  hdrMetric.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_BLUE } };
+  hdrMetric.alignment = { horizontal: "left", vertical: "middle" };
+  hdrMetric.border = {
     top: { style: "thin", color: edge },
     bottom: { style: "thin", color: edge },
+    left: { style: "thin", color: edge },
+    right: { style: "thin", color: edge },
   };
-  ws.getRow(summaryRow).height = 20;
+  const hdrVal = sw.getCell(tableStart, 2);
+  hdrVal.value = "Valor";
+  hdrVal.font = { bold: true, size: 10, color: { argb: WHITE } };
+  hdrVal.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_BLUE } };
+  hdrVal.alignment = { horizontal: "right", vertical: "middle" };
+  hdrVal.border = {
+    top: { style: "thin", color: edge },
+    bottom: { style: "thin", color: edge },
+    left: { style: "thin", color: edge },
+    right: { style: "thin", color: edge },
+  };
+  sw.getRow(tableStart).height = 22;
 
   report.summary.forEach(([label, value], idx) => {
-    const rowNumber = summaryRow + idx + 1;
-    const labelCell = ws.getCell(rowNumber, 1);
-    const valueCell = ws.getCell(rowNumber, 2);
+    const rowNumber = tableStart + idx + 1;
+    const labelCell = sw.getCell(rowNumber, 1);
+    const valueCell = sw.getCell(rowNumber, 2);
 
-    labelCell.value = label;
-    labelCell.font = { bold: true, size: 10 };
-    labelCell.alignment = { horizontal: "left", vertical: "middle" };
+    labelCell.value = {
+      richText: [{ text: label, font: { bold: true, size: 10, color: { argb: "FF333333" } } }],
+    };
+    labelCell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
     labelCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: SUMMARY_FILL } };
 
-    valueCell.value = value;
-    valueCell.font = { size: 10 };
+    valueCell.value = {
+      richText: [{ text: String(value), font: { bold: true, size: 11, color: { argb: "FF1F5582" } } }],
+    };
     valueCell.alignment = { horizontal: "right", vertical: "middle" };
-    valueCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: WHITE } };
+    valueCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE8F4FA" } };
 
     const box = {
       top: { style: "thin" as const, color: edge },
@@ -487,13 +598,23 @@ function addSummary(ws: ExcelJS.Worksheet, report: ReportDefinition, startRow: n
     valueCell.border = box;
 
     if (report.key === "ventas" && String(label).toLowerCase().includes("monto")) {
+      valueCell.value = value;
+      valueCell.font = { bold: true, size: 11, color: { argb: "FF1F5582" } };
       valueCell.numFmt = '"$"#,##0';
+      valueCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE8F4FA" } };
     }
   });
 
-  // Ancho mínimo de la columna de valores del resumen (siempre columna B)
-  const colB = ws.getColumn(2);
-  colB.width = Math.max(Number(colB.width) || 0, 14);
+  sw.getColumn(1).width = 32;
+  sw.getColumn(2).width = 18;
+
+  sw.eachRow((row) => {
+    row.eachCell((cell) => {
+      const v = cell.value;
+      if (cellValueIsRichText(v)) return;
+      cell.font = cell.font ?? { size: 10 };
+    });
+  });
 }
 
 function excelCellValue(value: string | number | Date | null | undefined): string | number | Date {
@@ -551,14 +672,16 @@ export async function buildCategoryExcelBuffer(opts: {
   }
 
   applyCategoryHighlights(ws, report, dataStart);
-  addSummary(ws, report, dataStart);
 
   ws.columns = report.columns.map((column) => ({ width: column.width }));
   ws.eachRow((row) => {
     row.eachCell((cell) => {
+      if (cellValueIsRichText(cell.value)) return;
       cell.font = cell.font ?? { size: 10 };
     });
   });
+
+  addSummaryWorksheet(workbook, report, context);
 
   const raw = await workbook.xlsx.writeBuffer();
   return Buffer.from(raw);
