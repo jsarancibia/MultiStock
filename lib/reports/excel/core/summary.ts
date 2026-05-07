@@ -41,9 +41,10 @@ export type SummaryCard = {
 
 // ── Constantes internas ────────────────────────────────────────────────────
 
-const LABEL_ROW_HEIGHT = 14;
+const LABEL_ROW_HEIGHT = 16;
 const VALUE_ROW_HEIGHT = 24;
-const PADDING_ROW_HEIGHT = 4;
+// Mantener padding visible para evitar "filas ocultas" visualmente.
+const PADDING_ROW_HEIGHT = 12;
 
 // ── Función principal ──────────────────────────────────────────────────────
 

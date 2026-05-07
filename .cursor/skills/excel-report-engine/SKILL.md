@@ -231,6 +231,9 @@ export async function buildInventoryExcel(
 - Widths manuales en cada columna
 - Orientación landscape para impresión
 - Footer para reportes administrativos
+- Alturas de fila legibles (evitar filas micro): usar `>= 12` para separadores/padding
+- Separadores visuales discretos pero visibles (sin filas casi ocultas)
+- Espaciado vertical consistente entre header, summary, tabla y footer
 
 ### NUNCA
 - Bordes en 4 lados en celdas de datos
@@ -239,6 +242,8 @@ export async function buildInventoryExcel(
 - `ws.addImage` sin `tl` y `ext` fijos
 - Colores con argb "FFFF0000" (rojo puro) o similares agresivos
 - Mezclar lógica visual con lógica de datos
+- Usar `row.height` de `4`, `5` o `6` en padding/separadores (genera efecto de filas cortadas)
+- Dejar huecos visuales grandes o zonas vacías desbalanceadas antes de la tabla
 
 ---
 

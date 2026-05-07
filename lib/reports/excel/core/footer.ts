@@ -18,7 +18,8 @@ import type { ExcelReportContext } from "./workbook";
 
 // ── Constantes ─────────────────────────────────────────────────────────────
 
-const SEPARATOR_HEIGHT = 4;
+// Altura suficiente para que no se vea como fila "cortada" en Excel.
+const SEPARATOR_HEIGHT = 12;
 const FOOTER_HEIGHT = 14;
 
 // ── Función principal ──────────────────────────────────────────────────────

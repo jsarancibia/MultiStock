@@ -130,7 +130,8 @@ export function applyBrandHeader(
 
   // ── Fila separadora (color del tema, altura mínima) ───────────────────
   const sepRow = currentRow;
-  ws.getRow(sepRow).height = 6;
+  // Evita filas ultra delgadas que en Excel se perciben como "saltos" visuales.
+  ws.getRow(sepRow).height = 12;
   for (let c = 1; c <= colCount; c++) {
     ws.getCell(sepRow, c).fill = {
       type: "pattern",
