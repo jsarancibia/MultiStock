@@ -13,7 +13,7 @@ export type ProductExportSource = {
   categories: { name: string | null } | null;
 };
 
-/** Filas fuente únicas para CSV y libro Excel (.xlsx). */
+/** Filas fuente únicas para exportaciones CSV. */
 export async function loadExportSourceRows(supabase: SupabaseClient<Database>, businessId: string) {
   const [products, inventoryProducts, movements, sales, alerts] = await Promise.all([
     supabase

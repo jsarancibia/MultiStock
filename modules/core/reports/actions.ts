@@ -13,10 +13,10 @@ function csvEscape(value: string | number | boolean | null | undefined) {
   return `"${text.replaceAll('"', '""')}"`;
 }
 
-function toExcelCsv(headers: string[], rows: Array<Array<string | number | boolean | null | undefined>>) {
+function toCsvFile(headers: string[], rows: Array<Array<string | number | boolean | null | undefined>>) {
   const delimiter = ";";
   const body = [headers, ...rows].map((row) => row.map(csvEscape).join(delimiter)).join("\r\n");
-  // BOM + sep=; evita que Excel en configuración ES deje todo en una sola celda.
+  // BOM + sep=; mantiene compatibilidad con apertura directa en hojas de cálculo.
   return `\uFEFFsep=;\r\n${body}`;
 }
 
@@ -136,7 +136,7 @@ export async function getCsvExports() {
   const src = await loadExportSourceRows(supabase, business.id);
 
   return {
-    productos: toExcelCsv(
+    productos: toCsvFile(
       ["codigo", "descripcion", "unidad", "categoria", "precio_venta", "estado", "sku", "codigo_barras"],
       src.products.map((p) => [
         typeof p.sku === "string" && p.sku.trim() ? p.sku.trim() : typeof p.barcode === "string" && p.barcode.trim() ? p.barcode.trim() : "—",
@@ -149,7 +149,7 @@ export async function getCsvExports() {
         p.barcode ?? "",
       ])
     ),
-    inventario: toExcelCsv(
+    inventario: toCsvFile(
       [
         "nombre",
         "sku",
@@ -180,11 +180,11 @@ export async function getCsvExports() {
         ];
       })
     ),
-    movimientos: toExcelCsv(
+    movimientos: toCsvFile(
       ["fecha", "tipo", "cantidad", "motivo"],
       src.movements.map((m) => [m.created_at, movementTypeLabel(m.type), m.quantity, m.reason])
     ),
-    ventas: toExcelCsv(
+    ventas: toCsvFile(
       ["fecha", "total", "metodo_pago"],
       src.sales.map((s) => [
         s.created_at,
@@ -194,7 +194,7 @@ export async function getCsvExports() {
           : s.payment_method,
       ])
     ),
-    alertas: toExcelCsv(
+    alertas: toCsvFile(
       ["fecha", "tipo", "mensaje", "estado"],
       src.alerts.map((a) => [a.created_at, a.type, a.message, a.resolved ? "Resuelta" : "Pendiente"])
     ),
