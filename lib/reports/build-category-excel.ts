@@ -278,7 +278,7 @@ function applyBrandTop(
   logoId?: number
 ) {
   const endCol = report.columns.length;
-  ws.views = [{ state: "frozen", ySplit: dataHeaderRow }];
+  ws.views = [{ state: "frozen", ySplit: dataHeaderRow, topLeftCell: `A${dataHeaderRow + 1}` }];
 
   ws.mergeCells(1, 1, 1, endCol);
   const brandCell = ws.getCell(1, 1);
@@ -308,13 +308,12 @@ function applyBrandTop(
   for (let c = 1; c <= endCol; c += 1) {
     const cell = ws.getCell(4, c);
     cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: TOP_BG } };
-    cell.border = { bottom: { style: "thin", color: { argb: EDGE } } };
   }
 
   if (logoId != null) {
     ws.addImage(logoId, {
-      tl: { col: 0.2, row: 0.65 },
-      ext: { width: 82, height: 52 },
+      tl: { col: 0.1, row: 0.15 },
+      ext: { width: 64, height: 40 },
     });
   }
 }
@@ -383,8 +382,8 @@ function addSummarySheet(workbook: ExcelJS.Workbook, report: ReportDefinition, c
 
   if (logoId != null) {
     ws.addImage(logoId, {
-      tl: { col: 1.2, row: 0.15 },
-      ext: { width: 70, height: 42 },
+      tl: { col: 0.1, row: 0.15 },
+      ext: { width: 60, height: 38 },
     });
   }
 
