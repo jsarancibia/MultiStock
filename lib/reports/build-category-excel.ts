@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { movementTypeLabel } from "@/lib/business/movement-type-labels";
+import { loadExcelBrandLogo } from "@/lib/reports/excel-brand-logo";
 import { categoryLabel, type ProductExportSource } from "@/lib/reports/export-queries";
 import { inventarioEstadoCalculado, inventarioSolicitarEtiqueta } from "@/lib/reports/inventory-stock-status";
 import { paymentMethodLabels } from "@/lib/validations/sale";
@@ -42,10 +43,15 @@ type ReportDefinition = {
   tabColor: string;
 };
 
-const HEADER_BG = "FF1F5582";
+// Paleta aproximada a la UI actual (primary/accent/border del tema claro).
+const HEADER_BG = "FF2F7D57";
 const HEADER_TEXT = "FFFFFFFF";
-const EDGE = "FFCCD6E0";
-const STRIPE = "FFF7FAFC";
+const TOP_BG = "FFF7FAF6";
+const TOP_ACCENT = "FFEAF4ED";
+const EDGE = "FFD9E7DD";
+const STRIPE = "FFFCFEFD";
+const KPI_BG = "FFEFF7F2";
+const KPI_TEXT = "FF21553C";
 
 export function isExportReportKey(value: string): value is ExportReportKey {
   return exportReportKeys.includes(value as ExportReportKey);
@@ -251,9 +257,71 @@ function excelCellValue(value: string | number | Date | null | undefined): strin
   return value ?? "—";
 }
 
-function styleDataSheet(ws: ExcelJS.Worksheet, report: ReportDefinition) {
-  const headerRow = ws.getRow(1);
-  headerRow.height = 22;
+function humanDate(value: Date): string {
+  return new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeStyle: "short" }).format(value);
+}
+
+function addLogo(workbook: ExcelJS.Workbook): number | undefined {
+  const logo = loadExcelBrandLogo();
+  if (!logo) return undefined;
+  return workbook.addImage({
+    buffer: logo.buffer as never,
+    extension: logo.extension,
+  });
+}
+
+function applyBrandTop(
+  ws: ExcelJS.Worksheet,
+  report: ReportDefinition,
+  context: ExportWorkbookContext,
+  dataHeaderRow: number,
+  logoId?: number
+) {
+  const endCol = report.columns.length;
+  ws.views = [{ state: "frozen", ySplit: dataHeaderRow }];
+
+  ws.mergeCells(1, 1, 1, endCol);
+  const brandCell = ws.getCell(1, 1);
+  brandCell.value = "MultiStock";
+  brandCell.font = { bold: true, size: 14, color: { argb: "FF1F3A2A" } };
+  brandCell.alignment = { horizontal: "center", vertical: "middle" };
+  brandCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: TOP_ACCENT } };
+  ws.getRow(1).height = 24;
+
+  ws.mergeCells(2, 1, 2, endCol);
+  const titleCell = ws.getCell(2, 1);
+  titleCell.value = report.title;
+  titleCell.font = { bold: true, size: 16, color: { argb: "FF203628" } };
+  titleCell.alignment = { horizontal: "left", vertical: "middle" };
+  titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: TOP_BG } };
+  ws.getRow(2).height = 28;
+
+  ws.mergeCells(3, 1, 3, endCol);
+  const metaCell = ws.getCell(3, 1);
+  metaCell.value = `${context.businessName} · ${context.businessTypeLabel} · Exportado: ${humanDate(context.exportedAt)}`;
+  metaCell.font = { size: 10, color: { argb: "FF4A5C51" } };
+  metaCell.alignment = { horizontal: "left", vertical: "middle" };
+  metaCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: TOP_BG } };
+  ws.getRow(3).height = 20;
+
+  ws.getRow(4).height = 8;
+  for (let c = 1; c <= endCol; c += 1) {
+    const cell = ws.getCell(4, c);
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: TOP_BG } };
+    cell.border = { bottom: { style: "thin", color: { argb: EDGE } } };
+  }
+
+  if (logoId != null) {
+    ws.addImage(logoId, {
+      tl: { col: 0.2, row: 0.65 },
+      ext: { width: 82, height: 52 },
+    });
+  }
+}
+
+function styleDataSheet(ws: ExcelJS.Worksheet, report: ReportDefinition, headerRowNumber: number) {
+  const headerRow = ws.getRow(headerRowNumber);
+  headerRow.height = 24;
   report.columns.forEach((_, i) => {
     const cell = headerRow.getCell(i + 1);
     cell.font = { bold: true, color: { argb: HEADER_TEXT } };
@@ -267,9 +335,9 @@ function styleDataSheet(ws: ExcelJS.Worksheet, report: ReportDefinition) {
     };
   });
 
-  for (let rowNum = 2; rowNum <= report.rows.length + 1; rowNum += 1) {
+  for (let rowNum = headerRowNumber + 1; rowNum <= headerRowNumber + report.rows.length; rowNum += 1) {
     const row = ws.getRow(rowNum);
-    const stripe = rowNum % 2 === 0;
+    const stripe = (rowNum - headerRowNumber) % 2 === 1;
     report.columns.forEach((column, i) => {
       const cell = row.getCell(i + 1);
       cell.alignment = { horizontal: column.align ?? "left", vertical: "middle", wrapText: column.key === "mensaje" || column.key === "motivo" };
@@ -280,12 +348,14 @@ function styleDataSheet(ws: ExcelJS.Worksheet, report: ReportDefinition) {
       cell.border = {
         top: { style: "thin", color: { argb: EDGE } },
         bottom: { style: "thin", color: { argb: EDGE } },
+        left: { style: "thin", color: { argb: EDGE } },
+        right: { style: "thin", color: { argb: EDGE } },
       };
     });
   }
 }
 
-function addSummarySheet(workbook: ExcelJS.Workbook, report: ReportDefinition) {
+function addSummarySheet(workbook: ExcelJS.Workbook, report: ReportDefinition, context: ExportWorkbookContext, logoId?: number) {
   const ws = workbook.addWorksheet("Resumen", {
     properties: { tabColor: { argb: report.tabColor } },
   });
@@ -294,9 +364,34 @@ function addSummarySheet(workbook: ExcelJS.Workbook, report: ReportDefinition) {
     { header: "Valor", key: "valor", width: 18 },
   ];
 
-  ws.getRow(1).height = 22;
+  ws.insertRow(1, []);
+  ws.insertRow(2, []);
+  ws.mergeCells(1, 1, 1, 2);
+  const title = ws.getCell(1, 1);
+  title.value = `Resumen · ${report.title}`;
+  title.font = { bold: true, size: 14, color: { argb: "FF1F3A2A" } };
+  title.alignment = { horizontal: "left", vertical: "middle" };
+  title.fill = { type: "pattern", pattern: "solid", fgColor: { argb: TOP_ACCENT } };
+  ws.getRow(1).height = 24;
+
+  ws.mergeCells(2, 1, 2, 2);
+  const meta = ws.getCell(2, 1);
+  meta.value = `${context.businessName} · Exportado: ${humanDate(context.exportedAt)}`;
+  meta.font = { size: 10, color: { argb: "FF4A5C51" } };
+  meta.alignment = { horizontal: "left", vertical: "middle" };
+  meta.fill = { type: "pattern", pattern: "solid", fgColor: { argb: TOP_BG } };
+
+  if (logoId != null) {
+    ws.addImage(logoId, {
+      tl: { col: 1.2, row: 0.15 },
+      ext: { width: 70, height: 42 },
+    });
+  }
+
+  const tableHeaderRow = ws.getRow(3);
+  tableHeaderRow.height = 22;
   [1, 2].forEach((i) => {
-    const cell = ws.getRow(1).getCell(i);
+    const cell = tableHeaderRow.getCell(i);
     cell.font = { bold: true, color: { argb: HEADER_TEXT } };
     cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_BG } };
     cell.alignment = { horizontal: i === 1 ? "left" : "right", vertical: "middle" };
@@ -310,13 +405,15 @@ function addSummarySheet(workbook: ExcelJS.Workbook, report: ReportDefinition) {
 
   report.summary.forEach(([metrica, valor], idx) => {
     const row = ws.addRow({ metrica, valor });
-    const rowNum = idx + 2;
+    const rowNum = idx + 4;
     const stripe = rowNum % 2 === 0;
     const metricCell = row.getCell(1);
     const valueCell = row.getCell(2);
     metricCell.font = { bold: true };
     metricCell.alignment = { horizontal: "left", vertical: "middle" };
     valueCell.alignment = { horizontal: "right", vertical: "middle" };
+    valueCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: KPI_BG } };
+    valueCell.font = { bold: true, color: { argb: KPI_TEXT } };
     if (report.key === "ventas" && metrica.toLowerCase().includes("monto")) {
       valueCell.numFmt = '"$"#,##0';
     }
@@ -327,10 +424,14 @@ function addSummarySheet(workbook: ExcelJS.Workbook, report: ReportDefinition) {
     metricCell.border = {
       top: { style: "thin", color: { argb: EDGE } },
       bottom: { style: "thin", color: { argb: EDGE } },
+      left: { style: "thin", color: { argb: EDGE } },
+      right: { style: "thin", color: { argb: EDGE } },
     };
     valueCell.border = {
       top: { style: "thin", color: { argb: EDGE } },
       bottom: { style: "thin", color: { argb: EDGE } },
+      left: { style: "thin", color: { argb: EDGE } },
+      right: { style: "thin", color: { argb: EDGE } },
     };
   });
 }
@@ -350,12 +451,14 @@ export async function buildCategoryExcelBuffer(opts: {
   workbook.modified = context.exportedAt;
   workbook.title = report.title;
   workbook.description = `${report.title} · ${context.businessName}`;
+  const logoId = addLogo(workbook);
 
   const dataSheet = workbook.addWorksheet(report.sheetName, {
     properties: { tabColor: { argb: report.tabColor } },
     pageSetup: { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9 },
   });
-  dataSheet.views = [{ state: "frozen", ySplit: 1 }];
+  const dataHeaderRow = 5;
+  applyBrandTop(dataSheet, report, context, dataHeaderRow, logoId);
 
   dataSheet.columns = report.columns.map((column) => ({
     header: column.header,
@@ -373,13 +476,13 @@ export async function buildCategoryExcelBuffer(opts: {
 
   if (report.rows.length > 0) {
     dataSheet.autoFilter = {
-      from: { row: 1, column: 1 },
-      to: { row: report.rows.length + 1, column: report.columns.length },
+      from: { row: dataHeaderRow, column: 1 },
+      to: { row: dataHeaderRow + report.rows.length, column: report.columns.length },
     };
   }
 
-  styleDataSheet(dataSheet, report);
-  addSummarySheet(workbook, report);
+  styleDataSheet(dataSheet, report, dataHeaderRow);
+  addSummarySheet(workbook, report, context, logoId);
 
   const raw = await workbook.xlsx.writeBuffer();
   return Buffer.from(raw);
