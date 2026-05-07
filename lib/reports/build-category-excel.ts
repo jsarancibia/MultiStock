@@ -46,10 +46,12 @@ type ReportDefinition = {
   specialLastHeader?: boolean;
 };
 
-const HEADER_BLUE = "FF00A6D6";
-const HEADER_DARK = "FF1F4E79";
+/** Azul sobrio (menos “neón” que el cian brillante) — buena lectura con texto blanco */
+const HEADER_BLUE = "FF1F5582";
+const HEADER_DARK = "FF163E5C";
 const HEADER_GRAY = "FFD9E2EA";
 const STRIPE_GRAY = "FFF2F2F2";
+const SUMMARY_FILL = "FFF8F9FA";
 const WHITE = "FFFFFFFF";
 
 export function isExportReportKey(value: string): value is ExportReportKey {
@@ -71,6 +73,12 @@ function humanDate(value: Date): string {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(value);
+}
+
+/** Fecha/hora local en forma ISO-friendly (YYYY-MM-DD HH:mm) para trazabilidad y ETL. */
+function isoLocalDateTime(value: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())} ${pad(value.getHours())}:${pad(value.getMinutes())}`;
 }
 
 function productCode(row: Pick<ProductExportSource, "sku" | "barcode">): string {
@@ -286,7 +294,7 @@ function addLogo(workbook: ExcelJS.Workbook): number | undefined {
 function applyTopLayout(ws: ExcelJS.Worksheet, report: ReportDefinition, ctx: ExportWorkbookContext, logoId?: number) {
   const endCol = report.columns.length;
   ws.properties.defaultRowHeight = 18;
-  ws.views = [{ state: "frozen", ySplit: 9 }];
+  ws.views = [{ state: "frozen", ySplit: 9, showGridLines: false }];
 
   // Fila 1: Banda superior "MultiStock"
   ws.mergeCells(1, 1, 1, endCol);
@@ -297,54 +305,63 @@ function applyTopLayout(ws: ExcelJS.Worksheet, report: ReportDefinition, ctx: Ex
   top.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFD9D9D9" } };
   ws.getRow(1).height = 20;
 
-  // Filas 2-4: Área de marca con logo
-  ws.mergeCells(2, 1, 4, endCol);
+  // Filas 2-3: Marca (compacto; una fila menos que antes)
+  ws.mergeCells(2, 1, 3, endCol);
   const brand = ws.getCell(2, 1);
   brand.value = "MultiStock";
-  brand.font = { bold: true, italic: true, size: 18, color: { argb: "FF888888" } };
+  brand.font = { bold: true, italic: true, size: 17, color: { argb: "FF888888" } };
   brand.alignment = { horizontal: "center", vertical: "middle" };
   brand.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF5F5F5" } };
-  ws.getRow(2).height = 20;
-  ws.getRow(3).height = 20;
-  ws.getRow(4).height = 20;
+  ws.getRow(2).height = 22;
+  ws.getRow(3).height = 22;
 
   if (logoId != null) {
-    ws.addImage(logoId, { tl: { col: 0.15, row: 1.2 }, ext: { width: 90, height: 52 } });
+    ws.addImage(logoId, { tl: { col: 0.15, row: 1.05 }, ext: { width: 88, height: 50 } });
   }
 
-  // Fila 5: Separador delgado
-  ws.getRow(5).height = 6;
+  // Fila 4: Separador delgado
+  ws.getRow(4).height = 6;
 
-  // Fila 6: Título (cols 1..midCol) + negocio/tipo (cols midCol+1..endCol)
-  const midCol = Math.max(2, Math.ceil(endCol * 0.6));
-  ws.mergeCells(6, 1, 6, midCol);
-  const titleCell = ws.getCell(6, 1);
+  // Fila 5: Título (cols 1..midCol) + negocio/tipo (cols midCol+1..endCol)
+  const midCol = Math.max(2, Math.ceil(endCol * 0.58));
+  ws.mergeCells(5, 1, 5, midCol);
+  const titleCell = ws.getCell(5, 1);
   titleCell.value = report.title;
   titleCell.font = { bold: true, size: 15 };
   titleCell.alignment = { horizontal: "left", vertical: "middle" };
-  ws.getRow(6).height = 24;
+  ws.getRow(5).height = 24;
 
   if (midCol < endCol) {
-    ws.mergeCells(6, midCol + 1, 6, endCol);
-    const meta = ws.getCell(6, midCol + 1);
+    ws.mergeCells(5, midCol + 1, 5, endCol);
+    const meta = ws.getCell(5, midCol + 1);
     meta.value = `${ctx.businessName} · ${ctx.businessTypeLabel}`;
     meta.font = { size: 10, color: { argb: "FF595959" } };
     meta.alignment = { horizontal: "right", vertical: "middle" };
   }
 
-  // Fila 7: Descripción del reporte (listLabel)
-  ws.mergeCells(7, 1, 7, endCol);
-  const listCell = ws.getCell(7, 1);
+  // Fila 6: Alcance del listado (listLabel)
+  ws.mergeCells(6, 1, 6, endCol);
+  const listCell = ws.getCell(6, 1);
   listCell.value = report.listLabel;
   listCell.font = { italic: true, size: 10, color: { argb: "FF595959" } };
   listCell.alignment = { horizontal: "left", vertical: "middle" };
 
-  // Fila 8: Fecha de exportación
-  ws.mergeCells(8, 1, 8, endCol);
-  const exportCell = ws.getCell(8, 1);
-  exportCell.value = `Exportado: ${humanDate(ctx.exportedAt)}`;
-  exportCell.font = { size: 9, color: { argb: "FF777777" } };
-  exportCell.alignment = { horizontal: "left", vertical: "middle" };
+  // Fila 7: Exportación — legible local + sello ISO para automatización
+  ws.mergeCells(7, 1, 7, endCol);
+  const exportCell = ws.getCell(7, 1);
+  const isoLine = isoLocalDateTime(ctx.exportedAt);
+  const exportBits = [
+    `Exportado: ${humanDate(ctx.exportedAt)}`,
+    `ISO ${isoLine}`,
+    ctx.exporterEmail ? `Por: ${ctx.exporterEmail}` : null,
+  ].filter(Boolean);
+  exportCell.value = exportBits.join("  ·  ");
+  exportCell.font = { size: 9, color: { argb: "FF666666" } };
+  exportCell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+  ws.getRow(7).height = ctx.exporterEmail ? 30 : 22;
+
+  // Fila 8: vacía mínima — separa metadatos de la tabla (cabecera fila 9)
+  ws.getRow(8).height = 6;
 }
 
 function applyHeaderRow(ws: ExcelJS.Worksheet, report: ReportDefinition, rowNumber: number) {
@@ -353,7 +370,7 @@ function applyHeaderRow(ws: ExcelJS.Worksheet, report: ReportDefinition, rowNumb
     const cell = row.getCell(index + 1);
     const special = Boolean(report.specialLastHeader && index === report.columns.length - 1);
     cell.value = column.header;
-    cell.font = { bold: true, color: { argb: special ? "FF000000" : WHITE } };
+    cell.font = { bold: true, size: 10, color: { argb: special ? "FF000000" : WHITE } };
     cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
     cell.fill = {
       type: "pattern",
@@ -367,7 +384,8 @@ function applyHeaderRow(ws: ExcelJS.Worksheet, report: ReportDefinition, rowNumb
       right: { style: "thin", color: { argb: HEADER_DARK } },
     };
   });
-  row.height = 23;
+  // Altura extra para que texto + icono de filtro no choquen
+  row.height = 27;
 }
 
 function applyBodyRowStyle(row: ExcelJS.Row, rowIndex: number, report: ReportDefinition) {
@@ -427,19 +445,55 @@ function applyCategoryHighlights(ws: ExcelJS.Worksheet, report: ReportDefinition
 }
 
 function addSummary(ws: ExcelJS.Worksheet, report: ReportDefinition, startRow: number) {
+  const endCol = report.columns.length;
   const summaryRow = startRow + report.rows.length + 2;
-  ws.getCell(summaryRow, 1).value = "RESUMEN";
-  ws.getCell(summaryRow, 1).font = { bold: true, size: 12 };
+  const edge = { argb: "FFCCD6E0" };
+
+  const titleMergeEnd = Math.min(4, endCol);
+  ws.mergeCells(summaryRow, 1, summaryRow, titleMergeEnd);
+  const titleCell = ws.getCell(summaryRow, 1);
+  titleCell.value = "RESUMEN";
+  titleCell.font = { bold: true, size: 11, color: { argb: "FF1F5582" } };
+  titleCell.alignment = { horizontal: "left", vertical: "middle" };
+  titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: SUMMARY_FILL } };
+  titleCell.border = {
+    top: { style: "thin", color: edge },
+    bottom: { style: "thin", color: edge },
+  };
+  ws.getRow(summaryRow).height = 20;
 
   report.summary.forEach(([label, value], idx) => {
-    const row = ws.getRow(summaryRow + idx + 1);
-    row.getCell(1).value = label;
-    row.getCell(1).font = { bold: true };
-    row.getCell(2).value = value;
-    if (report.key === "ventas" && label.toLowerCase().includes("monto")) {
-      row.getCell(2).numFmt = '"$"#,##0';
+    const rowNumber = summaryRow + idx + 1;
+    const labelCell = ws.getCell(rowNumber, 1);
+    const valueCell = ws.getCell(rowNumber, 2);
+
+    labelCell.value = label;
+    labelCell.font = { bold: true, size: 10 };
+    labelCell.alignment = { horizontal: "left", vertical: "middle" };
+    labelCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: SUMMARY_FILL } };
+
+    valueCell.value = value;
+    valueCell.font = { size: 10 };
+    valueCell.alignment = { horizontal: "right", vertical: "middle" };
+    valueCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: WHITE } };
+
+    const box = {
+      top: { style: "thin" as const, color: edge },
+      left: { style: "thin" as const, color: edge },
+      bottom: { style: "thin" as const, color: edge },
+      right: { style: "thin" as const, color: edge },
+    };
+    labelCell.border = box;
+    valueCell.border = box;
+
+    if (report.key === "ventas" && String(label).toLowerCase().includes("monto")) {
+      valueCell.numFmt = '"$"#,##0';
     }
   });
+
+  // Ancho mínimo de la columna de valores del resumen (siempre columna B)
+  const colB = ws.getColumn(2);
+  colB.width = Math.max(Number(colB.width) || 0, 14);
 }
 
 function excelCellValue(value: string | number | Date | null | undefined): string | number | Date {
@@ -473,6 +527,7 @@ export async function buildCategoryExcelBuffer(opts: {
       fitToWidth: 1,
       fitToHeight: 0,
       paperSize: 9,
+      showGridLines: false,
     },
   });
 
