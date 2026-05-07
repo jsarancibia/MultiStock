@@ -1,6 +1,5 @@
 import ExcelJS from "exceljs";
 import { movementTypeLabel } from "@/lib/business/movement-type-labels";
-import { loadExcelBrandLogo } from "@/lib/reports/excel-brand-logo";
 import { categoryLabel, type ProductExportSource } from "@/lib/reports/export-queries";
 import { inventarioEstadoCalculado, inventarioSolicitarEtiqueta } from "@/lib/reports/inventory-stock-status";
 import { paymentMethodLabels } from "@/lib/validations/sale";
@@ -37,22 +36,16 @@ type ReportDefinition = {
   fileLabel: string;
   sheetName: string;
   title: string;
-  subtitle: string;
-  listLabel: string;
   columns: ReportColumn[];
   rows: Array<Record<string, string | number | Date | null>>;
-  summary: Array<[string, string | number]>;
+  summary: Array<[string, number]>;
   tabColor: string;
-  specialLastHeader?: boolean;
 };
 
-/** Azul sobrio (menos “neón” que el cian brillante) — buena lectura con texto blanco */
-const HEADER_BLUE = "FF1F5582";
-const HEADER_DARK = "FF163E5C";
-const HEADER_GRAY = "FFD9E2EA";
-const STRIPE_GRAY = "FFF2F2F2";
-const SUMMARY_FILL = "FFF8F9FA";
-const WHITE = "FFFFFFFF";
+const HEADER_BG = "FF1F5582";
+const HEADER_TEXT = "FFFFFFFF";
+const EDGE = "FFCCD6E0";
+const STRIPE = "FFF7FAFC";
 
 export function isExportReportKey(value: string): value is ExportReportKey {
   return exportReportKeys.includes(value as ExportReportKey);
@@ -66,74 +59,6 @@ function n(value: unknown): number {
 function parseDate(value: string): Date {
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? new Date() : d;
-}
-
-function humanDate(value: Date): string {
-  return new Intl.DateTimeFormat("es-CL", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(value);
-}
-
-/** Fecha/hora local en forma ISO-friendly (YYYY-MM-DD HH:mm) para trazabilidad y ETL. */
-function isoLocalDateTime(value: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())} ${pad(value.getHours())}:${pad(value.getMinutes())}`;
-}
-
-function cellValueIsRichText(value: unknown): value is { richText: ExcelJS.RichText[] } {
-  return Boolean(value && typeof value === "object" && value !== null && "richText" in value);
-}
-
-/** Resalta la primera palabra (útil en subtítulos de alcance). */
-function richTextEmphasizeFirstWord(phrase: string, accentArgb = "FF1F5582"): ExcelJS.CellRichTextValue {
-  const t = phrase.trim();
-  const i = t.indexOf(" ");
-  if (i === -1) {
-    return {
-      richText: [{ text: t, font: { bold: true, italic: true, size: 10, color: { argb: accentArgb } } }],
-    };
-  }
-  return {
-    richText: [
-      { text: t.slice(0, i), font: { bold: true, italic: true, size: 10, color: { argb: accentArgb } } },
-      { text: t.slice(i), font: { italic: true, size: 10, color: { argb: "FF595959" } } },
-    ],
-  };
-}
-
-/** Resalta la última palabra del título del informe. */
-function richTextEmphasizeTitleTail(title: string): ExcelJS.CellRichTextValue {
-  const trimmed = title.trim();
-  const lastSpace = trimmed.lastIndexOf(" ");
-  if (lastSpace <= 0) {
-    return { richText: [{ text: trimmed, font: { bold: true, size: 15, color: { argb: "FF1A1A1A" } } }] };
-  }
-  return {
-    richText: [
-      { text: trimmed.slice(0, lastSpace + 1), font: { size: 15, color: { argb: "FF333333" } } },
-      { text: trimmed.slice(lastSpace + 1), font: { bold: true, size: 15, color: { argb: "FF1F5582" } } },
-    ],
-  };
-}
-
-function buildExportRichText(ctx: ExportWorkbookContext): ExcelJS.CellRichTextValue {
-  const isoLine = isoLocalDateTime(ctx.exportedAt);
-  const parts: ExcelJS.RichText[] = [
-    { text: "Exportado: ", font: { bold: true, size: 9, color: { argb: "FF333333" } } },
-    { text: humanDate(ctx.exportedAt), font: { size: 9, color: { argb: "FF666666" } } },
-    { text: "  ·  ", font: { size: 9, color: { argb: "FFAAAAAA" } } },
-    { text: "ISO ", font: { bold: true, size: 9, color: { argb: "FF1F5582" } } },
-    { text: isoLine, font: { size: 9, color: { argb: "FF444444" } } },
-  ];
-  if (ctx.exporterEmail) {
-    parts.push(
-      { text: "  ·  ", font: { size: 9 } },
-      { text: "Por: ", font: { bold: true, size: 9, color: { argb: "FF333333" } } },
-      { text: ctx.exporterEmail, font: { size: 9, color: { argb: "FF555555" } } },
-    );
-  }
-  return { richText: parts };
 }
 
 function productCode(row: Pick<ProductExportSource, "sku" | "barcode">): string {
@@ -164,27 +89,24 @@ function buildReportDefinition(key: ExportReportKey, source: ExportSourceSubset,
     const rows = source.products.map((p) => ({
       codigo: productCode(p),
       descripcion: p.name,
-      unidad: unitLabel(p.unit_type),
+      unidad_medida: unitLabel(p.unit_type),
       categoria: categoryLabel(p),
-      precio: n(p.sale_price),
+      precio_venta: n(p.sale_price),
       estado: p.active ? "Activo" : "Inactivo",
     }));
-
     return {
       key,
       fileLabel: "productos",
       sheetName: "Productos",
-      title: "Lista de Productos",
-      subtitle: `${ctx.businessName} · ${ctx.businessTypeLabel}`,
-      listLabel: "Catálogo de productos",
+      title: "Reporte de Productos",
       tabColor: "FF548235",
       columns: [
-        { header: "CÓDIGO", key: "codigo", width: 16, align: "center" },
-        { header: "DESCRIPCIÓN", key: "descripcion", width: 42 },
-        { header: "UdM", key: "unidad", width: 9, align: "center" },
-        { header: "CATEGORÍA", key: "categoria", width: 20, align: "center" },
-        { header: "PRECIO", key: "precio", width: 14, align: "right", numFmt: '"$"#,##0' },
-        { header: "ESTADO", key: "estado", width: 14, align: "center" },
+        { header: "Código", key: "codigo", width: 16, align: "center" },
+        { header: "Descripción", key: "descripcion", width: 42 },
+        { header: "UdM", key: "unidad_medida", width: 10, align: "center" },
+        { header: "Categoría", key: "categoria", width: 22, align: "center" },
+        { header: "Precio venta", key: "precio_venta", width: 15, align: "right", numFmt: '"$"#,##0' },
+        { header: "Estado", key: "estado", width: 14, align: "center" },
       ],
       rows,
       summary: [["Total productos", rows.length]],
@@ -205,35 +127,31 @@ function buildReportDefinition(key: ExportReportKey, source: ExportSourceSubset,
       return {
         codigo: productCode(p),
         descripcion: p.name,
-        unidad: unitLabel(p.unit_type),
+        unidad_medida: unitLabel(p.unit_type),
         categoria: categoryLabel(p),
         almacen: ctx.businessName,
         stock_minimo: Number.isFinite(min) ? min : null,
-        inventario: Number.isFinite(current) ? current : null,
-        estado,
-        solicitar: inventarioSolicitarEtiqueta(current, min),
+        stock_actual: Number.isFinite(current) ? current : null,
+        estado_stock: estado,
+        accion_sugerida: inventarioSolicitarEtiqueta(current, min),
       };
     });
-
     return {
       key,
       fileLabel: "inventario",
       sheetName: "Inventario",
-      title: "Control de Inventario",
-      subtitle: `${ctx.businessName} · ${ctx.businessTypeLabel}`,
-      listLabel: "Lista de Materiales",
+      title: "Reporte de Inventario",
       tabColor: "FF00A6D6",
-      specialLastHeader: true,
       columns: [
-        { header: "CÓDIGO", key: "codigo", width: 14, align: "center" },
-        { header: "DESCRIPCIÓN", key: "descripcion", width: 36 },
-        { header: "UdM", key: "unidad", width: 9, align: "center" },
-        { header: "CATEGORÍA", key: "categoria", width: 18, align: "center" },
-        { header: "ALMACÉN", key: "almacen", width: 22, align: "center" },
-        { header: "STOCK MÍNIMO", key: "stock_minimo", width: 15, align: "right", numFmt: "#,##0.####" },
-        { header: "INVENTARIO", key: "inventario", width: 14, align: "right", numFmt: "#,##0.####" },
-        { header: "ESTADO", key: "estado", width: 16, align: "center" },
-        { header: "SOLICITAR", key: "solicitar", width: 22, align: "center" },
+        { header: "Código", key: "codigo", width: 14, align: "center" },
+        { header: "Descripción", key: "descripcion", width: 34 },
+        { header: "UdM", key: "unidad_medida", width: 10, align: "center" },
+        { header: "Categoría", key: "categoria", width: 18, align: "center" },
+        { header: "Almacén", key: "almacen", width: 22, align: "center" },
+        { header: "Stock mínimo", key: "stock_minimo", width: 15, align: "right", numFmt: "#,##0.####" },
+        { header: "Stock actual", key: "stock_actual", width: 15, align: "right", numFmt: "#,##0.####" },
+        { header: "Estado stock", key: "estado_stock", width: 16, align: "center" },
+        { header: "Acción sugerida", key: "accion_sugerida", width: 22, align: "center" },
       ],
       rows,
       summary: [
@@ -247,25 +165,22 @@ function buildReportDefinition(key: ExportReportKey, source: ExportSourceSubset,
 
   if (key === "movimientos") {
     const rows = source.movements.map((m) => ({
-      fecha: parseDate(m.created_at),
-      tipo: movementTypeLabel(m.type),
+      fecha_hora: parseDate(m.created_at),
+      tipo_movimiento: movementTypeLabel(m.type),
       cantidad: n(m.quantity),
       motivo: m.reason ?? "—",
     }));
-
     return {
       key,
       fileLabel: "movimientos",
       sheetName: "Movimientos",
-      title: "Movimientos de Stock",
-      subtitle: `${ctx.businessName} · ${ctx.businessTypeLabel}`,
-      listLabel: "Registro de movimientos",
+      title: "Reporte de Movimientos",
       tabColor: "FFFFC000",
       columns: [
-        { header: "FECHA", key: "fecha", width: 22, numFmt: "dd/mm/yyyy hh:mm" },
-        { header: "TIPO", key: "tipo", width: 20 },
-        { header: "CANTIDAD", key: "cantidad", width: 14, align: "right", numFmt: "#,##0.####" },
-        { header: "MOTIVO", key: "motivo", width: 56 },
+        { header: "Fecha y hora", key: "fecha_hora", width: 22, numFmt: "dd/mm/yyyy hh:mm" },
+        { header: "Tipo movimiento", key: "tipo_movimiento", width: 22 },
+        { header: "Cantidad", key: "cantidad", width: 14, align: "right", numFmt: "#,##0.####" },
+        { header: "Motivo", key: "motivo", width: 56 },
       ],
       rows,
       summary: [["Total movimientos", rows.length]],
@@ -273,59 +188,53 @@ function buildReportDefinition(key: ExportReportKey, source: ExportSourceSubset,
   }
 
   if (key === "ventas") {
-    let total = 0;
+    let totalVentas = 0;
     const rows = source.sales.map((s) => {
-      const saleTotal = n(s.total);
-      if (Number.isFinite(saleTotal)) total += saleTotal;
+      const total = n(s.total);
+      if (Number.isFinite(total)) totalVentas += total;
       return {
-        fecha: parseDate(s.created_at),
-        total: saleTotal,
+        fecha_hora: parseDate(s.created_at),
+        total_venta: total,
         metodo_pago: paymentMethodLabel(s.payment_method),
       };
     });
-
     return {
       key,
       fileLabel: "ventas",
       sheetName: "Ventas",
       title: "Reporte de Ventas",
-      subtitle: `${ctx.businessName} · ${ctx.businessTypeLabel}`,
-      listLabel: "Ventas registradas",
       tabColor: "FF9DC3E6",
       columns: [
-        { header: "FECHA", key: "fecha", width: 22, numFmt: "dd/mm/yyyy hh:mm" },
-        { header: "TOTAL", key: "total", width: 16, align: "right", numFmt: '"$"#,##0' },
-        { header: "MÉTODO DE PAGO", key: "metodo_pago", width: 22 },
+        { header: "Fecha y hora", key: "fecha_hora", width: 22, numFmt: "dd/mm/yyyy hh:mm" },
+        { header: "Total venta", key: "total_venta", width: 16, align: "right", numFmt: '"$"#,##0' },
+        { header: "Método de pago", key: "metodo_pago", width: 22 },
       ],
       rows,
       summary: [
         ["Total ventas", rows.length],
-        ["Monto total", total],
+        ["Monto total", totalVentas],
       ],
     };
   }
 
   const pendientes = source.alerts.filter((a) => !a.resolved).length;
   const rows = source.alerts.map((a) => ({
-    fecha: parseDate(a.created_at),
-    tipo: a.type,
+    fecha_hora: parseDate(a.created_at),
+    tipo_alerta: a.type,
     mensaje: a.message ?? "—",
     estado: a.resolved ? "Resuelta" : "Pendiente",
   }));
-
   return {
     key,
     fileLabel: "alertas",
     sheetName: "Alertas",
     title: "Reporte de Alertas",
-    subtitle: `${ctx.businessName} · ${ctx.businessTypeLabel}`,
-    listLabel: "Alertas operativas",
     tabColor: "FFC65911",
     columns: [
-      { header: "FECHA", key: "fecha", width: 22, numFmt: "dd/mm/yyyy hh:mm" },
-      { header: "TIPO", key: "tipo", width: 20 },
-      { header: "MENSAJE", key: "mensaje", width: 58 },
-      { header: "ESTADO", key: "estado", width: 14, align: "center" },
+      { header: "Fecha y hora", key: "fecha_hora", width: 22, numFmt: "dd/mm/yyyy hh:mm" },
+      { header: "Tipo alerta", key: "tipo_alerta", width: 20 },
+      { header: "Mensaje", key: "mensaje", width: 58 },
+      { header: "Estado", key: "estado", width: 14, align: "center" },
     ],
     rows,
     summary: [
@@ -336,291 +245,94 @@ function buildReportDefinition(key: ExportReportKey, source: ExportSourceSubset,
   };
 }
 
-function addLogo(workbook: ExcelJS.Workbook): number | undefined {
-  const logoAsset = loadExcelBrandLogo();
-  if (!logoAsset) return undefined;
-  return workbook.addImage({
-    // exceljs aún no refleja bien los tipos de Buffer con Node 22+.
-    buffer: logoAsset.buffer as never,
-    extension: logoAsset.extension,
-  });
-}
-
-function applyTopLayout(ws: ExcelJS.Worksheet, report: ReportDefinition, ctx: ExportWorkbookContext, logoId?: number) {
-  const endCol = report.columns.length;
-  ws.properties.defaultRowHeight = 18;
-  ws.views = [{ state: "frozen", ySplit: 9, showGridLines: false }];
-
-  // Fila 1: Banda superior "MultiStock"
-  ws.mergeCells(1, 1, 1, endCol);
-  const top = ws.getCell(1, 1);
-  top.value = "MultiStock";
-  top.font = { bold: true, size: 13, color: { argb: "FF222222" } };
-  top.alignment = { horizontal: "center", vertical: "middle" };
-  top.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFD9D9D9" } };
-  ws.getRow(1).height = 20;
-
-  // Filas 2-3: Franja para logo (sin repetir el texto "MultiStock"; la fila 1 ya identifica la app)
-  ws.mergeCells(2, 1, 3, endCol);
-  const brand = ws.getCell(2, 1);
-  brand.value = "";
-  brand.alignment = { horizontal: "center", vertical: "middle" };
-  brand.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF5F5F5" } };
-  ws.getRow(2).height = 22;
-  ws.getRow(3).height = 22;
-
-  if (logoId != null) {
-    ws.addImage(logoId, { tl: { col: 0.15, row: 1.05 }, ext: { width: 88, height: 50 } });
-  }
-
-  // Fila 4: Separador delgado
-  ws.getRow(4).height = 6;
-
-  // Fila 5: Título (cols 1..midCol) + negocio/tipo (cols midCol+1..endCol)
-  const midCol = Math.max(2, Math.ceil(endCol * 0.58));
-  ws.mergeCells(5, 1, 5, midCol);
-  const titleCell = ws.getCell(5, 1);
-  titleCell.value = richTextEmphasizeTitleTail(report.title);
-  titleCell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-  ws.getRow(5).height = 24;
-
-  if (midCol < endCol) {
-    ws.mergeCells(5, midCol + 1, 5, endCol);
-    const meta = ws.getCell(5, midCol + 1);
-    meta.value = {
-      richText: [
-        { text: "Negocio: ", font: { bold: true, size: 10, color: { argb: "FF444444" } } },
-        {
-          text: `${ctx.businessName} · ${ctx.businessTypeLabel}`,
-          font: { size: 10, color: { argb: "FF666666" } },
-        },
-      ],
-    };
-    meta.alignment = { horizontal: "right", vertical: "middle", wrapText: true };
-  }
-
-  // Fila 6: Alcance del listado (listLabel)
-  ws.mergeCells(6, 1, 6, endCol);
-  const listCell = ws.getCell(6, 1);
-  listCell.value = richTextEmphasizeFirstWord(report.listLabel);
-  listCell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-
-  // Fila 7: Exportación — texto enriquecido (etiquetas en negrita)
-  ws.mergeCells(7, 1, 7, endCol);
-  const exportCell = ws.getCell(7, 1);
-  exportCell.value = buildExportRichText(ctx);
-  exportCell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-  ws.getRow(7).height = ctx.exporterEmail ? 30 : 22;
-
-  // Fila 8: vacía mínima — separa metadatos de la tabla (cabecera fila 9)
-  ws.getRow(8).height = 6;
-}
-
-function applyHeaderRow(ws: ExcelJS.Worksheet, report: ReportDefinition, rowNumber: number) {
-  const row = ws.getRow(rowNumber);
-  report.columns.forEach((column, index) => {
-    const cell = row.getCell(index + 1);
-    const special = Boolean(report.specialLastHeader && index === report.columns.length - 1);
-    cell.value = column.header;
-    cell.font = { bold: true, size: 10, color: { argb: special ? "FF000000" : WHITE } };
-    cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-    cell.fill = {
-      type: "pattern",
-      pattern: "solid",
-      fgColor: { argb: special ? HEADER_GRAY : HEADER_BLUE },
-    };
-    cell.border = {
-      top: { style: "thin", color: { argb: HEADER_DARK } },
-      left: { style: "thin", color: { argb: HEADER_DARK } },
-      bottom: { style: "thin", color: { argb: HEADER_DARK } },
-      right: { style: "thin", color: { argb: HEADER_DARK } },
-    };
-  });
-  // Altura extra para que texto + icono de filtro no choquen
-  row.height = 27;
-}
-
-function applyBodyRowStyle(row: ExcelJS.Row, rowIndex: number, report: ReportDefinition) {
-  const useStripe = rowIndex % 2 === 1;
-  report.columns.forEach((column, index) => {
-    const cell = row.getCell(index + 1);
-    cell.alignment = {
-      horizontal: column.align ?? "left",
-      vertical: "middle",
-      wrapText: column.key === "mensaje" || column.key === "motivo",
-    };
-    if (column.numFmt) cell.numFmt = column.numFmt;
-    if (useStripe) {
-      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: STRIPE_GRAY } };
-    }
-    cell.border = {
-      top: { style: "thin", color: { argb: "FFD9D9D9" } },
-      bottom: { style: "thin", color: { argb: "FFD9D9D9" } },
-    };
-  });
-}
-
-function applyCategoryHighlights(ws: ExcelJS.Worksheet, report: ReportDefinition, startRow: number) {
-  if (!report.rows.length) return;
-
-  for (let i = 0; i < report.rows.length; i += 1) {
-    const rowNumber = startRow + i;
-
-    if (report.key === "inventario") {
-      const estado = String(ws.getCell(rowNumber, 8).value ?? "");
-      const solicitar = String(ws.getCell(rowNumber, 9).value ?? "");
-      const estadoCell = ws.getCell(rowNumber, 8);
-      const solicitarCell = ws.getCell(rowNumber, 9);
-
-      if (estado === "OK") estadoCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFC6EFCE" } };
-      if (estado.includes("bajo")) estadoCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFF2CC" } };
-      if (estado.includes("crítico") || estado.includes("Crítico")) {
-        estadoCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFC7CE" } };
-      }
-
-      solicitarCell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: solicitar.includes("Solicitar") ? "FFFFF2CC" : "FFC6EFCE" },
-      };
-    }
-
-    if (report.key === "alertas") {
-      const estado = String(ws.getCell(rowNumber, 4).value ?? "");
-      ws.getCell(rowNumber, 4).fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: estado === "Pendiente" ? "FFFFF2CC" : "FFC6EFCE" },
-      };
-    }
-  }
-}
-
-/**
- * KPIs y totales en hoja aparte: la hoja de datos queda solo con encabezado + tabla rectangular
- * (adecuado para filtros, tablas dinámicas y automatización sin huecos “fantasma”).
- */
-function addSummaryWorksheet(workbook: ExcelJS.Workbook, report: ReportDefinition, ctx: ExportWorkbookContext) {
-  const sw = workbook.addWorksheet("Resumen", {
-    properties: { tabColor: { argb: report.tabColor } },
-    pageSetup: {
-      orientation: "landscape",
-      fitToPage: true,
-      fitToWidth: 1,
-      fitToHeight: 0,
-      paperSize: 9,
-      showGridLines: false,
-    },
-  });
-  sw.views = [{ showGridLines: false }];
-  sw.properties.defaultRowHeight = 19;
-  const edge = { argb: "FFCCD6E0" };
-
-  sw.mergeCells(1, 1, 1, 4);
-  sw.getCell(1, 1).value = {
-    richText: [
-      { text: "RESUMEN", font: { bold: true, size: 14, color: { argb: "FF1F5582" } } },
-      { text: " — ", font: { size: 11, color: { argb: "FFBBBBBB" } } },
-      { text: report.title, font: { bold: true, size: 12, color: { argb: "FF222222" } } },
-    ],
-  };
-  sw.getCell(1, 1).alignment = { vertical: "middle", wrapText: true };
-  sw.getRow(1).height = 28;
-
-  sw.mergeCells(2, 1, 2, 4);
-  sw.getCell(2, 1).value = {
-    richText: [
-      { text: "Negocio: ", font: { bold: true, size: 10, color: { argb: "FF444444" } } },
-      {
-        text: `${ctx.businessName} · ${ctx.businessTypeLabel}`,
-        font: { size: 10, color: { argb: "FF666666" } },
-      },
-    ],
-  };
-  sw.getCell(2, 1).alignment = { vertical: "middle", wrapText: true };
-
-  sw.mergeCells(3, 1, 3, 4);
-  sw.getCell(3, 1).value = buildExportRichText(ctx);
-  sw.getCell(3, 1).alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-  sw.getRow(3).height = ctx.exporterEmail ? 28 : 22;
-
-  sw.getRow(4).height = 8;
-
-  const tableStart = 5;
-  const hdrMetric = sw.getCell(tableStart, 1);
-  hdrMetric.value = "Métrica";
-  hdrMetric.font = { bold: true, size: 10, color: { argb: WHITE } };
-  hdrMetric.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_BLUE } };
-  hdrMetric.alignment = { horizontal: "left", vertical: "middle" };
-  hdrMetric.border = {
-    top: { style: "thin", color: edge },
-    bottom: { style: "thin", color: edge },
-    left: { style: "thin", color: edge },
-    right: { style: "thin", color: edge },
-  };
-  const hdrVal = sw.getCell(tableStart, 2);
-  hdrVal.value = "Valor";
-  hdrVal.font = { bold: true, size: 10, color: { argb: WHITE } };
-  hdrVal.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_BLUE } };
-  hdrVal.alignment = { horizontal: "right", vertical: "middle" };
-  hdrVal.border = {
-    top: { style: "thin", color: edge },
-    bottom: { style: "thin", color: edge },
-    left: { style: "thin", color: edge },
-    right: { style: "thin", color: edge },
-  };
-  sw.getRow(tableStart).height = 22;
-
-  report.summary.forEach(([label, value], idx) => {
-    const rowNumber = tableStart + idx + 1;
-    const labelCell = sw.getCell(rowNumber, 1);
-    const valueCell = sw.getCell(rowNumber, 2);
-
-    labelCell.value = {
-      richText: [{ text: label, font: { bold: true, size: 10, color: { argb: "FF333333" } } }],
-    };
-    labelCell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-    labelCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: SUMMARY_FILL } };
-
-    valueCell.value = {
-      richText: [{ text: String(value), font: { bold: true, size: 11, color: { argb: "FF1F5582" } } }],
-    };
-    valueCell.alignment = { horizontal: "right", vertical: "middle" };
-    valueCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE8F4FA" } };
-
-    const box = {
-      top: { style: "thin" as const, color: edge },
-      left: { style: "thin" as const, color: edge },
-      bottom: { style: "thin" as const, color: edge },
-      right: { style: "thin" as const, color: edge },
-    };
-    labelCell.border = box;
-    valueCell.border = box;
-
-    if (report.key === "ventas" && String(label).toLowerCase().includes("monto")) {
-      valueCell.value = value;
-      valueCell.font = { bold: true, size: 11, color: { argb: "FF1F5582" } };
-      valueCell.numFmt = '"$"#,##0';
-      valueCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE8F4FA" } };
-    }
-  });
-
-  sw.getColumn(1).width = 32;
-  sw.getColumn(2).width = 18;
-
-  sw.eachRow((row) => {
-    row.eachCell((cell) => {
-      const v = cell.value;
-      if (cellValueIsRichText(v)) return;
-      cell.font = cell.font ?? { size: 10 };
-    });
-  });
-}
-
 function excelCellValue(value: string | number | Date | null | undefined): string | number | Date {
   if (value instanceof Date) return value;
   if (typeof value === "number") return Number.isFinite(value) ? value : "—";
   return value ?? "—";
+}
+
+function styleDataSheet(ws: ExcelJS.Worksheet, report: ReportDefinition) {
+  const headerRow = ws.getRow(1);
+  headerRow.height = 22;
+  report.columns.forEach((_, i) => {
+    const cell = headerRow.getCell(i + 1);
+    cell.font = { bold: true, color: { argb: HEADER_TEXT } };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_BG } };
+    cell.alignment = { horizontal: "center", vertical: "middle" };
+    cell.border = {
+      top: { style: "thin", color: { argb: EDGE } },
+      left: { style: "thin", color: { argb: EDGE } },
+      bottom: { style: "thin", color: { argb: EDGE } },
+      right: { style: "thin", color: { argb: EDGE } },
+    };
+  });
+
+  for (let rowNum = 2; rowNum <= report.rows.length + 1; rowNum += 1) {
+    const row = ws.getRow(rowNum);
+    const stripe = rowNum % 2 === 0;
+    report.columns.forEach((column, i) => {
+      const cell = row.getCell(i + 1);
+      cell.alignment = { horizontal: column.align ?? "left", vertical: "middle", wrapText: column.key === "mensaje" || column.key === "motivo" };
+      if (column.numFmt) cell.numFmt = column.numFmt;
+      if (stripe) {
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: STRIPE } };
+      }
+      cell.border = {
+        top: { style: "thin", color: { argb: EDGE } },
+        bottom: { style: "thin", color: { argb: EDGE } },
+      };
+    });
+  }
+}
+
+function addSummarySheet(workbook: ExcelJS.Workbook, report: ReportDefinition) {
+  const ws = workbook.addWorksheet("Resumen", {
+    properties: { tabColor: { argb: report.tabColor } },
+  });
+  ws.columns = [
+    { header: "Métrica", key: "metrica", width: 30 },
+    { header: "Valor", key: "valor", width: 18 },
+  ];
+
+  ws.getRow(1).height = 22;
+  [1, 2].forEach((i) => {
+    const cell = ws.getRow(1).getCell(i);
+    cell.font = { bold: true, color: { argb: HEADER_TEXT } };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_BG } };
+    cell.alignment = { horizontal: i === 1 ? "left" : "right", vertical: "middle" };
+    cell.border = {
+      top: { style: "thin", color: { argb: EDGE } },
+      left: { style: "thin", color: { argb: EDGE } },
+      bottom: { style: "thin", color: { argb: EDGE } },
+      right: { style: "thin", color: { argb: EDGE } },
+    };
+  });
+
+  report.summary.forEach(([metrica, valor], idx) => {
+    const row = ws.addRow({ metrica, valor });
+    const rowNum = idx + 2;
+    const stripe = rowNum % 2 === 0;
+    const metricCell = row.getCell(1);
+    const valueCell = row.getCell(2);
+    metricCell.font = { bold: true };
+    metricCell.alignment = { horizontal: "left", vertical: "middle" };
+    valueCell.alignment = { horizontal: "right", vertical: "middle" };
+    if (report.key === "ventas" && metrica.toLowerCase().includes("monto")) {
+      valueCell.numFmt = '"$"#,##0';
+    }
+    if (stripe) {
+      metricCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: STRIPE } };
+      valueCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: STRIPE } };
+    }
+    metricCell.border = {
+      top: { style: "thin", color: { argb: EDGE } },
+      bottom: { style: "thin", color: { argb: EDGE } },
+    };
+    valueCell.border = {
+      top: { style: "thin", color: { argb: EDGE } },
+      bottom: { style: "thin", color: { argb: EDGE } },
+    };
+  });
 }
 
 export async function buildCategoryExcelBuffer(opts: {
@@ -636,68 +348,58 @@ export async function buildCategoryExcelBuffer(opts: {
   workbook.company = context.businessName;
   workbook.created = context.exportedAt;
   workbook.modified = context.exportedAt;
-  workbook.title = `MultiStock · ${report.title}`;
+  workbook.title = report.title;
   workbook.description = `${report.title} · ${context.businessName}`;
 
-  const logoId = addLogo(workbook);
-  const ws = workbook.addWorksheet(report.sheetName, {
+  const dataSheet = workbook.addWorksheet(report.sheetName, {
     properties: { tabColor: { argb: report.tabColor } },
-    pageSetup: {
-      orientation: "landscape",
-      fitToPage: true,
-      fitToWidth: 1,
-      fitToHeight: 0,
-      paperSize: 9,
-      showGridLines: false,
-    },
+    pageSetup: { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0, paperSize: 9 },
   });
+  dataSheet.views = [{ state: "frozen", ySplit: 1 }];
 
-  applyTopLayout(ws, report, context, logoId);
-  applyHeaderRow(ws, report, 9);
+  dataSheet.columns = report.columns.map((column) => ({
+    header: column.header,
+    key: column.key,
+    width: column.width,
+  }));
 
-  const dataStart = 10;
-  report.rows.forEach((data, index) => {
-    const row = ws.getRow(dataStart + index);
-    report.columns.forEach((column, colIndex) => {
-      row.getCell(colIndex + 1).value = excelCellValue(data[column.key]);
+  report.rows.forEach((data) => {
+    const rowValues: Record<string, string | number | Date> = {};
+    report.columns.forEach((column) => {
+      rowValues[column.key] = excelCellValue(data[column.key]);
     });
-    applyBodyRowStyle(row, index, report);
+    dataSheet.addRow(rowValues);
   });
 
-  if (report.rows.length) {
-    ws.autoFilter = {
-      from: { row: 9, column: 1 },
-      to: { row: 9 + report.rows.length, column: report.columns.length },
+  if (report.rows.length > 0) {
+    dataSheet.autoFilter = {
+      from: { row: 1, column: 1 },
+      to: { row: report.rows.length + 1, column: report.columns.length },
     };
   }
 
-  applyCategoryHighlights(ws, report, dataStart);
-
-  ws.columns = report.columns.map((column) => ({ width: column.width }));
-  ws.eachRow((row) => {
-    row.eachCell((cell) => {
-      if (cellValueIsRichText(cell.value)) return;
-      cell.font = cell.font ?? { size: 10 };
-    });
-  });
-
-  addSummaryWorksheet(workbook, report, context);
+  styleDataSheet(dataSheet, report);
+  addSummarySheet(workbook, report);
 
   const raw = await workbook.xlsx.writeBuffer();
   return Buffer.from(raw);
 }
 
 export function reportFileLabel(key: ExportReportKey): string {
-  return buildReportDefinition(key, {
-    products: [],
-    inventoryProducts: [],
-    movements: [],
-    sales: [],
-    alerts: [],
-  }, {
-    businessId: "",
-    businessName: "",
-    businessTypeLabel: "",
-    exportedAt: new Date(0),
-  }).fileLabel;
+  return buildReportDefinition(
+    key,
+    {
+      products: [],
+      inventoryProducts: [],
+      movements: [],
+      sales: [],
+      alerts: [],
+    },
+    {
+      businessId: "",
+      businessName: "",
+      businessTypeLabel: "",
+      exportedAt: new Date(0),
+    }
+  ).fileLabel;
 }
