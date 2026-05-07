@@ -2,9 +2,15 @@
  * Sistema centralizado de estilos para reportes Excel.
  * TODOS los generators deben importar estilos desde aquí.
  * Nunca repetir estilos inline en otros archivos.
+ *
+ * Para soporte de temas:
+ *   import { createStyleSet } from "./styles";
+ *   import { resolveTheme } from "../themes";
+ *   const styles = createStyleSet(resolveTheme("corporate-blue"));
  */
 import type ExcelJS from "exceljs";
 import { Brand } from "./colors";
+import type { ExcelTheme } from "../themes/index";
 
 // ── Tipo local para mayor comodidad ────────────────────────────────────────
 export type CellStyle = {
@@ -199,6 +205,7 @@ export function applyStyle(cell: ExcelJS.Cell, style: CellStyle): void {
 
 /**
  * Dado un tipo semántico de columna, retorna el estilo de celda base correspondiente.
+ * Versión legacy: usa los estilos estáticos (sin tema).
  */
 export function styleForColumnType(
   type: "text" | "number" | "currency" | "date" | "datetime" | "status" | undefined,
@@ -212,3 +219,214 @@ export function styleForColumnType(
   if (align === "right") return rightStyle;
   return leftStyle;
 }
+
+// ── Sistema de StyleSet con soporte de temas ──────────────────────────────
+
+/**
+ * Crea un conjunto completo de estilos derivado de un tema.
+ * Usar en workbook.ts para propagar el tema a todos los módulos de rendering.
+ *
+ * @example
+ *   const styles = createStyleSet(resolveTheme("corporate-blue"));
+ *   applyBrandHeader(ws, ctx, colCount, logoId, styles);
+ *   applyTableHeader(ws, columns, row, styles);
+ */
+export function createStyleSet(theme: ExcelTheme) {
+  const sf = (argb: string): ExcelJS.Fill => ({
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb },
+  });
+
+  const base = (
+    size?: number,
+    color?: string,
+    bold?: boolean,
+    italic?: boolean
+  ): Partial<ExcelJS.Font> => ({
+    name: theme.fonts.base,
+    size: size ?? theme.fonts.dataSize,
+    color: { argb: color ?? theme.colors.titleText },
+    bold: bold ?? false,
+    italic: italic ?? false,
+  });
+
+  return {
+    brandBar: {
+      font: base(theme.fonts.headerSize + 3, theme.colors.brandBarText, true),
+      fill: sf(theme.colors.brandBarBg),
+      alignment: { horizontal: "center" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    title: {
+      font: base(theme.fonts.titleSize, theme.colors.titleText, true),
+      fill: sf(theme.colors.bgPage),
+      alignment: { horizontal: "left" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    subtitle: {
+      font: base(theme.fonts.metaSize, theme.colors.subtitleText, false, true),
+      fill: sf(theme.colors.bgPage),
+      alignment: { horizontal: "left" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    meta: {
+      font: base(theme.fonts.metaSize, theme.colors.metaText),
+      fill: sf(theme.colors.bgPage),
+      alignment: { horizontal: "right" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    bizName: {
+      font: base(theme.fonts.dataSize, theme.colors.bizNameText, true),
+      fill: sf(theme.colors.bgPage),
+      alignment: { horizontal: "right" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    tableHeader: {
+      font: base(theme.fonts.headerSize, theme.colors.headerText, true),
+      fill: sf(theme.colors.headerBg),
+      alignment: { horizontal: "center" as const, vertical: "middle" as const, wrapText: true },
+      border: {
+        bottom: { style: "medium" as const, color: { argb: theme.colors.headerBorderBottom } },
+      },
+    } satisfies CellStyle,
+
+    dataLeft: {
+      font: base(),
+      fill: sf(theme.colors.bgCard),
+      alignment: { horizontal: "left" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    dataCenter: {
+      font: base(),
+      fill: sf(theme.colors.bgCard),
+      alignment: { horizontal: "center" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    dataRight: {
+      font: base(),
+      fill: sf(theme.colors.bgCard),
+      alignment: { horizontal: "right" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    dataCurrency: {
+      font: base(),
+      fill: sf(theme.colors.bgCard),
+      alignment: { horizontal: "right" as const, vertical: "middle" as const },
+      numFmt: '"$"#,##0',
+    } satisfies CellStyle,
+
+    dataQuantity: {
+      font: base(),
+      fill: sf(theme.colors.bgCard),
+      alignment: { horizontal: "right" as const, vertical: "middle" as const },
+      numFmt: "#,##0.##",
+    } satisfies CellStyle,
+
+    dataDate: {
+      font: base(),
+      fill: sf(theme.colors.bgCard),
+      alignment: { horizontal: "left" as const, vertical: "middle" as const },
+      numFmt: "dd/mm/yyyy",
+    } satisfies CellStyle,
+
+    dataDatetime: {
+      font: base(),
+      fill: sf(theme.colors.bgCard),
+      alignment: { horizontal: "left" as const, vertical: "middle" as const },
+      numFmt: "dd/mm/yyyy hh:mm",
+    } satisfies CellStyle,
+
+    stripe: {
+      fill: sf(theme.colors.stripe),
+    } as Pick<CellStyle, "fill">,
+
+    statusAlert: {
+      font: base(undefined, theme.colors.errorText, true),
+      fill: sf(theme.colors.errorBg),
+      alignment: { horizontal: "center" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    statusOk: {
+      font: base(undefined, theme.colors.okText),
+      fill: sf(theme.colors.okBg),
+      alignment: { horizontal: "center" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    statusWarn: {
+      font: base(undefined, theme.colors.warnText),
+      fill: sf(theme.colors.warnBg),
+      alignment: { horizontal: "center" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    statusInfo: {
+      font: base(undefined, theme.colors.infoText),
+      fill: sf(theme.colors.infoBg),
+      alignment: { horizontal: "center" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    kpiLabel: {
+      font: base(theme.fonts.metaSize, theme.colors.summaryText, true),
+      fill: sf(theme.colors.summaryBg),
+      alignment: { horizontal: "left" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    kpiValue: {
+      font: base(12, theme.colors.summaryValueText, true),
+      fill: sf(theme.colors.summaryBg),
+      alignment: { horizontal: "right" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    summaryCardLabel: {
+      font: base(theme.fonts.metaSize - 1, theme.colors.summaryText),
+      fill: sf(theme.colors.summaryBg),
+      alignment: { horizontal: "left" as const, vertical: "bottom" as const },
+    } satisfies CellStyle,
+
+    summaryCardValue: {
+      font: base(14, theme.colors.summaryValueText, true),
+      fill: sf(theme.colors.summaryBg),
+      alignment: { horizontal: "left" as const, vertical: "top" as const },
+    } satisfies CellStyle,
+
+    summaryCardPrimary: {
+      font: base(14, theme.colors.summaryValueText, true),
+      fill: sf(theme.colors.summaryBg),
+      alignment: { horizontal: "left" as const, vertical: "top" as const },
+      border: { left: { style: "medium" as const, color: { argb: theme.colors.summaryValueText } } },
+    } satisfies CellStyle,
+
+    summaryCardWarning: {
+      font: base(14, theme.colors.warnText, true),
+      fill: sf(theme.colors.summaryBg),
+      alignment: { horizontal: "left" as const, vertical: "top" as const },
+      border: { left: { style: "medium" as const, color: { argb: theme.colors.warnText } } },
+    } satisfies CellStyle,
+
+    summaryCardDanger: {
+      font: base(14, theme.colors.errorText, true),
+      fill: sf(theme.colors.summaryBg),
+      alignment: { horizontal: "left" as const, vertical: "top" as const },
+      border: { left: { style: "medium" as const, color: { argb: theme.colors.errorText } } },
+    } satisfies CellStyle,
+
+    footer: {
+      font: base(theme.fonts.metaSize, theme.colors.footerText, false, true),
+      fill: sf(theme.colors.footerBg),
+      alignment: { horizontal: "center" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+
+    footerMeta: {
+      font: base(theme.fonts.metaSize - 1, theme.colors.footerText),
+      fill: sf(theme.colors.footerBg),
+      alignment: { horizontal: "left" as const, vertical: "middle" as const },
+    } satisfies CellStyle,
+  };
+}
+
+/** Tipo derivado del StyleSet generado por createStyleSet */
+export type StyleSet = ReturnType<typeof createStyleSet>;
+
+/** StyleSet por defecto usando el tema MultiStock (verde corporativo) */
+import { MULTISTOCK_THEME } from "../themes/multistock";
+export const DEFAULT_STYLE_SET: StyleSet = createStyleSet(MULTISTOCK_THEME);

@@ -11,9 +11,9 @@
  * └──────────────────────────────────────────────────────────┘
  *
  * Panel congelado: siempre en la fila del header de tabla.
+ * Soporta StyleSet temático: si no se provee, usa los estilos estáticos por defecto.
  */
 import type ExcelJS from "exceljs";
-import { Brand } from "./colors";
 import {
   applyStyle,
   brandBarStyle,
@@ -21,6 +21,7 @@ import {
   subtitleStyle,
   metaStyle,
   bizNameStyle,
+  type StyleSet,
 } from "./styles";
 import { placeLogoInSheet, type LogoPlacementOptions } from "./images";
 import { formatExportDate } from "../utils/currency";
@@ -49,20 +50,34 @@ export function headerRowCount(hasDescription: boolean): number {
  * @param ctx       - Contexto del reporte (título, negocio, fecha)
  * @param colCount  - Número total de columnas del reporte
  * @param logoId    - ID del logo registrado (opcional)
+ * @param styles    - StyleSet del tema activo (opcional, usa default si no se provee)
  * @returns         - Número de fila donde debe comenzar el header de tabla
  */
 export function applyBrandHeader(
   ws: ExcelJS.Worksheet,
   ctx: LayoutContext,
   colCount: number,
-  logoId?: number
+  logoId?: number,
+  styles?: StyleSet
 ): number {
   const hasDesc = Boolean(ctx.reportDescription);
+
+  // Resolver estilos: usar themed o static por defecto
+  const sBrandBar = styles?.brandBar ?? brandBarStyle;
+  const sTitle = styles?.title ?? titleStyle;
+  const sSubtitle = styles?.subtitle ?? subtitleStyle;
+  const sMeta = styles?.meta ?? metaStyle;
+  const sBizName = styles?.bizName ?? bizNameStyle;
+
+  // Color del separador: desde el theme o fallback al verde
+  const separatorArgb =
+    (styles?.tableHeader?.fill as { fgColor?: { argb?: string } } | undefined)
+      ?.fgColor?.argb ?? "FF2E7C51";
 
   // ── Row 1: Barra de marca ──────────────────────────────────────────────
   ws.mergeCells(1, 1, 1, colCount);
   const brandCell = ws.getCell(1, 1);
-  applyStyle(brandCell, brandBarStyle);
+  applyStyle(brandCell, sBrandBar);
   brandCell.value = "MultiStock";
   ws.getRow(1).height = 24;
 
@@ -72,14 +87,14 @@ export function applyBrandHeader(
 
   ws.mergeCells(2, 1, 2, splitCol);
   const titleCell = ws.getCell(2, 1);
-  applyStyle(titleCell, titleStyle);
+  applyStyle(titleCell, sTitle);
   titleCell.value = ctx.reportTitle;
   ws.getRow(2).height = 30;
 
   if (splitCol < colCount) {
     ws.mergeCells(2, splitCol + 1, 2, colCount);
     const bizCell = ws.getCell(2, splitCol + 1);
-    applyStyle(bizCell, bizNameStyle);
+    applyStyle(bizCell, sBizName);
     bizCell.value = `${ctx.businessName} · ${ctx.businessTypeLabel}`;
   }
 
@@ -91,41 +106,40 @@ export function applyBrandHeader(
 
     ws.mergeCells(3, 1, 3, descSplit);
     const descCell = ws.getCell(3, 1);
-    applyStyle(descCell, subtitleStyle);
+    applyStyle(descCell, sSubtitle);
     descCell.value = ctx.reportDescription!;
     ws.getRow(3).height = 18;
 
     if (descSplit < colCount) {
       ws.mergeCells(3, descSplit + 1, 3, colCount);
       const dateCell = ws.getCell(3, descSplit + 1);
-      applyStyle(dateCell, metaStyle);
+      applyStyle(dateCell, sMeta);
       dateCell.value = `Exportado: ${formatExportDate(ctx.exportedAt)}`;
     }
 
     currentRow = 4;
   } else {
-    // Sin descripción: fecha en row 2 ya cubierta, solo añadimos meta en row 3
     ws.mergeCells(3, 1, 3, colCount);
     const metaCell = ws.getCell(3, 1);
-    applyStyle(metaCell, metaStyle);
+    applyStyle(metaCell, sMeta);
     metaCell.value = `Exportado: ${formatExportDate(ctx.exportedAt)}`;
     ws.getRow(3).height = 16;
 
     currentRow = 4;
   }
 
-  // ── Fila separadora (verde, altura mínima) ────────────────────────────
+  // ── Fila separadora (color del tema, altura mínima) ───────────────────
   const sepRow = currentRow;
   ws.getRow(sepRow).height = 6;
   for (let c = 1; c <= colCount; c++) {
     ws.getCell(sepRow, c).fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: Brand.primary },
+      fgColor: { argb: separatorArgb },
     };
   }
 
-  // ── Logo (opcional) ───────────────────────────────────────────────────
+  // ── Logo (opcional, anclado a esquina superior izquierda) ─────────────
   if (logoId != null) {
     const placement: LogoPlacementOptions = {
       logoId,
@@ -145,7 +159,7 @@ export function applyBrandHeader(
  * Configura el panel congelado de la hoja para que el header de tabla
  * permanezca visible al hacer scroll.
  *
- * @param ws            - Worksheet
+ * @param ws             - Worksheet
  * @param tableHeaderRow - Número de fila del header de tabla (retornado por applyBrandHeader)
  */
 export function applyFreezePane(ws: ExcelJS.Worksheet, tableHeaderRow: number): void {
