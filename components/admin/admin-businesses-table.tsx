@@ -1,4 +1,5 @@
 import { PageSurface } from "@/components/ui/page-surface";
+import { formatSystemDateTime } from "@/lib/utils";
 
 type AdminBusinessRow = {
   id: string;
@@ -14,7 +15,7 @@ type AdminBusinessesTableProps = {
 };
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleString("es-CL");
+  return formatSystemDateTime(value);
 }
 
 export function AdminBusinessesTable({ businesses }: AdminBusinessesTableProps) {

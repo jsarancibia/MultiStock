@@ -145,7 +145,11 @@ function buildTrendSeries(
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() - i);
     const dateKey = localDateKeyFromIso(d.toISOString());
-    const label = d.toLocaleDateString(APP_LOCALE, { weekday: "short", day: "numeric" });
+    const label = d.toLocaleDateString(APP_LOCALE, {
+      timeZone: "America/Santiago",
+      weekday: "short",
+      day: "numeric",
+    });
     out.push({
       dateKey,
       label,

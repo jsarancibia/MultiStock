@@ -51,10 +51,11 @@ export function asciiFileSlug(raw: string, max = 48): string {
   return s || "negocio"
 }
 
-/** Formato estándar del sistema: DD/MM/AAAA HH:mm:ss */
+/** Formato estándar del sistema: DD/MM/AAAA HH:mm:ss (hora Chile) */
 export function formatSystemDateTime(iso: string): string {
   const date = new Date(iso);
   return date.toLocaleString("es-CL", {
+    timeZone: "America/Santiago",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

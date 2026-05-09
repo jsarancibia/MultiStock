@@ -2,9 +2,10 @@ import Link from "next/link";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { PageSurface } from "@/components/ui/page-surface";
 import { getAdminDashboard } from "@/modules/admin/actions";
+import { formatSystemDateTime } from "@/lib/utils";
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleString("es-CL");
+  return formatSystemDateTime(value);
 }
 
 export default async function AdminPage() {
