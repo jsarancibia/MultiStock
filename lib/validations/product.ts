@@ -20,6 +20,18 @@ export const productSchema = z.object({
   active: z.coerce.boolean().default(true),
   businessType: z.enum(businessTypeValues),
   metadata: productMetadataSchema,
+}).superRefine((data, ctx) => {
+  // Verdulería: SKU y barcode son opcionales
+  if (data.businessType === "verduleria") return;
+
+  // Almacén y ferretería: al menos un identificador obligatorio
+  if (!data.sku && !data.barcode) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "El producto debe tener al menos un identificador (SKU o código de barras).",
+      path: ["sku"],
+    });
+  }
 });
 
 export const productFilterFocusValues = [

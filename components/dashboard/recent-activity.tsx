@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { movementTypeLabel } from "@/lib/business/movement-type-labels";
 import type { DashboardActivityItem } from "@/lib/business/dashboard-metrics";
-import { APP_LOCALE, formatCurrency, formatQuantity } from "@/lib/utils";
+import { formatCurrency, formatQuantity, formatSystemDateTime } from "@/lib/utils";
 
 type RecentActivityProps = {
   items: DashboardActivityItem[];
@@ -26,12 +26,7 @@ export function RecentActivity({ items }: RecentActivityProps) {
               <div className="min-w-0">
                 <p className="font-medium">Venta</p>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(item.at).toLocaleString(APP_LOCALE, {
-                    day: "2-digit",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {formatSystemDateTime(item.at)}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -54,12 +49,7 @@ export function RecentActivity({ items }: RecentActivityProps) {
                   ) : null}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(item.at).toLocaleString(APP_LOCALE, {
-                    day: "2-digit",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {formatSystemDateTime(item.at)}
                 </p>
               </div>
               <span className="tabular-nums text-sm text-muted-foreground">

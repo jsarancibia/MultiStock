@@ -7,6 +7,7 @@ import { businessTypes } from "@/config/business-types";
 import { getNavigationForBusinessType, type NavigationItem } from "@/config/navigation";
 import { isAdmin } from "@/lib/auth/is-admin";
 import { requireUser } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
 import {
   listUserBusinesses,
   requireActiveBusiness,
@@ -27,6 +28,15 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
     business.business_type,
     business.subscription_plan
   );
+
+  // Conteo de alertas no resueltas para el badge en sidebar
+  const supabase = await createClient();
+  const { count: alertCount } = await supabase
+    .from("stock_alerts")
+    .select("id", { count: "exact", head: true })
+    .eq("business_id", business.id)
+    .eq("resolved", false);
+
   const navigation: NavigationItem[] = userIsAdmin
     ? [...baseNavigation, { label: "Admin Panel", href: "/admin", module: "admin" }]
     : baseNavigation;
@@ -56,7 +66,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
           }
         />
       }
-      sidebar={<AppSidebar items={navigation} />}
+      sidebar={<AppSidebar items={navigation} alertCount={alertCount ?? 0} />}
     >
       {children}
     </AppShell>

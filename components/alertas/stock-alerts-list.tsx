@@ -1,7 +1,7 @@
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { APP_LOCALE, formatQuantity } from "@/lib/utils";
+import { formatQuantity, formatSystemDateTime } from "@/lib/utils";
 import { resolveStockAlertAction } from "@/modules/core/alerts/actions";
 
 type AlertRow = {
@@ -51,7 +51,7 @@ export function StockAlertsList({ alerts }: StockAlertsListProps) {
         <tbody>
           {alerts.map((alert) => (
             <tr key={alert.id} className="border-t">
-              <td className="px-3 py-2 whitespace-nowrap">{new Date(alert.created_at).toLocaleString(APP_LOCALE)}</td>
+              <td className="px-3 py-2 whitespace-nowrap">{formatSystemDateTime(alert.created_at)}</td>
               <td className="px-3 py-2">
                 {alert.products?.name ?? "-"}
                 <p className="text-xs text-muted-foreground">

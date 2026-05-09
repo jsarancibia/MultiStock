@@ -50,3 +50,17 @@ export function asciiFileSlug(raw: string, max = 48): string {
     .slice(0, max)
   return s || "negocio"
 }
+
+/** Formato estándar del sistema: DD/MM/AAAA HH:mm:ss */
+export function formatSystemDateTime(iso: string): string {
+  const date = new Date(iso);
+  return date.toLocaleString("es-CL", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+}

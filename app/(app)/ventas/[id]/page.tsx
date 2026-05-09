@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { paymentMethodLabels } from "@/lib/validations/sale";
-import { APP_LOCALE, cn, formatCurrency, formatQuantity } from "@/lib/utils";
+import { cn, formatCurrency, formatQuantity, formatSystemDateTime } from "@/lib/utils";
 import { getSaleById } from "@/modules/core/sales/actions";
 
 type VentaDetallePageProps = {
@@ -28,7 +28,7 @@ export default async function VentaDetallePage({ params }: VentaDetallePageProps
     <section className="space-y-6">
       <PageHeader
         title={`Venta ${sale.id.slice(0, 8)}`}
-        description={`Registrada el ${new Date(sale.created_at).toLocaleString(APP_LOCALE)}`}
+        description={`Registrada el ${formatSystemDateTime(sale.created_at)}`}
       />
 
       <div className="rounded-lg border p-4">

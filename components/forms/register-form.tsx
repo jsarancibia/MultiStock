@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import { useActionState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { authInputClass } from "@/components/auth/auth-field-styles";
 import { registerAction, type AuthActionState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
@@ -9,7 +12,15 @@ import { FormMessage } from "@/components/ui/form-message";
 const initialState: AuthActionState = {};
 
 export function RegisterForm() {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(registerAction, initialState);
+
+  useEffect(() => {
+    if (state?.message?.includes("Cuenta creada")) {
+      toast.success(state.message);
+      router.push("/auth/login");
+    }
+  }, [state, router]);
 
   return (
     <form action={formAction} className="space-y-4">

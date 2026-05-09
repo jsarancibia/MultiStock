@@ -10,6 +10,8 @@ import { categorySchema } from "@/lib/validations/category";
 export type CategoryActionState = {
   message?: string;
   errors?: Record<string, string[]>;
+  createdId?: string;
+  createdName?: string;
 };
 
 export async function listCategories() {
@@ -72,5 +74,5 @@ export async function createCategoryAction(
     afterData: { name: parsed.data.name },
   });
 
-  return { message: "Categoria creada." };
+  return { message: "Categoria creada.", createdId: row.id, createdName: parsed.data.name };
 }

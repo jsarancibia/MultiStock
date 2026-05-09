@@ -1,5 +1,5 @@
 import type { AuditLogRow } from "@/modules/core/audit/actions";
-import { APP_LOCALE } from "@/lib/utils";
+import { formatSystemDateTime } from "@/lib/utils";
 
 const entityLabels: Record<string, string> = {
   product: "Producto",
@@ -51,7 +51,7 @@ export function AuditTable({ rows }: AuditTableProps) {
           {rows.map((row) => (
             <tr key={row.id} className="border-t">
               <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
-                {new Date(row.created_at).toLocaleString(APP_LOCALE)}
+                {formatSystemDateTime(row.created_at)}
               </td>
               <td className="px-3 py-2">
                 {row.profiles?.email ?? (row.user_id ? `${row.user_id.slice(0, 8)}…` : "—")}

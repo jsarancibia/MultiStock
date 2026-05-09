@@ -4,6 +4,7 @@ import type { Database } from "@/types/database";
 import { cn, formatQuantity } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { AgregarStockButton } from "@/components/inventario/agregar-stock-button";
 
 type StockProduct = Pick<
   Database["public"]["Tables"]["products"]["Row"],
@@ -41,6 +42,7 @@ export function StockTable({ products }: StockTableProps) {
             <th className="px-3 py-2 font-medium">Stock minimo</th>
             <th className="px-3 py-2 font-medium">Codigo</th>
             <th className="px-3 py-2 font-medium">Historial</th>
+            <th className="px-3 py-2 font-medium">Agregar stock</th>
           </tr>
         </thead>
         <tbody>
@@ -62,6 +64,13 @@ export function StockTable({ products }: StockTableProps) {
                   >
                     Ver
                   </Link>
+                </td>
+                <td className="px-3 py-2">
+                  <AgregarStockButton
+                    productId={product.id}
+                    productName={product.name}
+                    currentStock={product.current_stock}
+                  />
                 </td>
               </tr>
             );

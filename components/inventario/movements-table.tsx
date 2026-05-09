@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { History } from "lucide-react";
 import { movementTypeLabels } from "@/lib/business/movement-type-labels";
-import { APP_LOCALE, cn, formatCurrency, formatQuantity } from "@/lib/utils";
+import { cn, formatCurrency, formatQuantity, formatSystemDateTime } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -51,7 +51,7 @@ export function MovementsTable({ movements }: MovementsTableProps) {
         <tbody>
           {movements.map((movement) => (
             <tr key={movement.id} className="border-t">
-              <td className="px-3 py-2">{new Date(movement.created_at).toLocaleString(APP_LOCALE)}</td>
+              <td className="px-3 py-2">{formatSystemDateTime(movement.created_at)}</td>
               <td className="px-3 py-2">{movement.products?.name ?? "-"}</td>
               <td className="px-3 py-2">{movementTypeLabels[movement.type] ?? movement.type}</td>
               <td className="px-3 py-2 whitespace-nowrap">{formatQuantity(movement.quantity)}</td>

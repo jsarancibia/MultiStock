@@ -1,3 +1,4 @@
+import { formatSystemDateTime } from "@/lib/utils";
 import { PageSurface } from "@/components/ui/page-surface";
 import { UserPlanSelect } from "@/components/admin/user-plan-select";
 import { UserRoleSelect } from "@/components/admin/user-role-select";
@@ -16,7 +17,7 @@ type AdminUsersTableProps = {
 };
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleString("es-CL");
+  return formatSystemDateTime(value);
 }
 
 export function AdminUsersTable({ users }: AdminUsersTableProps) {

@@ -20,9 +20,10 @@ import { BrandLogo } from "@/components/brand/brand-logo";
 
 type AppSidebarProps = {
   items: NavigationItem[];
+  alertCount?: number;
 };
 
-export function AppSidebar({ items }: AppSidebarProps) {
+export function AppSidebar({ items, alertCount = 0 }: AppSidebarProps) {
   const pathname = usePathname();
   const iconByModule: Record<NavigationItem["module"], ComponentType<{ className?: string }>> = {
     dashboard: LayoutDashboard,
@@ -82,6 +83,11 @@ export function AppSidebar({ items }: AppSidebarProps) {
               >
                 <Icon className="size-4 shrink-0" aria-hidden />
                 <span className="whitespace-nowrap">{item.label}</span>
+                {item.module === "alerts" && alertCount > 0 ? (
+                  <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                    {alertCount}
+                  </span>
+                ) : null}
               </Link>
             );
           })}
