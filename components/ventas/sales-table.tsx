@@ -57,9 +57,18 @@ export function SalesTable({ sales }: SalesTableProps) {
               paymentKey && paymentKey in paymentMethodLabels
                 ? paymentMethodLabels[paymentKey]
                 : (sale.payment_method ?? "-");
+            const dateTime = new Date(sale.created_at).toLocaleString(APP_LOCALE, {
+              year: "2-digit",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: false,
+            });
             return (
               <tr key={sale.id} className="border-t">
-                <td className="px-3 py-2">{new Date(sale.created_at).toLocaleString(APP_LOCALE)}</td>
+                <td className="px-3 py-2">{dateTime}</td>
                 <td className="px-3 py-2">{lineCount}</td>
                 <td className="px-3 py-2">{methodLabel}</td>
                 <td className="px-3 py-2">{formatCurrency(sale.total)}</td>
