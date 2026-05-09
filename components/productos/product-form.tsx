@@ -72,7 +72,7 @@ export function ProductForm({
   const quickSummary = useMemo(
     () =>
       quickMode
-        ? "Modo rápido: nombre, código opcional, precio de venta y stock inicial."
+        ? "Modo rápido: nombre, precio de venta y stock inicial. SKU y código de barras son opcionales."
         : "Modo completo: incluye datos comerciales y técnicos.",
     [quickMode]
   );
@@ -143,6 +143,9 @@ export function ProductForm({
       <FormMessage message={state?.errors?.costPrice?.[0]} />
       <FormMessage message={state?.errors?.minStock?.[0]} />
       <FormMessage message={state?.errors?.barcode?.[0]} />
+      <FormMessage message={state?.errors?.sku?.[0]} />
+      <FormMessage message={state?.errors?.categoryId?.[0]} />
+      <FormMessage message={state?.errors?.supplierId?.[0]} />
       <FormMessage message={state?.message} />
 
       <div className="flex flex-wrap gap-2">

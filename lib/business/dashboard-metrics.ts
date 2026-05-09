@@ -65,6 +65,14 @@ export type LowStockPreviewRow = {
   unit_type: string;
 };
 
+export type AlertPreviewRow = {
+  id: string;
+  productName: string;
+  message: string;
+  severity: string;
+  createdAt: string;
+};
+
 export type DashboardMetrics = {
   activeProducts: number;
   lowStock: number;
@@ -78,6 +86,7 @@ export type DashboardMetrics = {
   topCategories: { name: string; count: number }[];
   recentActivity: DashboardActivityItem[];
   lowStockPreview: LowStockPreviewRow[];
+  alertPreview: AlertPreviewRow[];
   verduleria: {
     perishableCount: number;
     wasteRecentQty: number;
@@ -108,6 +117,7 @@ function emptyMetrics(): DashboardMetrics {
     topCategories: [],
     recentActivity: [],
     lowStockPreview: [],
+    alertPreview: [],
     verduleria: { perishableCount: 0, wasteRecentQty: 0, weightSaleLines30d: 0 },
     almacen: { fastRotationCount: 0, avgMarginPercent: null },
     ferreteria: { staleCount: 0, categoryTop: null, lowStockTechnicalCount: 0 },
@@ -210,6 +220,7 @@ export async function getDashboardMetrics(
     movActivityRes,
     salesActivityRes,
     sales30Res,
+    alertPreviewRes,
   ] = await Promise.all([
     supabase
       .from("sales")
@@ -260,6 +271,13 @@ export async function getDashboardMetrics(
       .order("created_at", { ascending: false })
       .limit(5),
     supabase.from("sales").select("id").eq("business_id", businessId).gte("created_at", since30),
+    supabase
+      .from("stock_alerts")
+      .select("id, type, message, created_at, products(name)")
+      .eq("business_id", businessId)
+      .eq("resolved", false)
+      .order("created_at", { ascending: false })
+      .limit(5),
   ]);
 
   const salesToday = salesTodayRes.data ?? [];
@@ -274,6 +292,14 @@ export async function getDashboardMetrics(
     (acc, row) => acc + Math.abs(Number(row.quantity)),
     0
   );
+
+  const alertPreview = (alertPreviewRes.data ?? []).map((r) => ({
+    id: r.id,
+    productName: (r.products as { name: string } | null)?.name ?? "Producto",
+    message: r.message,
+    severity: r.type,
+    createdAt: r.created_at,
+  }));
 
   const recentlyMoved = new Set((recentMoves30Res.data ?? []).map((r) => r.product_id));
   const staleCount = active.filter(
@@ -397,6 +423,7 @@ export async function getDashboardMetrics(
       topCategories,
       recentActivity: activity,
       lowStockPreview,
+      alertPreview,
       verduleria: {
         perishableCount,
         wasteRecentQty,

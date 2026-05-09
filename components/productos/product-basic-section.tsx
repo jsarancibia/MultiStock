@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ProductBarcodeField } from "@/components/productos/product-barcode-field";
 import {
   formSectionClass,
@@ -47,6 +47,15 @@ export function ProductBasicSection({
   const [newCatName, setNewCatName] = useState("");
   const [localCategories, setLocalCategories] = useState(categories);
   const [catPending, setCatPending] = useState(false);
+  const [pendingCatId, setPendingCatId] = useState<string | null>(null);
+  const categoryRef = useRef<HTMLSelectElement>(null);
+
+  useEffect(() => {
+    if (pendingCatId && categoryRef.current) {
+      categoryRef.current.value = pendingCatId;
+      setPendingCatId(null);
+    }
+  }, [pendingCatId]);
 
   async function handleCreateCategory() {
     if (!newCatName.trim()) return;
@@ -59,6 +68,7 @@ export function ProductBasicSection({
         ...prev,
         { id: result.createdId!, name: result.createdName! },
       ]);
+      setPendingCatId(result.createdId);
       setNewCatName("");
       setShowNewCategory(false);
     }
@@ -115,6 +125,7 @@ export function ProductBasicSection({
               <select
                 id="categoryId"
                 name="categoryId"
+                ref={categoryRef}
                 className={panelSelectClass}
                 defaultValue={categoryIdDefault}
                 onChange={(e) => {

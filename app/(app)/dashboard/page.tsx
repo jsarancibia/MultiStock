@@ -14,6 +14,7 @@ import { TrendBars } from "@/components/dashboard/trend-bars";
 import { TopProductsPanel } from "@/components/dashboard/top-products-panel";
 import { TopCategoriesPanel } from "@/components/dashboard/top-categories-panel";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
+import { AlertPanel } from "@/components/dashboard/alert-panel";
 import { LowStockPanel } from "@/components/dashboard/low-stock-panel";
 import { buttonVariants } from "@/components/ui/button";
 import { MetricCard } from "@/components/ui/metric-card";
@@ -179,12 +180,18 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-3">
           <SimpleChartCard
             title="Stock crítico"
             description="Priorizamos los casos más lejos del mínimo."
           >
             <LowStockPanel rows={metrics.lowStockPreview} totalLow={metrics.lowStock} />
+          </SimpleChartCard>
+          <SimpleChartCard
+            title="Alertas de stock"
+            description="Alertas activas sin resolver."
+          >
+            <AlertPanel rows={metrics.alertPreview} totalPending={metrics.pendingAlertsCount} />
           </SimpleChartCard>
           <SimpleChartCard
             title="Actividad reciente"
