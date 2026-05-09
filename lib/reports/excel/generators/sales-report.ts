@@ -7,6 +7,17 @@ type SaleRow = {
   payment_method: string | null;
 };
 
+function formatTimeHms(value: string): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return new Intl.DateTimeFormat("es-CL", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(d);
+}
+
 export async function buildSalesExcel(
   ctx: ExcelReportContext,
   rows: SaleRow[]
@@ -14,7 +25,7 @@ export async function buildSalesExcel(
   const totalAmount = rows.reduce((acc, row) => acc + Number(row.total ?? 0), 0);
 
   const columns: ReportColumn[] = [
-    { header: "Fecha", key: "fecha", width: 22, align: "left" },
+    { header: "Hora", key: "hora", width: 12, align: "center" },
     { header: "Total", key: "total", width: 14, type: "currency", align: "right" },
     { header: "Metodo Pago", key: "metodo_pago", width: 18, align: "center" },
   ];
@@ -31,7 +42,7 @@ export async function buildSalesExcel(
     ],
     columns,
     rows: rows.map((s) => ({
-      fecha: s.created_at,
+      hora: formatTimeHms(s.created_at),
       total: Number(s.total ?? 0),
       metodo_pago:
         s.payment_method && s.payment_method in paymentMethodLabels
