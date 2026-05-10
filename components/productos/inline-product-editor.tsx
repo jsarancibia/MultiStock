@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { panelInputClass, panelSelectClass } from "@/components/ui/form-field-styles";
 import { FormMessage } from "@/components/ui/form-message";
@@ -31,6 +32,7 @@ export function InlineProductEditor({
   onSaved,
   onCancel,
 }: InlineProductEditorProps) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(
     quickUpdateProductAction.bind(null, productId),
     initialState,
@@ -38,10 +40,13 @@ export function InlineProductEditor({
 
   const success = state?.success;
 
-  // Si la acción fue exitosa, llamamos onSaved para refrescar
+  // Si la acción fue exitosa, llamamos onSaved y refrescamos datos del servidor
   if (success) {
     // Llamar after render para evitar setState durante render
-    queueMicrotask(() => onSaved());
+    queueMicrotask(() => {
+      onSaved();
+      router.refresh();
+    });
   }
 
   return (

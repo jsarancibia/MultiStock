@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
 import type { AuditAction } from "@/lib/audit/create-audit-log";
 import { assertProductLimit } from "@/lib/billing/plan-guards";
@@ -586,6 +587,8 @@ export async function quickUpdateProductAction(
       active: parsed.data.active,
     },
   });
+
+  revalidatePath("/productos");
 
   return { message: "Producto actualizado.", success: true };
 }
