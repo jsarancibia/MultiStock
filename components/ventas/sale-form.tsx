@@ -5,6 +5,8 @@ import { useActionState } from "react";
 import type { BusinessType } from "@/config/business-types";
 import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
+import { PageNavigation } from "@/components/ui/page-navigation";
+import { useBeforeUnload } from "@/lib/hooks/use-before-unload";
 import { QuickProductButtons } from "@/components/ventas/quick-product-buttons";
 import { ProductSearch, type SaleProductOption } from "@/components/ventas/product-search";
 import { SaleItemsTable, type SaleCartItem } from "@/components/ventas/sale-items-table";
@@ -23,6 +25,8 @@ type SaleFormProps = {
     prevState: SaleActionState | undefined,
     formData: FormData
   ) => Promise<SaleActionState | undefined>;
+  /** Ruta a la que volver. Por defecto "/ventas". */
+  backHref?: string;
 };
 
 const initialState: SaleActionState = {};
@@ -41,11 +45,14 @@ export function SaleForm({
   pinnedProducts = [],
   allowMobileBarcodeLink = true,
   action,
+  backHref = "/ventas",
 }: SaleFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "debit" | "credit" | "transfer" | "other">("cash");
   const [items, setItems] = useState<SaleCartItem[]>([]);
   const [clientError, setClientError] = useState<string | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+  useBeforeUnload(isDirty);
 
   const total = useMemo(
     () => items.reduce((acc, item) => acc + item.quantity * item.unitPrice, 0),
@@ -142,70 +149,75 @@ export function SaleForm({
   );
 
   return (
-    <form
-      action={formAction}
-      onSubmit={(event) => {
-        if (!validateBeforeSubmit()) {
-          event.preventDefault();
-        }
-      }}
-      className="space-y-4"
-    >
-      <input type="hidden" name="paymentMethod" value={paymentMethod} />
-      <input type="hidden" name="items" value={payload} />
+    <div className="space-y-6">
+      <PageNavigation backHref={backHref} />
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
-          {saleConfig.showQuickButtons ? (
-            pinnedProducts.length > 0 ? (
-              <QuickProductButtons products={pinnedProducts} onAdd={addProduct} />
-            ) : (
-              <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-5 text-sm text-muted-foreground">
-                <p className="font-medium text-foreground">Sin accesos rápidos configurados</p>
-                <p className="mt-1 text-xs">
-                  En la ficha de cada producto podés activar{" "}
-                  <span className="font-medium text-foreground">Acceso rápido en ventas</span> para que
-                  aparezca aquí como botón directo.
-                </p>
-              </div>
-            )
-          ) : null}
-          <ProductSearch
-            businessType={businessType}
-            products={products}
-            onAddProduct={addProduct}
-            allowMobileBarcodeLink={allowMobileBarcodeLink}
-            searchPlaceholder={saleConfig.searchPlaceholder}
-            searchAutoFocus={saleConfig.searchAutoFocus}
-            quantityHint={saleConfig.quantityHint}
-          />
-          <SaleItemsTable
-            items={items}
-            onUpdateQuantity={updateQuantity}
-            onUpdateUnitPrice={updateUnitPrice}
-            onRemove={removeItem}
-          />
-        </div>
+      <form
+        action={formAction}
+        onSubmit={(event) => {
+          if (!validateBeforeSubmit()) {
+            event.preventDefault();
+          }
+        }}
+        onChange={() => setIsDirty(true)}
+        className="space-y-4"
+      >
+        <input type="hidden" name="paymentMethod" value={paymentMethod} />
+        <input type="hidden" name="items" value={payload} />
 
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="space-y-3 rounded-xl border border-border bg-card p-3 text-card-foreground shadow-sm">
-            <SaleSummary
-              paymentMethod={paymentMethod}
-              total={total}
-              itemsCount={items.length}
-              onPaymentMethodChange={setPaymentMethod}
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="space-y-4 lg:col-span-2">
+            {saleConfig.showQuickButtons ? (
+              pinnedProducts.length > 0 ? (
+                <QuickProductButtons products={pinnedProducts} onAdd={addProduct} />
+              ) : (
+                <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-5 text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground">Sin accesos rápidos configurados</p>
+                  <p className="mt-1 text-xs">
+                    En la ficha de cada producto podés activar{" "}
+                    <span className="font-medium text-foreground">Acceso rápido en ventas</span> para que
+                    aparezca aquí como botón directo.
+                  </p>
+                </div>
+              )
+            ) : null}
+            <ProductSearch
+              businessType={businessType}
+              products={products}
+              onAddProduct={addProduct}
+              allowMobileBarcodeLink={allowMobileBarcodeLink}
+              searchPlaceholder={saleConfig.searchPlaceholder}
+              searchAutoFocus={saleConfig.searchAutoFocus}
+              quantityHint={saleConfig.quantityHint}
             />
-            <FormMessage message={clientError} />
-            <FormMessage message={state?.message} />
-            <Button className="w-full" type="submit" disabled={pending || !items.length}>
-              {pending ? "Confirmando venta..." : "Confirmar venta"}
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Confirma solo cuando revises total, método de pago y cantidades.
-            </p>
+            <SaleItemsTable
+              items={items}
+              onUpdateQuantity={updateQuantity}
+              onUpdateUnitPrice={updateUnitPrice}
+              onRemove={removeItem}
+            />
           </div>
-        </aside>
-      </div>
-    </form>
+
+          <aside className="lg:sticky lg:top-24 lg:self-start">
+            <div className="space-y-3 rounded-xl border border-border bg-card p-3 text-card-foreground shadow-sm">
+              <SaleSummary
+                paymentMethod={paymentMethod}
+                total={total}
+                itemsCount={items.length}
+                onPaymentMethodChange={setPaymentMethod}
+              />
+              <FormMessage message={clientError} />
+              <FormMessage message={state?.message} />
+              <Button className="w-full" type="submit" disabled={pending || !items.length}>
+                {pending ? "Confirmando venta..." : "Confirmar venta"}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Confirma solo cuando revises total, método de pago y cantidades.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </form>
+    </div>
   );
 }
