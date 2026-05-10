@@ -6,7 +6,7 @@ import { Package, Pencil } from "lucide-react";
 import type { BusinessType } from "@/config/business-types";
 import { marginPercentOnCost } from "@/lib/business/business-type-config";
 import { cn, formatCurrency, formatQuantity } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InlineProductEditor } from "@/components/productos/inline-product-editor";
 
@@ -147,14 +147,16 @@ export function ProductsTable({ businessType, products, suppliers }: ProductsTab
                 <td className="px-3 py-2">{formatCurrency(product.sale_price)}</td>
                 <td className="px-3 py-2">{product.active ? "Activo" : "Inactivo"}</td>
                 <td className="px-3 py-2">
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setEditingId(product.id)}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="gap-1"
                   >
                     <Pencil className="size-3" aria-hidden />
                     Editar
-                  </button>
+                  </Button>
                 </td>
               </tr>
             );
