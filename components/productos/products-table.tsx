@@ -33,13 +33,14 @@ type ProductsTableProps = {
   businessType: BusinessType;
   products: ProductRow[];
   suppliers: { id: string; name: string }[];
+  isEmployee?: boolean;
 };
 
 function meta(m: unknown) {
   return m && typeof m === "object" ? (m as Record<string, unknown>) : {};
 }
 
-export function ProductsTable({ businessType, products, suppliers }: ProductsTableProps) {
+export function ProductsTable({ businessType, products, suppliers, isEmployee = false }: ProductsTableProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState(false);
@@ -51,9 +52,11 @@ export function ProductsTable({ businessType, products, suppliers }: ProductsTab
         title="No hay productos para mostrar"
         description="Crea el primero o prueba otro criterio de búsqueda o filtros."
         action={
-          <Link href="/productos/nuevo" className={cn(buttonVariants())}>
-            Crear producto
-          </Link>
+          !isEmployee ? (
+            <Link href="/productos/nuevo" className={cn(buttonVariants())}>
+              Crear producto
+            </Link>
+          ) : undefined
         }
       />
     );
@@ -152,25 +155,32 @@ export function ProductsTable({ businessType, products, suppliers }: ProductsTab
                 <td className="px-3 py-2">{product.active ? "Activo" : "Inactivo"}</td>
                 <td className="px-3 py-2">
                   <div className="flex items-center gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditingId(product.id)}
-                      className="gap-1"
-                    >
-                      <Pencil className="size-3" aria-hidden />
-                      Editar
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setDeletingId(product.id)}
-                      className="gap-1 text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="size-3" aria-hidden />
-                    </Button>
+                    {!isEmployee && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingId(product.id)}
+                        className="gap-1"
+                      >
+                        <Pencil className="size-3" aria-hidden />
+                        Editar
+                      </Button>
+                    )}
+                    {!isEmployee && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeletingId(product.id)}
+                        className="gap-1 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="size-3" aria-hidden />
+                      </Button>
+                    )}
+                    {isEmployee && (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
                   </div>
                 </td>
               </tr>

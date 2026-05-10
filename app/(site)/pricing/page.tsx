@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Check, Info, X } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { PLAN_DEFINITIONS } from "@/config/plans";
 import { cn } from "@/lib/utils";
+import { getCurrentProfile } from "@/lib/auth/is-admin";
 
 export const metadata: Metadata = {
   title: "Precios",
@@ -12,7 +14,12 @@ export const metadata: Metadata = {
 
 const plans = [PLAN_DEFINITIONS.free, PLAN_DEFINITIONS.pro, PLAN_DEFINITIONS.business] as const;
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  // Si el usuario tiene sesión y no es admin, redirigir al dashboard
+  const profile = await getCurrentProfile().catch(() => null);
+  if (profile && profile.role !== "admin") {
+    redirect("/dashboard");
+  }
   return (
     <main className="py-14 sm:py-16">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">

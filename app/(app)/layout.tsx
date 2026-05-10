@@ -7,6 +7,7 @@ import { businessTypes } from "@/config/business-types";
 import { getNavigationForBusinessType, type NavigationItem } from "@/config/navigation";
 import { isAdmin } from "@/lib/auth/is-admin";
 import { requireUser } from "@/lib/auth/session";
+import { getBusinessRole } from "@/lib/auth/require-business-role";
 import { createClient } from "@/lib/supabase/server";
 import {
   listUserBusinesses,
@@ -41,6 +42,13 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
     ? [...baseNavigation, { label: "Admin Panel", href: "/admin", module: "admin" }]
     : baseNavigation;
 
+  // Filtrar navegación según rol: employee solo ve módulos esenciales
+  const employeeModules = ["dashboard", "products", "inventory", "sales"];
+  const userBusinessRole = !userIsAdmin ? await getBusinessRole(user.id, business.id) : null;
+  const finalNavigation = userBusinessRole === "employee"
+    ? navigation.filter((item) => employeeModules.includes(item.module))
+    : navigation;
+
   async function switchBusinessAction(
     _state: { ok?: boolean } | undefined,
     formData: FormData
@@ -66,7 +74,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
           }
         />
       }
-      sidebar={<AppSidebar items={navigation} alertCount={alertCount ?? 0} />}
+      sidebar={<AppSidebar items={finalNavigation} alertCount={alertCount ?? 0} />}
     >
       {children}
     </AppShell>

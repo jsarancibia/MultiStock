@@ -9,6 +9,7 @@ import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
+import { requireBusinessRole } from "@/lib/auth/require-business-role";
 import { normalizeBarcode } from "@/lib/barcode/normalize";
 import { mapProductForSale, type ProductFromDb, type SaleFormProduct } from "@/lib/products/map-product-for-sale";
 import { barcodeLookupSchema } from "@/lib/validations/barcode";
@@ -306,8 +307,8 @@ export async function createProductAction(
   _prevState: ProductActionState | undefined,
   formData: FormData
 ): Promise<ProductActionState | undefined> {
+  const { business } = await requireBusinessRole(["owner"]);
   const user = await requireUser();
-  const business = await requireActiveBusiness(user.id);
   const metadata = buildMetadataFromFormData(formData, business.business_type);
 
   const parsed = productSchema.safeParse({
@@ -399,8 +400,8 @@ export async function updateProductAction(
   _prevState: ProductActionState | undefined,
   formData: FormData
 ): Promise<ProductActionState | undefined> {
+  const { business } = await requireBusinessRole(["owner"]);
   const user = await requireUser();
-  const business = await requireActiveBusiness(user.id);
   const metadata = buildMetadataFromFormData(formData, business.business_type);
 
   const parsed = productSchema.safeParse({
@@ -490,9 +491,9 @@ export async function updateProductAction(
 }
 
 export async function deactivateProductAction(productId: string) {
-  const user = await requireUser();
-  const business = await requireActiveBusiness(user.id);
+  const { business } = await requireBusinessRole(["owner"]);
   const supabase = await createClient();
+  const user = await requireUser();
   const { data: row } = await supabase
     .from("products")
     .select("name")
@@ -521,8 +522,8 @@ export async function quickUpdateProductAction(
   _prevState: ProductActionState | undefined,
   formData: FormData
 ): Promise<ProductActionState | undefined> {
+  const { business } = await requireBusinessRole(["owner"]);
   const user = await requireUser();
-  const business = await requireActiveBusiness(user.id);
 
   const parsed = quickProductUpdateSchema.safeParse({
     supplierId: formData.get("supplierId"),
@@ -594,9 +595,9 @@ export async function quickUpdateProductAction(
 }
 
 export async function toggleProductActiveAction(productId: string) {
-  const user = await requireUser();
-  const business = await requireActiveBusiness(user.id);
+  const { business } = await requireBusinessRole(["owner"]);
   const supabase = await createClient();
+  const user = await requireUser();
 
   const { data: row } = await supabase
     .from("products")
@@ -632,9 +633,9 @@ export async function toggleProductActiveAction(productId: string) {
 }
 
 export async function deleteProductAction(productId: string) {
-  const user = await requireUser();
-  const business = await requireActiveBusiness(user.id);
+  const { business } = await requireBusinessRole(["owner"]);
   const supabase = await createClient();
+  const user = await requireUser();
 
   const { data: product, error: fetchError } = await supabase
     .from("products")

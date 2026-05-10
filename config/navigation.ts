@@ -66,6 +66,11 @@ export const navigationItems: NavigationItem[] = [
     href: "/exportaciones",
     module: "exports",
   },
+  {
+    label: "Equipo",
+    href: "/equipo",
+    module: "suppliers",
+  },
 ];
 
 export function getEnabledModules(businessType: BusinessType): Set<AppModule> {

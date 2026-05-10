@@ -8,6 +8,7 @@ import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
+import { requireBusinessRole } from "@/lib/auth/require-business-role";
 import { allowsDecimalQuantity } from "@/lib/business/unit-quantity";
 import { stockMovementSchema, type StockMovementInput } from "@/lib/validations/stock-movement";
 
@@ -157,6 +158,8 @@ export async function createStockMovementAction(
   _prevState: StockMovementActionState | undefined,
   formData: FormData
 ): Promise<StockMovementActionState | undefined> {
+  const { business } = await requireBusinessRole(["owner"]);
+  const supabase = await createClient();
   const parsed = stockMovementSchema.safeParse({
     productId: formData.get("productId"),
     type: formData.get("type"),

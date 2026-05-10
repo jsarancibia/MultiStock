@@ -12,6 +12,9 @@ import { listCategories, createCategoryAction } from "@/modules/core/categories/
 import { listSuppliers } from "@/modules/core/suppliers/actions";
 import { getProductFocusFilterOptions } from "@/lib/business/business-type-config";
 import { listProducts } from "@/modules/core/products/actions";
+import { getBusinessRole } from "@/lib/auth/require-business-role";
+import { requireUser } from "@/lib/auth/session";
+import { requireActiveBusiness } from "@/lib/business/get-active-business";
 
 type ProductosPageProps = {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -24,6 +27,12 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
     listCategories(),
     listSuppliers(),
   ]);
+
+  // Verificar si el usuario es employee para ocultar botones de edición
+  const user = await requireUser();
+  const activeBusiness = await requireActiveBusiness(user.id);
+  const userBusinessRole = await getBusinessRole(user.id, activeBusiness.id);
+  const isEmployee = userBusinessRole === "employee";
 
   return (
     <section className="space-y-6">
@@ -85,15 +94,24 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
         </Button>
       </form>
 
-      <div className="flex justify-end">
-        <Link href="/productos/nuevo">
-          <Button>Nuevo producto</Button>
-        </Link>
-      </div>
+      {!isEmployee && (
+        <div className="flex justify-end">
+          <Link href="/productos/nuevo">
+            <Button>Nuevo producto</Button>
+          </Link>
+        </div>
+      )}
 
-      <ProductsTable businessType={business.business_type} products={products} suppliers={suppliers.map((s) => ({ id: s.id, name: s.name }))} />
+      <ProductsTable
+        businessType={business.business_type}
+        products={products}
+        suppliers={suppliers.map((s) => ({ id: s.id, name: s.name }))}
+        isEmployee={isEmployee}
+      />
 
-      <CategoryForm action={createCategoryAction} businessType={business.business_type} />
+      {!isEmployee && (
+        <CategoryForm action={createCategoryAction} businessType={business.business_type} />
+      )}
     </section>
   );
 }

@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/utils";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
+import { requireBusinessRole } from "@/lib/auth/require-business-role";
 import { createSaleSchema } from "@/lib/validations/sale";
 import { allowsDecimalQuantity, exceedsStock } from "@/lib/business/unit-quantity";
 import { mapProductForSale, type ProductFromDb, type SaleFormProduct } from "@/lib/products/map-product-for-sale";
@@ -90,9 +91,9 @@ export async function createSaleAction(
   _prevState: SaleActionState | undefined,
   formData: FormData
 ): Promise<SaleActionState | undefined> {
-  const user = await requireUser();
-  const business = await requireActiveBusiness(user.id);
+  const { business } = await requireBusinessRole(["owner", "employee"]);
   const supabase = await createClient();
+  const user = await requireUser();
 
   let parsedItems: unknown[] = [];
 
