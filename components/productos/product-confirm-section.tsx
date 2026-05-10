@@ -62,16 +62,6 @@ export function ProductConfirmSection({
     !showStockWarning &&
     !showIdentificadorWarning;
 
-  // ---- Leer campos de configuración del snapshot ----
-  const allowsWeightSale = getVal(snapshot, "allows_weight_sale") === "on";
-  const isPerishable = getVal(snapshot, "is_perishable") === "on";
-  const wasteTracking = getVal(snapshot, "waste_tracking") === "on";
-  const expirationDays = getVal(snapshot, "expiration_days");
-  const brand = getVal(snapshot, "brand");
-  const model = getVal(snapshot, "model");
-  const material = getVal(snapshot, "material");
-  const measure = getVal(snapshot, "measure");
-
   return (
     <div className={formSectionClass}>
       <h2 className="mb-1 text-sm font-semibold text-foreground">
@@ -189,78 +179,6 @@ export function ProductConfirmSection({
           </dl>
         </div>
 
-        {/* ---- Configuración (rubro) ---- */}
-        <div className="rounded-lg border border-border bg-muted/30 p-3">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Configuración del producto
-          </h3>
-          {businessType === "verduleria" ? (
-            <dl className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Venta por peso</dt>
-                <dd className="font-medium text-foreground">
-                  {allowsWeightSale ? "Sí" : "No"}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Perecible</dt>
-                <dd className="font-medium text-foreground">
-                  {isPerishable ? "Sí" : "No"}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Control de merma</dt>
-                <dd className="font-medium text-foreground">
-                  {wasteTracking ? "Sí" : "No"}
-                </dd>
-              </div>
-              {Number(expirationDays) > 0 ? (
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Vida útil</dt>
-                  <dd className="font-medium text-foreground">
-                    {expirationDays} días
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
-          ) : businessType === "ferreteria" ? (
-            <dl className="space-y-1 text-sm">
-              {brand ? (
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Marca</dt>
-                  <dd className="font-medium text-foreground">{brand}</dd>
-                </div>
-              ) : null}
-              {model ? (
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Modelo</dt>
-                  <dd className="font-medium text-foreground">{model}</dd>
-                </div>
-              ) : null}
-              {material ? (
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Material</dt>
-                  <dd className="font-medium text-foreground">{material}</dd>
-                </div>
-              ) : null}
-              {measure ? (
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Medida</dt>
-                  <dd className="font-medium text-foreground">{measure}</dd>
-                </div>
-              ) : null}
-            </dl>
-          ) : businessType === "almacen" ? (
-            <p className="text-sm text-muted-foreground">
-              Sin configuración adicional
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Sin configuración adicional
-            </p>
-          )}
-        </div>
-
         {/* ---- Checklist visual ---- */}
         <div className="rounded-lg border border-border bg-muted/30 p-3">
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -313,11 +231,6 @@ export function ProductConfirmSection({
                 Stock: {currentStock || "0"}
               </span>
               <span className="uppercase">{unitType}</span>
-              {businessType === "ferreteria" ? (
-                <span>
-                  {[brand, measure].filter(Boolean).join(" · ")}
-                </span>
-              ) : null}
               {barcode ? <span>#{barcode}</span> : null}
             </div>
           </div>

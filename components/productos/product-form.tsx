@@ -58,7 +58,6 @@ const wizardSteps: WizardStep[] = [
   { id: "basicos", label: "Datos básicos" },
   { id: "precio", label: "Precio y stock" },
   { id: "venta-rapida", label: "Venta rápida" },
-  { id: "config", label: "Configuración" },
   { id: "confirmar", label: "Confirmar" },
 ];
 
@@ -254,25 +253,21 @@ export function ProductForm({
           </div>
         ) : null}
 
-        {/* Paso 4 — Configuración del producto (solo en modo avanzado) */}
-        {showAdvanced ? (
-          <div className={showAllSections || currentStep === 3 ? "" : "hidden"}>
+        {/* Paso 4 — Confirmación (solo en modo avanzado + creación) */}
+        {showAdvanced && !isEditing && confirmSnapshot ? (
+          <div className={currentStep === 3 ? "" : "hidden"}>
             <ProductConfigSection
               businessType={businessType}
               metadata={metadata}
             />
-          </div>
-        ) : null}
-
-        {/* Paso 5 — Confirmación (solo en modo avanzado + creación) */}
-        {showAdvanced && !isEditing && confirmSnapshot ? (
-          <div className={currentStep === 4 ? "" : "hidden"}>
-            <ProductConfirmSection
-              snapshot={confirmSnapshot}
-              businessType={businessType}
-              categories={categories}
-              suppliers={suppliers}
-            />
+            <div className="mt-4">
+              <ProductConfirmSection
+                snapshot={confirmSnapshot}
+                businessType={businessType}
+                categories={categories}
+                suppliers={suppliers}
+              />
+            </div>
           </div>
         ) : null}
 
