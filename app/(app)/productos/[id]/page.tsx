@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BackButton } from "@/components/ui/back-button";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { getProductById, deactivateProductAction } from "@/modules/core/products/actions";
@@ -15,6 +16,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   return (
     <section className="space-y-6">
+      <BackButton href="/productos" />
       <PageHeader title={product.name} description="Detalle completo del producto." />
 
       <div className="grid gap-3 rounded-lg border p-4 sm:grid-cols-2">
@@ -29,13 +31,6 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         <p><strong>Stock actual:</strong> {product.current_stock}</p>
         <p><strong>Stock minimo:</strong> {product.min_stock}</p>
       </div>
-
-      <details className="rounded-lg border p-4">
-        <summary className="cursor-pointer font-medium">Metadata por rubro</summary>
-        <pre className="mt-3 overflow-x-auto rounded bg-muted p-3 text-xs">
-          {JSON.stringify(product.metadata, null, 2)}
-        </pre>
-      </details>
 
       <div className="flex flex-wrap gap-3">
         <Link href={`/productos/${product.id}/editar`}>
