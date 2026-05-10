@@ -1,3 +1,4 @@
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import { PageHeader } from "@/components/layout/page-header";
 import { getPlanModuleAccess } from "@/lib/billing/require-plan-module";
@@ -5,6 +6,7 @@ import { AuditTable } from "@/components/auditoria/audit-table";
 import { listAuditLogs } from "@/modules/core/audit/actions";
 
 export default async function AuditoriaPage() {
+  await requirePageAccess(["owner"]);
   const access = await getPlanModuleAccess("audit");
   if (!access.allowed) {
     return (

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import { PageHeader } from "@/components/layout/page-header";
 import { SupplierForm } from "@/components/forms/supplier-form";
@@ -10,6 +11,7 @@ type EditarProveedorPageProps = {
 };
 
 export default async function EditarProveedorPage({ params }: EditarProveedorPageProps) {
+  await requirePageAccess(["owner"]);
   const access = await getPlanModuleAccess("suppliers");
   if (!access.allowed) {
     return <UpgradeRequired title="Proveedores disponibles desde Pro" />;

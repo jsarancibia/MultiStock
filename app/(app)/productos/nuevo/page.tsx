@@ -1,9 +1,11 @@
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProductForm } from "@/components/productos/product-form";
 import { canUseMobileScanner } from "@/config/plans";
 import { createProductAction, getProductFormData } from "@/modules/core/products/actions";
 
 export default async function NuevoProductoPage() {
+  await requirePageAccess(["owner"]);
   const { business, categories, suppliers } = await getProductFormData();
 
   return (

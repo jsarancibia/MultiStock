@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProductForm } from "@/components/productos/product-form";
 import { canUseMobileScanner } from "@/config/plans";
@@ -9,6 +10,7 @@ type EditarProductoPageProps = {
 };
 
 export default async function EditarProductoPage({ params }: EditarProductoPageProps) {
+  await requirePageAccess(["owner"]);
   const { id } = await params;
   const [product, formData] = await Promise.all([getProductById(id), getProductFormData()]);
   if (!product) notFound();

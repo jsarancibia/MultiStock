@@ -1,3 +1,4 @@
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import { buttonVariants } from "@/components/ui/button";
 import { getPlanModuleAccess } from "@/lib/billing/require-plan-module";
@@ -13,6 +14,7 @@ function toExcelHref(reportKey: string) {
 }
 
 export default async function ExportacionesPage() {
+  await requirePageAccess(["owner"]);
   const access = await getPlanModuleAccess("exports");
   if (!access.allowed) {
     return (

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Building2 } from "lucide-react";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import { PageHeader } from "@/components/layout/page-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { listSuppliers } from "@/modules/core/suppliers/actions";
 
 export default async function ProveedoresPage() {
+  await requirePageAccess(["owner"]);
   const access = await getPlanModuleAccess("suppliers");
   if (!access.allowed) {
     return (

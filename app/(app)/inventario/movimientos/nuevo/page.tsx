@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Package } from "lucide-react";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { PageHeader } from "@/components/layout/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -8,6 +9,7 @@ import { StockMovementForm } from "@/components/inventario/stock-movement-form";
 import { createStockMovementAction, getMovementFormData } from "@/modules/core/stock-movements/actions";
 
 export default async function NuevoMovimientoPage() {
+  await requirePageAccess(["owner"]);
   const { products } = await getMovementFormData();
 
   if (!products.length) {

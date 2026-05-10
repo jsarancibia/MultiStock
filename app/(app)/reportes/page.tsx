@@ -1,9 +1,11 @@
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import { getPlanModuleAccess } from "@/lib/billing/require-plan-module";
 import { formatCurrency, formatQuantity } from "@/lib/utils";
 import { getSimpleReports } from "@/modules/core/reports/actions";
 
 export default async function ReportesPage() {
+  await requirePageAccess(["owner"]);
   const access = await getPlanModuleAccess("reports");
   if (!access.allowed) {
     return (
