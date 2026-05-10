@@ -630,3 +630,44 @@ export async function toggleProductActiveAction(productId: string) {
 
   return { success: true, active: newActive, message: newActive ? "Producto reactivado." : "Producto desactivado." };
 }
+
+export async function deleteProductAction(productId: string) {
+  const user = await requireUser();
+  const business = await requireActiveBusiness(user.id);
+  const supabase = await createClient();
+
+  const { data: product, error: fetchError } = await supabase
+    .from("products")
+    .select("name")
+    .eq("id", productId)
+    .eq("business_id", business.id)
+    .maybeSingle();
+
+  if (fetchError || !product) {
+    return { message: "Producto no encontrado." };
+  }
+
+  const { error: deleteError } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", productId)
+    .eq("business_id", business.id);
+
+  if (deleteError) {
+    return { message: "No se pudo eliminar el producto." };
+  }
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "product",
+    entityId: productId,
+    action: "deleted" as const,
+    summary: `Producto eliminado: ${product.name}`,
+    beforeData: { name: product.name },
+  });
+
+  revalidatePath("/productos");
+
+  return { success: true, message: "Producto eliminado correctamente." };
+}

@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Package, Pencil } from "lucide-react";
+import { Package, Pencil, Trash2 } from "lucide-react";
 import type { BusinessType } from "@/config/business-types";
 import { marginPercentOnCost } from "@/lib/business/business-type-config";
 import { cn, formatCurrency, formatQuantity } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { InlineProductEditor } from "@/components/productos/inline-product-editor";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { deleteProductAction } from "@/modules/core/products/actions";
 
 type ProductRow = {
   id: string;
@@ -39,6 +41,8 @@ function meta(m: unknown) {
 
 export function ProductsTable({ businessType, products, suppliers }: ProductsTableProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState(false);
 
   if (!products.length) {
     return (
@@ -147,22 +151,53 @@ export function ProductsTable({ businessType, products, suppliers }: ProductsTab
                 <td className="px-3 py-2">{formatCurrency(product.sale_price)}</td>
                 <td className="px-3 py-2">{product.active ? "Activo" : "Inactivo"}</td>
                 <td className="px-3 py-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditingId(product.id)}
-                    className="gap-1"
-                  >
-                    <Pencil className="size-3" aria-hidden />
-                    Editar
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditingId(product.id)}
+                      className="gap-1"
+                    >
+                      <Pencil className="size-3" aria-hidden />
+                      Editar
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDeletingId(product.id)}
+                      className="gap-1 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="size-3" aria-hidden />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+
+      <ConfirmDialog
+        open={deletingId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeletingId(null);
+        }}
+        title="Eliminar producto"
+        description="¿Estás seguro? Esta acción no se puede deshacer. El producto se eliminará permanentemente."
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        variant="destructive"
+        onConfirm={async () => {
+          if (!deletingId) return;
+          setPendingDelete(true);
+          await deleteProductAction(deletingId);
+          setDeletingId(null);
+          setPendingDelete(false);
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }
