@@ -1,10 +1,14 @@
+"use client";
+
 import Link from "next/link";
-import { Package } from "lucide-react";
+import { useState } from "react";
+import { Package, Pencil } from "lucide-react";
 import type { BusinessType } from "@/config/business-types";
 import { marginPercentOnCost } from "@/lib/business/business-type-config";
 import { cn, formatCurrency, formatQuantity } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { InlineProductEditor } from "@/components/productos/inline-product-editor";
 
 type ProductRow = {
   id: string;
@@ -20,18 +24,22 @@ type ProductRow = {
   metadata: unknown;
   categories: { name: string } | null;
   suppliers: { name: string } | null;
+  supplier_id: string | null;
 };
 
 type ProductsTableProps = {
   businessType: BusinessType;
   products: ProductRow[];
+  suppliers: { id: string; name: string }[];
 };
 
 function meta(m: unknown) {
   return m && typeof m === "object" ? (m as Record<string, unknown>) : {};
 }
 
-export function ProductsTable({ businessType, products }: ProductsTableProps) {
+export function ProductsTable({ businessType, products, suppliers }: ProductsTableProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   if (!products.length) {
     return (
       <EmptyState
@@ -63,6 +71,7 @@ export function ProductsTable({ businessType, products }: ProductsTableProps) {
             <th className="px-3 py-2 font-medium">Stock</th>
             <th className="px-3 py-2 font-medium">Precio</th>
             <th className="px-3 py-2 font-medium">Estado</th>
+            <th className="px-3 py-2 font-medium">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -74,6 +83,26 @@ export function ProductsTable({ businessType, products }: ProductsTableProps) {
             const ferreteriaLine = [m.brand, m.measure, m.model].filter(
               (x) => typeof x === "string" && x.trim()
             ) as string[];
+
+            if (editingId === product.id) {
+              return (
+                <tr key={product.id} className="border-t">
+                  <td colSpan={10} className="px-3 py-2">
+                    <InlineProductEditor
+                      productId={product.id}
+                      initialSupplierId={product.supplier_id}
+                      initialSalePrice={product.sale_price}
+                      initialCostPrice={product.cost_price}
+                      initialActive={product.active}
+                      suppliers={suppliers}
+                      onSaved={() => setEditingId(null)}
+                      onCancel={() => setEditingId(null)}
+                    />
+                  </td>
+                </tr>
+              );
+            }
+
             return (
               <tr key={product.id} className="border-t">
                 <td className="px-3 py-2">
@@ -117,6 +146,16 @@ export function ProductsTable({ businessType, products }: ProductsTableProps) {
                 </td>
                 <td className="px-3 py-2">{formatCurrency(product.sale_price)}</td>
                 <td className="px-3 py-2">{product.active ? "Activo" : "Inactivo"}</td>
+                <td className="px-3 py-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingId(product.id)}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    <Pencil className="size-3" aria-hidden />
+                    Editar
+                  </button>
+                </td>
               </tr>
             );
           })}

@@ -91,7 +91,7 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
         </Link>
       </div>
 
-      <ProductsTable businessType={business.business_type} products={products} />
+      <ProductsTable businessType={business.business_type} products={products} suppliers={suppliers.map((s) => ({ id: s.id, name: s.name }))} />
 
       <CategoryForm action={createCategoryAction} businessType={business.business_type} />
     </section>

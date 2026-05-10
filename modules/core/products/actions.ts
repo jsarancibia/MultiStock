@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
+import type { AuditAction } from "@/lib/audit/create-audit-log";
 import { assertProductLimit } from "@/lib/billing/plan-guards";
 import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
@@ -10,7 +11,7 @@ import { requireActiveBusiness } from "@/lib/business/get-active-business";
 import { normalizeBarcode } from "@/lib/barcode/normalize";
 import { mapProductForSale, type ProductFromDb, type SaleFormProduct } from "@/lib/products/map-product-for-sale";
 import { barcodeLookupSchema } from "@/lib/validations/barcode";
-import { productFiltersSchema, productSchema } from "@/lib/validations/product";
+import { productFiltersSchema, productSchema, quickProductUpdateSchema } from "@/lib/validations/product";
 import type { BusinessType } from "@/config/business-types";
 import { isLowMargin } from "@/lib/business/business-type-config";
 import { createStockMovement } from "@/modules/core/stock-movements/actions";
@@ -18,10 +19,10 @@ import type { Json } from "@/types/database";
 
 export type ProductActionState = {
   message?: string;
+  success?: boolean;
   errors?: Record<string, string[]>;
 };
 
-/** Fase 8: aviso de producto perecible con vida util definida. */
 async function syncPerishableProductAlert(
   supabase: Awaited<ReturnType<typeof createClient>>,
   businessId: string,
@@ -78,7 +79,6 @@ function buildMetadataFromFormData(formData: FormData, businessType: BusinessTyp
       pinned: formData.get("pinned") === "on",
     };
   }
-
   if (businessType === "almacen") {
     return {
       fast_rotation: formData.get("fast_rotation") === "on",
@@ -87,7 +87,6 @@ function buildMetadataFromFormData(formData: FormData, businessType: BusinessTyp
       pinned: formData.get("pinned") === "on",
     };
   }
-
   return {
     brand: String(formData.get("brand") || ""),
     model: String(formData.get("model") || ""),
@@ -109,7 +108,7 @@ export async function listProducts(rawFilters: Record<string, string | undefined
   let query = supabase
     .from("products")
     .select(
-      "id,name,sku,barcode,unit_type,sale_price,cost_price,current_stock,min_stock,active,created_at,metadata,categories(name),suppliers(name)"
+      "id,name,sku,barcode,unit_type,sale_price,cost_price,current_stock,min_stock,active,created_at,metadata,supplier_id,categories(name),suppliers(name)"
     )
     .eq("business_id", business.id)
     .order("created_at", { ascending: false });
@@ -219,7 +218,6 @@ async function findProductUsingBarcode(
   if (exceptProductId) looseQuery = looseQuery.neq("id", exceptProductId);
 
   const { data: looseRows } = await looseQuery.limit(10);
-
   return (
     (looseRows ?? []).find((row) => row.barcode && normalizeBarcode(row.barcode) === barcode) ??
     null
@@ -231,7 +229,6 @@ export async function findActiveProductByBarcode(
 ): Promise<{ ok: true; product: SaleFormProduct } | { ok: false; message: string }> {
   const user = await requireUser();
   const business = await requireActiveBusiness(user.id);
-
   const parsed = barcodeLookupSchema.safeParse(raw);
   if (!parsed.success) {
     const msg = parsed.error.issues[0]?.message ?? "Código inválido.";
@@ -254,7 +251,6 @@ export async function findActiveProductByBarcode(
   if (errExact) {
     return { ok: false, message: "No se pudo buscar el producto." };
   }
-
   if ((exactRows ?? []).length > 1) {
     return { ok: false, message: "Hay más de un producto activo con ese código." };
   }
@@ -282,7 +278,6 @@ export async function findActiveProductByBarcode(
       message: "No encontramos un producto activo con ese código.",
     };
   }
-
   return { ok: true, product: mapProductForSale(row as ProductFromDb) };
 }
 
@@ -364,17 +359,11 @@ export async function createProductAction(
     .single();
 
   if (error || !product) {
-    return {
-      message: humanizeActionError(error?.message, "No se pudo crear el producto."),
-    };
+    return { message: humanizeActionError(error?.message, "No se pudo crear el producto.") };
   }
 
   await syncPerishableProductAlert(
-    supabase,
-    business.id,
-    product.id,
-    business.business_type,
-    parsed.data.metadata as Record<string, unknown>
+    supabase, business.id, product.id, business.business_type, parsed.data.metadata as Record<string, unknown>
   );
 
   if (parsed.data.currentStock > 0) {
@@ -384,10 +373,7 @@ export async function createProductAction(
       quantity: parsed.data.currentStock,
       reason: "Stock inicial al crear producto",
     });
-
-    if (!movementResult.ok) {
-      return { message: movementResult.message };
-    }
+    if (!movementResult.ok) return { message: movementResult.message };
   }
 
   await createAuditLog({
@@ -400,9 +386,7 @@ export async function createProductAction(
     afterData: { name: parsed.data.name },
   });
 
-  if (createAnother) {
-    redirect("/productos/nuevo");
-  }
+  if (createAnother) redirect("/productos/nuevo");
   redirect("/productos");
 }
 
@@ -435,12 +419,7 @@ export async function updateProductAction(
 
   const supabase = await createClient();
   if (parsed.data.barcode) {
-    const barcodeTaken = await findProductUsingBarcode(
-      supabase,
-      business.id,
-      parsed.data.barcode,
-      productId
-    );
+    const barcodeTaken = await findProductUsingBarcode(supabase, business.id, parsed.data.barcode, productId);
     if (barcodeTaken) {
       const ref = barcodeTaken.sku ? `${barcodeTaken.name} (${barcodeTaken.sku})` : barcodeTaken.name;
       return { message: `El código de barras ya existe y pertenece a ${ref}.` };
@@ -475,29 +454,16 @@ export async function updateProductAction(
   if (error) return { message: humanizeActionError(error.message, "No se pudo actualizar el producto.") };
 
   await syncPerishableProductAlert(
-    supabase,
-    business.id,
-    productId,
-    business.business_type,
-    parsed.data.metadata as Record<string, unknown>
+    supabase, business.id, productId, business.business_type, parsed.data.metadata as Record<string, unknown>
   );
 
-  const costChanged =
-    prior && String(prior.cost_price) !== String(parsed.data.costPrice);
-  const saleChanged =
-    prior && String(prior.sale_price) !== String(parsed.data.salePrice);
-  const action =
-    costChanged || saleChanged ? ("price_changed" as const) : ("updated" as const);
+  const costChanged = prior && String(prior.cost_price) !== String(parsed.data.costPrice);
+  const saleChanged = prior && String(prior.sale_price) !== String(parsed.data.salePrice);
+  const action = costChanged || saleChanged ? ("price_changed" as const) : ("updated" as const);
   const summaryParts = [`Producto actualizado: ${parsed.data.name}`];
-  if (costChanged) {
-    summaryParts.push(`costo ${prior?.cost_price ?? "?"} → ${parsed.data.costPrice}`);
-  }
-  if (saleChanged) {
-    summaryParts.push(`venta ${prior?.sale_price ?? "?"} → ${parsed.data.salePrice}`);
-  }
-  if (prior && prior.active && !parsed.data.active) {
-    summaryParts.push("marcado inactivo en formulario");
-  }
+  if (costChanged) summaryParts.push(`costo ${prior?.cost_price ?? "?"} -> ${parsed.data.costPrice}`);
+  if (saleChanged) summaryParts.push(`venta ${prior?.sale_price ?? "?"} -> ${parsed.data.salePrice}`);
+  if (prior && prior.active && !parsed.data.active) summaryParts.push("marcado inactivo en formulario");
 
   await createAuditLog({
     businessId: business.id,
@@ -507,11 +473,7 @@ export async function updateProductAction(
     action,
     summary: summaryParts.join(" · "),
     beforeData: prior
-      ? {
-          cost_price: prior.cost_price,
-          sale_price: prior.sale_price,
-          active: prior.active,
-        }
+      ? { cost_price: prior.cost_price, sale_price: prior.sale_price, active: prior.active }
       : null,
     afterData: {
       cost_price: String(parsed.data.costPrice),
@@ -548,4 +510,117 @@ export async function deactivateProductAction(productId: string) {
   });
 
   redirect("/productos");
+}
+
+export async function quickUpdateProductAction(
+  productId: string,
+  _prevState: ProductActionState | undefined,
+  formData: FormData
+): Promise<ProductActionState | undefined> {
+  const user = await requireUser();
+  const business = await requireActiveBusiness(user.id);
+
+  const parsed = quickProductUpdateSchema.safeParse({
+    supplierId: formData.get("supplierId"),
+    salePrice: formData.get("salePrice"),
+    costPrice: formData.get("costPrice"),
+    active: formData.get("active") === "on" || formData.get("active") === "true",
+  });
+
+  if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors };
+
+  const supabase = await createClient();
+
+  const { data: prior } = await supabase
+    .from("products")
+    .select("name,cost_price,sale_price,active,metadata")
+    .eq("id", productId)
+    .eq("business_id", business.id)
+    .maybeSingle();
+
+  if (!prior) return { message: "Producto no encontrado." };
+
+  const { error } = await supabase
+    .from("products")
+    .update({
+      supplier_id: parsed.data.supplierId || null,
+      sale_price: String(parsed.data.salePrice),
+      cost_price: String(parsed.data.costPrice),
+      active: parsed.data.active,
+    })
+    .eq("id", productId)
+    .eq("business_id", business.id);
+
+  if (error) return { message: humanizeActionError(error.message, "No se pudo actualizar el producto.") };
+
+  const costChanged = String(prior.cost_price) !== String(parsed.data.costPrice);
+  const saleChanged = String(prior.sale_price) !== String(parsed.data.salePrice);
+  const activeChanged = prior.active !== parsed.data.active;
+
+  const summaryParts = [`Producto actualizado: ${prior.name}`];
+  if (costChanged) summaryParts.push(`costo ${prior.cost_price} -> ${parsed.data.costPrice}`);
+  if (saleChanged) summaryParts.push(`venta ${prior.sale_price} -> ${parsed.data.salePrice}`);
+  if (activeChanged) summaryParts.push(parsed.data.active ? "reactivado" : "desactivado");
+
+  const actionKind: AuditAction =
+    costChanged || saleChanged
+      ? "price_changed"
+      : activeChanged
+        ? "updated"
+        : "updated";
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "product",
+    entityId: productId,
+    action: actionKind,
+    summary: summaryParts.join(" · "),
+    beforeData: { cost_price: prior.cost_price, sale_price: prior.sale_price, active: prior.active },
+    afterData: {
+      cost_price: String(parsed.data.costPrice),
+      sale_price: String(parsed.data.salePrice),
+      active: parsed.data.active,
+    },
+  });
+
+  return { message: "Producto actualizado.", success: true };
+}
+
+export async function toggleProductActiveAction(productId: string) {
+  const user = await requireUser();
+  const business = await requireActiveBusiness(user.id);
+  const supabase = await createClient();
+
+  const { data: row } = await supabase
+    .from("products")
+    .select("name,active")
+    .eq("id", productId)
+    .eq("business_id", business.id)
+    .maybeSingle();
+
+  if (!row) return { message: "Producto no encontrado." };
+
+  const newActive = !row.active;
+
+  const { error } = await supabase
+    .from("products")
+    .update({ active: newActive })
+    .eq("id", productId)
+    .eq("business_id", business.id);
+
+  if (error) return { message: humanizeActionError(error.message, "No se pudo cambiar el estado.") };
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "product",
+    entityId: productId,
+    action: newActive ? ("updated" as const) : ("deactivated" as const),
+    summary: `Producto ${newActive ? "reactivado" : "desactivado"}: ${row.name}`,
+    beforeData: { active: row.active },
+    afterData: { active: newActive },
+  });
+
+  return { success: true, active: newActive, message: newActive ? "Producto reactivado." : "Producto desactivado." };
 }

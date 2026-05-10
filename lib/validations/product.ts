@@ -50,5 +50,13 @@ export const productFiltersSchema = z.object({
   focus: z.enum(productFilterFocusValues).default("all"),
 });
 
+export const quickProductUpdateSchema = z.object({
+  supplierId: z.string().uuid().optional().or(z.literal("")),
+  salePrice: z.coerce.number().min(0, "Precio inválido."),
+  costPrice: z.coerce.number().min(0, "Costo inválido."),
+  active: z.coerce.boolean().default(true),
+});
+
 export type ProductInput = z.infer<typeof productSchema>;
 export type ProductFiltersInput = z.infer<typeof productFiltersSchema>;
+export type QuickProductUpdateInput = z.infer<typeof quickProductUpdateSchema>;
