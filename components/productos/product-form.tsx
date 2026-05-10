@@ -7,9 +7,9 @@ import { ProductBasicSection } from "@/components/productos/product-basic-sectio
 import { ProductPricingSection } from "@/components/productos/product-pricing-section";
 import { ProductQuickSaleSection } from "@/components/productos/product-quick-sale-section";
 import { ProductConfigSection } from "@/components/productos/product-config-section";
-import { ProductConfirmSection } from "@/components/productos/product-confirm-section";
 import { Button } from "@/components/ui/button";
 import { PageNavigation } from "@/components/ui/page-navigation";
+import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { WizardStepper, type WizardStep } from "@/components/ui/wizard-stepper";
 import { cn } from "@/lib/utils";
 import {
@@ -58,7 +58,6 @@ const wizardSteps: WizardStep[] = [
   { id: "precio", label: "Precio y stock" },
   { id: "venta-rapida", label: "Venta rápida" },
   { id: "config", label: "Configuración" },
-  { id: "confirmar", label: "Confirmar" },
 ];
 
 export function ProductForm({
@@ -79,8 +78,6 @@ export function ProductForm({
   const [quickMode, setQuickMode] = useState(!isEditing);
   const [currentStep, setCurrentStep] = useState(0);
   const topRef = useRef<HTMLDivElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-  const [confirmSnapshot, setConfirmSnapshot] = useState<FormData | null>(null);
 
   const metadata =
     initialProduct?.metadata && typeof initialProduct.metadata === "object"
@@ -102,10 +99,6 @@ export function ProductForm({
   );
 
   function goToStep(step: number) {
-    // Al entrar al paso de confirmación (último), capturar snapshot del formulario
-    if (step === maxSteps - 1 && formRef.current) {
-      setConfirmSnapshot(new FormData(formRef.current));
-    }
     setCurrentStep(step);
     topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -129,29 +122,6 @@ export function ProductForm({
   const defaultFastRotation = metadata?.fast_rotation === true;
   const defaultPinned = metadata?.pinned === true;
 
-  // Validación del snapshot para deshabilitar botón submit en confirmación
-  const snapshotValid = useMemo(() => {
-    if (!confirmSnapshot) return false;
-    const name = (confirmSnapshot.get("name") as string) ?? "";
-    const salePrice = (confirmSnapshot.get("salePrice") as string) ?? "";
-    const currentStock = (confirmSnapshot.get("currentStock") as string) ?? "";
-    const sku = (confirmSnapshot.get("sku") as string) ?? "";
-    const barcode = (confirmSnapshot.get("barcode") as string) ?? "";
-
-    if (name.trim().length < 2) return false;
-    if (Number(salePrice) <= 0) return false;
-    if (Number(currentStock) <= 0) return false;
-
-    // Almacén y ferretería necesitan al menos SKU o barcode
-    if (businessType === "almacen" || businessType === "ferreteria") {
-      if (!sku && !barcode) return false;
-    }
-
-    return true;
-  }, [confirmSnapshot, businessType]);
-
-  const isLastStep = currentStep === maxSteps - 1;
-
   return (
     <div ref={topRef} className="space-y-6">
       <PageNavigation backHref={backHref} />
@@ -169,29 +139,22 @@ export function ProductForm({
         />
       ) : null}
 
-      <form
-        ref={formRef}
-        action={formAction}
-        className="space-y-6"
-        onChange={() => setIsDirty(true)}
-      >
+      <form action={formAction} className="space-y-6" onChange={() => setIsDirty(true)}>
         {!isEditing ? (
           <div className={cn("flex items-center justify-between", formMutedSectionClass)}>
             <div>
               <p className="text-sm font-medium text-foreground">Modo de carga</p>
               <p className="text-xs text-muted-foreground">{quickSummary}</p>
             </div>
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                checked={quickMode}
-                onChange={(event) => {
-                  setQuickMode(event.target.checked);
-                  setCurrentStep(0);
-                }}
-              />
-              Rápido
-            </label>
+            <ToggleSwitch
+              name=""
+              label="Rápido"
+              checked={quickMode}
+              onChange={(checked) => {
+                setQuickMode(checked);
+                setCurrentStep(0);
+              }}
+            />
           </div>
         ) : null}
 
@@ -246,18 +209,6 @@ export function ProductForm({
           </div>
         ) : null}
 
-        {/* Paso 5 — Confirmación (solo en modo avanzado + creación) */}
-        {showAdvanced && !isEditing && confirmSnapshot ? (
-          <div className={currentStep === 4 ? "" : "hidden"}>
-            <ProductConfirmSection
-              snapshot={confirmSnapshot}
-              businessType={businessType}
-              categories={categories}
-              suppliers={suppliers}
-            />
-          </div>
-        ) : null}
-
         {/* Hidden: active siempre se envía como "true" en creación (por defecto) */}
         <input type="hidden" name="active" value={initialProduct?.active !== false ? "true" : "false"} />
 
@@ -287,7 +238,7 @@ export function ProductForm({
                 </Button>
               ) : (
                 <>
-                  <Button type="submit" disabled={pending || !snapshotValid}>
+                  <Button type="submit" disabled={pending}>
                     {pending ? "Guardando..." : submitLabel}
                   </Button>
                   {!isEditing ? (
@@ -296,7 +247,7 @@ export function ProductForm({
                       variant="outline"
                       name="intent"
                       value="create_another"
-                      disabled={pending || !snapshotValid}
+                      disabled={pending}
                     >
                       {pending ? "Guardando..." : "Guardar y crear otro"}
                     </Button>
