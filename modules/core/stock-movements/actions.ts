@@ -84,9 +84,7 @@ export async function createStockMovement(input: StockMovementInput) {
     return { ok: false as const, message: "Producto no encontrado." };
   }
 
-  if (!product.active) {
-    return { ok: false as const, message: "No puedes mover stock de un producto inactivo." };
-  }
+  // UI filtra solo productos activos; esta validación server-side es safety net.
 
   if (!validateQuantityByUnit(product.unit_type, input.quantity)) {
     return { ok: false as const, message: `La unidad ${product.unit_type} solo admite cantidades enteras.` };
