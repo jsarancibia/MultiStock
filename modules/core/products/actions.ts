@@ -320,7 +320,7 @@ export async function createProductAction(
     salePrice: formData.get("salePrice"),
     minStock: formData.get("minStock"),
     currentStock: formData.get("currentStock"),
-    active: formData.get("active") === "on",
+    active: formData.get("active") === "on" || formData.get("active") === "true",
     businessType: business.business_type,
     metadata,
   });
@@ -413,7 +413,7 @@ export async function updateProductAction(
     salePrice: formData.get("salePrice"),
     minStock: formData.get("minStock"),
     currentStock: formData.get("currentStock"),
-    active: formData.get("active") === "on",
+    active: formData.get("active") === "on" || formData.get("active") === "true",
     businessType: business.business_type,
     metadata,
   });
