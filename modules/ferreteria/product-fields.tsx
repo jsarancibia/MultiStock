@@ -12,7 +12,7 @@ function valueOf(metadata: Record<string, unknown> | null | undefined, key: stri
 
 export function FerreteriaProductFields({ metadata }: FerreteriaProductFieldsProps) {
   return (
-    <div className="grid gap-3 rounded-lg border border-border bg-muted/40 p-4 sm:grid-cols-2">
+    <div className="grid gap-3 sm:grid-cols-2">
       <div className="space-y-1">
         <label htmlFor="brand" className="text-sm font-medium text-foreground">
           Marca
@@ -39,7 +39,7 @@ export function FerreteriaProductFields({ metadata }: FerreteriaProductFieldsPro
       </div>
       <div className="space-y-1 sm:col-span-2">
         <label htmlFor="technical_specs" className="text-sm font-medium text-foreground">
-          Especificaciones tecnicas
+          Especificaciones técnicas
         </label>
         <textarea
           id="technical_specs"

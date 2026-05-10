@@ -5,7 +5,8 @@ import type { BusinessType } from "@/config/business-types";
 import type { ProductActionState } from "@/modules/core/products/actions";
 import { ProductBasicSection } from "@/components/productos/product-basic-section";
 import { ProductPricingSection } from "@/components/productos/product-pricing-section";
-import { ProductBusinessFields } from "@/components/productos/product-business-fields";
+import { ProductQuickSaleSection } from "@/components/productos/product-quick-sale-section";
+import { ProductConfigSection } from "@/components/productos/product-config-section";
 import { Button } from "@/components/ui/button";
 import { PageNavigation } from "@/components/ui/page-navigation";
 import { WizardStepper, type WizardStep } from "@/components/ui/wizard-stepper";
@@ -54,8 +55,8 @@ const initialState: ProductActionState = {};
 const wizardSteps: WizardStep[] = [
   { id: "basicos", label: "Datos básicos" },
   { id: "precio", label: "Precio y stock" },
-  { id: "rubro", label: "Datos del rubro" },
-  { id: "confirmar", label: "Confirmar" },
+  { id: "venta-rapida", label: "Venta rápida" },
+  { id: "config", label: "Configuración" },
 ];
 
 export function ProductForm({
@@ -116,6 +117,10 @@ export function ProductForm({
   // En modo rápido o edición, mostrar todo (comportamiento original)
   const showAllSections = !showAdvanced || isEditing;
 
+  // Valores por defecto para venta rápida y configuración
+  const defaultFastRotation = metadata?.fast_rotation === true;
+  const defaultPinned = metadata?.pinned === true;
+
   return (
     <div ref={topRef} className="space-y-6">
       <PageNavigation backHref={backHref} />
@@ -126,7 +131,6 @@ export function ProductForm({
           steps={wizardSteps}
           currentStep={currentStep}
           onStepClick={(step) => {
-            // Solo permitir ir a pasos anteriores o al siguiente completado
             if (step <= currentStep) {
               goToStep(step);
             }
@@ -155,7 +159,7 @@ export function ProductForm({
           </div>
         ) : null}
 
-        {/* Paso 1 o sección única */}
+        {/* Paso 1 — Datos básicos (o sección única en modo rápido) */}
         <div className={showAllSections || currentStep === 0 ? "" : "hidden"}>
           <ProductBasicSection
             showAdvanced={showAdvanced}
@@ -173,10 +177,9 @@ export function ProductForm({
           />
         </div>
 
-        {/* Paso 2 */}
+        {/* Paso 2 — Precio y stock */}
         <div className={showAllSections || currentStep === 1 ? "" : "hidden"}>
           <ProductPricingSection
-            showAdvanced={showAdvanced}
             salePriceDefault={initialProduct?.sale_price ?? "0"}
             currentStockDefault={initialProduct?.current_stock ?? "0"}
             costPriceDefault={defaultCostPrice}
@@ -187,28 +190,28 @@ export function ProductForm({
           />
         </div>
 
-        {/* Paso 3 */}
-        <div className={showAllSections || currentStep === 2 ? "" : "hidden"}>
-          <ProductBusinessFields
-            businessType={businessType}
-            metadata={metadata}
-            show={showAdvanced}
-          />
-        </div>
-
-        {/* Paso 4 */}
-        <div className={showAllSections || currentStep === 3 ? "" : "hidden"}>
-          <div className={formMutedSectionClass}>
-            <h2 className="mb-2 text-sm font-semibold text-foreground">4) Confirmar</h2>
-            <p className="text-xs text-muted-foreground">
-              Revisa nombre, precio de venta y stock inicial.
-            </p>
-            <label className="mt-3 flex items-center gap-2 text-sm text-foreground">
-              <input type="checkbox" name="active" defaultChecked={initialProduct?.active ?? true} />
-              Producto activo
-            </label>
+        {/* Paso 3 — Venta rápida (solo en modo avanzado) */}
+        {showAdvanced ? (
+          <div className={showAllSections || currentStep === 2 ? "" : "hidden"}>
+            <ProductQuickSaleSection
+              defaultFastRotation={defaultFastRotation}
+              defaultPinned={defaultPinned}
+            />
           </div>
-        </div>
+        ) : null}
+
+        {/* Paso 4 — Configuración del producto (solo en modo avanzado) */}
+        {showAdvanced ? (
+          <div className={showAllSections || currentStep === 3 ? "" : "hidden"}>
+            <ProductConfigSection
+              businessType={businessType}
+              metadata={metadata}
+            />
+          </div>
+        ) : null}
+
+        {/* Hidden: active siempre se envía como "true" en creación (por defecto) */}
+        <input type="hidden" name="active" value={initialProduct?.active !== false ? "true" : "false"} />
 
         <FormMessage message={state?.errors?.unitType?.[0]} />
         <FormMessage message={state?.errors?.costPrice?.[0]} />

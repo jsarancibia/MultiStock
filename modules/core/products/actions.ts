@@ -70,24 +70,27 @@ async function syncPerishableProductAlert(
 }
 
 function buildMetadataFromFormData(formData: FormData, businessType: BusinessType) {
+  const common = {
+    fast_rotation: formData.get("fast_rotation") === "on",
+    pinned: formData.get("pinned") === "on",
+  };
+
   if (businessType === "verduleria") {
     return {
+      ...common,
       is_perishable: formData.get("is_perishable") === "on",
       expiration_days: Number(formData.get("expiration_days") || 0),
       allows_weight_sale: formData.get("allows_weight_sale") === "on",
       waste_tracking: formData.get("waste_tracking") === "on",
-      pinned: formData.get("pinned") === "on",
     };
   }
   if (businessType === "almacen") {
     return {
-      fast_rotation: formData.get("fast_rotation") === "on",
-      suggested_margin: Number(formData.get("suggested_margin") || 0),
-      commercial_category: String(formData.get("commercial_category") || ""),
-      pinned: formData.get("pinned") === "on",
+      ...common,
     };
   }
   return {
+    ...common,
     brand: String(formData.get("brand") || ""),
     model: String(formData.get("model") || ""),
     material: String(formData.get("material") || ""),
