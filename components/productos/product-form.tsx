@@ -123,6 +123,24 @@ export function ProductForm({
     }
   }
 
+  function handleFormKeyDown(event: React.KeyboardEvent<HTMLFormElement>) {
+    // Solo interceptar Enter
+    if (event.key !== "Enter") return;
+
+    // Permitir Shift+Enter en textareas
+    if (event.shiftKey) return;
+
+    const target = event.target as HTMLElement;
+    // Si el foco está en un textarea, no interceptar
+    if (target.tagName === "TEXTAREA") return;
+
+    // Si no es el último paso, prevenir submit y avanzar
+    if (currentStep < maxSteps - 1) {
+      event.preventDefault();
+      handleNext();
+    }
+  }
+
   // En modo rápido o edición, mostrar todo (comportamiento original)
   const showAllSections = !showAdvanced || isEditing;
 
@@ -175,6 +193,7 @@ export function ProductForm({
         action={formAction}
         className="space-y-6"
         onChange={() => setIsDirty(true)}
+        onKeyDown={handleFormKeyDown}
       >
         {!isEditing ? (
           <div className={cn("flex items-center justify-between", formMutedSectionClass)}>
