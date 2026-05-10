@@ -2,10 +2,15 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StockTable } from "@/components/inventario/stock-table";
-import { listInventoryProducts, listLowStockProducts } from "@/modules/core/inventory/actions";
+import { ReactivateProductsBanner } from "@/components/inventario/reactivate-products-banner";
+import { listInventoryProducts, listLowStockProducts, countInactiveProducts } from "@/modules/core/inventory/actions";
 
 export default async function InventarioPage() {
-  const [products, lowStockProducts] = await Promise.all([listInventoryProducts(), listLowStockProducts()]);
+  const [products, lowStockProducts, inactiveCount] = await Promise.all([
+    listInventoryProducts(),
+    listLowStockProducts(),
+    countInactiveProducts(),
+  ]);
 
   return (
     <section className="space-y-6">
@@ -13,6 +18,8 @@ export default async function InventarioPage() {
         title="Inventario"
         description="Control de stock, entradas, salidas y ajustes."
       />
+
+      <ReactivateProductsBanner count={inactiveCount} />
 
       <div className="flex flex-wrap gap-3">
         <Link href="/inventario/movimientos">

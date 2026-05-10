@@ -102,3 +102,31 @@ Confirmar que `quickUpdateProductAction` es el único que ya tiene la correcció
 Para evitar este tipo de bugs, se recomienda:
 - Usar un helper `parseActiveField(value: FormDataEntryValue | null): boolean` que centralice la lógica de `"on"` / `"true"`.
 - Test de integración que verifique que un producto creado aparece en el inventario.
+
+---
+
+## Post-implementación: reparación de productos ya creados
+
+### Síntoma (reportado por el usuario)
+Aunque el bug está corregido para productos **nuevos**, los 5 productos creados antes de la corrección ya están en la base de datos con `active = false`. Siguen sin aparecer en inventario.
+
+### Solución: botón de reactivación masiva en la página de inventario
+
+Se agregaron los siguientes componentes:
+
+| Archivo | Acción |
+|---|---|
+| `modules/core/inventory/actions.ts` | Agregar `countInactiveProducts()` y `reactivateAllInactiveProducts()` |
+| `components/inventario/reactivate-products-banner.tsx` | Nuevo — banner con alerta y botón "Reactivar N producto(s)" |
+| `app/(app)/inventario/page.tsx` | Integrar banner usando `countInactiveProducts` |
+
+### Comportamiento del banner
+
+1. Al cargar la página de inventario, se consulta cuántos productos inactivos hay (`countInactiveProducts`).
+2. Si hay 0 productos inactivos, el banner no se muestra.
+3. Si hay 1+, se muestra un banner ámbar con el texto: *"Hay N producto(s) inactivo(s) que deberían estar visibles. Esto ocurrió por un bug al crear productos."*
+4. El botón "Reactivar N producto(s)" ejecuta `reactivateAllInactiveProducts` que:
+   - Actualiza `active = true` para todos los productos inactivos del negocio.
+   - Crea un audit log por cada producto reactivado.
+   - Revalida las rutas `/inventario` y `/productos`.
+5. Al completarse, el banner cambia a verde con un mensaje de éxito.
