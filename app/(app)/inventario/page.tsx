@@ -3,12 +3,20 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { StockTable } from "@/components/inventario/stock-table";
 import { listInventoryProducts, listLowStockProducts } from "@/modules/core/inventory/actions";
+import { requireUser } from "@/lib/auth/session";
+import { requireActiveBusiness } from "@/lib/business/get-active-business";
+import { getBusinessRole } from "@/lib/auth/require-business-role";
 
 export default async function InventarioPage() {
   const [products, lowStockProducts] = await Promise.all([
     listInventoryProducts(),
     listLowStockProducts(),
   ]);
+
+  const user = await requireUser();
+  const business = await requireActiveBusiness(user.id);
+  const role = await getBusinessRole(user.id, business.id);
+  const isEmployee = role === "employee";
 
   return (
     <section className="space-y-6">
@@ -21,9 +29,11 @@ export default async function InventarioPage() {
         <Link href="/inventario/movimientos">
           <Button variant="outline">Ver movimientos</Button>
         </Link>
-        <Link href="/inventario/movimientos/nuevo">
-          <Button>Registrar movimiento</Button>
-        </Link>
+        {!isEmployee && (
+          <Link href="/inventario/movimientos/nuevo">
+            <Button>Registrar movimiento</Button>
+          </Link>
+        )}
       </div>
 
       <div className="rounded-lg border p-4">

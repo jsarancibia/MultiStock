@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
 
-export type BusinessRole = "owner" | "admin" | "employee";
+export type BusinessRole = "owner" | "employee";
 
 export async function getBusinessRole(
   userId: string,

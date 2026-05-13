@@ -1,5 +1,9 @@
 -- MultiStock: roles globales en perfiles y plan de cuenta.
 -- Mantiene compatibilidad con subscription_plan por negocio.
+--
+-- ⚠ DEPRECATED: profiles.plan se mantiene por compatibilidad.
+-- Usar businesses.subscription_plan como fuente de verdad.
+-- Se eliminará en una migración futura.
 
 alter table public.profiles
   add column if not exists role text not null default 'user',

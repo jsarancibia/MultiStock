@@ -21,8 +21,8 @@ export default async function AdminPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <AdminStatCard label="Total usuarios" value={dashboard.totalUsers} />
         <AdminStatCard label="Total negocios" value={dashboard.totalBusinesses} />
-        <AdminStatCard label="Plan Free" value={dashboard.usersByPlan.free} />
-        <AdminStatCard label="Plan Pro + Business" value={dashboard.usersByPlan.pro + dashboard.usersByPlan.business} />
+        <AdminStatCard label="Negocios Free" value={dashboard.businessesByPlan.free} />
+        <AdminStatCard label="Negocios Pro + Business" value={dashboard.businessesByPlan.pro + dashboard.businessesByPlan.business} />
       </div>
 
       <PageSurface className="space-y-4">
@@ -41,7 +41,7 @@ export default async function AdminPage() {
           {dashboard.recentUsers.map((user) => (
             <li key={user.id} className="rounded-lg border border-border px-3 py-2 text-muted-foreground">
               <span className="font-medium text-foreground">{user.email ?? "Sin email"}</span>{" "}
-              - {user.role} / {user.plan} - {formatDate(user.created_at)}
+              - {user.role} - {formatDate(user.created_at)}
             </li>
           ))}
           {dashboard.recentUsers.length === 0 ? (

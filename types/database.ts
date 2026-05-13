@@ -5,7 +5,7 @@
  */
 
 export type BusinessType = "verduleria" | "almacen" | "ferreteria";
-export type BusinessRole = "owner" | "admin" | "staff";
+export type BusinessRole = "owner" | "employee";
 export type GlobalRole = "admin" | "user";
 export type SubscriptionPlan = "free" | "pro" | "business";
 export type UnitType = "unit" | "kg" | "g" | "box" | "liter" | "meter";
@@ -431,6 +431,7 @@ export type Database = {
     Functions: {
       is_business_member: { Args: { p_business_id: string }; Returns: boolean };
       is_business_admin: { Args: { p_business_id: string }; Returns: boolean };
+      get_business_role: { Args: { p_business_id: string }; Returns: string };
       create_sale_with_items: {
         Args: {
           p_business_id: string;

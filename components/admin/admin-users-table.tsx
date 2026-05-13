@@ -1,14 +1,12 @@
 import { formatSystemDateTime } from "@/lib/utils";
 import { PageSurface } from "@/components/ui/page-surface";
-import { UserPlanSelect } from "@/components/admin/user-plan-select";
 import { UserRoleSelect } from "@/components/admin/user-role-select";
-import { updateUserPlanAction, updateUserRoleAction } from "@/modules/admin/actions";
+import { updateUserRoleAction } from "@/modules/admin/actions";
 
 type AdminUserRow = {
   id: string;
   email: string | null;
   role: "admin" | "user";
-  plan: "free" | "pro" | "business";
   created_at: string;
 };
 
@@ -27,10 +25,8 @@ export function AdminUsersTable({ users }: AdminUsersTableProps) {
         <thead>
           <tr className="border-b border-border bg-muted/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
             <th className="px-4 py-3">Email</th>
-            <th className="px-4 py-3">Plan</th>
             <th className="px-4 py-3">Rol</th>
             <th className="px-4 py-3">Creado</th>
-            <th className="px-4 py-3">Cambiar plan</th>
             <th className="px-4 py-3">Cambiar rol</th>
           </tr>
         </thead>
@@ -38,16 +34,8 @@ export function AdminUsersTable({ users }: AdminUsersTableProps) {
           {users.map((user) => (
             <tr key={user.id} className="border-b border-border/70 align-top">
               <td className="px-4 py-3 text-foreground">{user.email ?? "Sin email"}</td>
-              <td className="px-4 py-3 text-muted-foreground">{user.plan}</td>
               <td className="px-4 py-3 text-muted-foreground">{user.role}</td>
               <td className="px-4 py-3 text-muted-foreground">{formatDate(user.created_at)}</td>
-              <td className="px-4 py-3">
-                <UserPlanSelect
-                  userId={user.id}
-                  currentPlan={user.plan}
-                  action={updateUserPlanAction}
-                />
-              </td>
               <td className="px-4 py-3">
                 <UserRoleSelect
                   userId={user.id}
@@ -59,7 +47,7 @@ export function AdminUsersTable({ users }: AdminUsersTableProps) {
           ))}
           {users.length === 0 ? (
             <tr>
-              <td className="px-4 py-6 text-muted-foreground" colSpan={6}>
+              <td className="px-4 py-6 text-muted-foreground" colSpan={4}>
                 No hay usuarios registrados.
               </td>
             </tr>

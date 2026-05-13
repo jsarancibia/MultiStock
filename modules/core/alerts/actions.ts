@@ -3,12 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
-import { requireUser } from "@/lib/auth/session";
-import { requireActiveBusiness } from "@/lib/business/get-active-business";
+import { requireBusinessRole } from "@/lib/auth/require-business-role";
 
 export async function listStockAlerts() {
-  const user = await requireUser();
-  const business = await requireActiveBusiness(user.id);
+  const { business } = await requireBusinessRole(["owner", "employee"]);
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -22,8 +20,7 @@ export async function listStockAlerts() {
 }
 
 export async function resolveStockAlertAction(formData: FormData) {
-  const user = await requireUser();
-  const business = await requireActiveBusiness(user.id);
+  const { user, business } = await requireBusinessRole(["owner", "employee"]);
   const alertId = String(formData.get("alertId") ?? "").trim();
   if (!alertId) return;
 

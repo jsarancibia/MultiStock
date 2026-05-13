@@ -20,7 +20,7 @@ export async function getUsers() {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id,email,role,plan,created_at")
+    .select("id,email,role,created_at")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -67,24 +67,24 @@ export async function getAdminDashboard() {
       supabase.from("businesses").select("id", { count: "exact", head: true }),
       supabase
         .from("profiles")
-        .select("id,email,role,plan,created_at")
+        .select("id,email,role,created_at")
         .order("created_at", { ascending: false })
         .limit(5),
-      supabase.from("profiles").select("plan"),
+      supabase.from("businesses").select("subscription_plan"),
     ]);
 
-  const usersByPlan = { free: 0, pro: 0, business: 0 };
+  const businessesByPlan = { free: 0, pro: 0, business: 0 };
   for (const row of planRows ?? []) {
-    const plan = adminPlanSchema.safeParse(row.plan);
+    const plan = adminPlanSchema.safeParse(row.subscription_plan);
     if (plan.success) {
-      usersByPlan[plan.data] += 1;
+      businessesByPlan[plan.data] += 1;
     }
   }
 
   return {
     totalUsers: totalUsers ?? 0,
     totalBusinesses: totalBusinesses ?? 0,
-    usersByPlan,
+    businessesByPlan,
     recentUsers: recentUsers ?? [],
   };
 }
@@ -94,22 +94,14 @@ export async function updateUserPlan(userId: string, plan: string) {
   const parsed = updateUserPlanSchema.parse({ userId, plan });
   const supabase = createAdminClient();
 
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .update({ plan: parsed.plan })
-    .eq("id", parsed.userId);
-
-  if (profileError) {
-    throw new Error("No se pudo actualizar el plan del usuario.");
-  }
-
+  // Actualizar SOLO businesses.subscription_plan (fuente de verdad única)
   const { error: businessError } = await supabase
     .from("businesses")
     .update({ subscription_plan: parsed.plan })
     .eq("owner_id", parsed.userId);
 
   if (businessError) {
-    throw new Error("El usuario cambió de plan pero no se sincronizaron sus negocios.");
+    throw new Error("No se pudo actualizar el plan del negocio.");
   }
 
   revalidatePath("/admin");
