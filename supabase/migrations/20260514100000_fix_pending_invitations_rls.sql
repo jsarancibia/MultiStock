@@ -11,12 +11,14 @@
 -- verificado del token de autenticación.
 
 -- 1. Política SELECT: el usuario puede ver sus propias invitaciones pendientes
+drop policy if exists "Users can view own pending invitations by email" on public.pending_invitations;
 create policy "Users can view own pending invitations by email"
   on public.pending_invitations for select
   to authenticated
   using (email = auth.jwt() ->> 'email');
 
 -- 2. Política SELECT para owners: el dueño del negocio puede ver todas las invitaciones de su negocio
+drop policy if exists "Owners can view pending invitations of their business" on public.pending_invitations;
 create policy "Owners can view pending invitations of their business"
   on public.pending_invitations for select
   to authenticated

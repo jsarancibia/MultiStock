@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { linkPendingInvitationsForUser } from "@/lib/auth/link-pending-invitations";
 import { createClient } from "@/lib/supabase/server";
 import type { BusinessType } from "@/config/business-types";
 import { normalizePlan, type SubscriptionPlan } from "@/config/plans";
@@ -61,6 +62,7 @@ export async function listUserBusinesses(userId: string): Promise<ActiveBusiness
 }
 
 export async function getActiveBusiness(userId: string): Promise<ActiveBusiness | null> {
+  await linkPendingInvitationsForUser({ userId });
   const userBusinesses = await listUserBusinesses(userId);
   const cookieBusinessId = await getActiveBusinessIdFromCookie();
 

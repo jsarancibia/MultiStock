@@ -2,48 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { humanizeActionError } from "@/lib/errors/action-error";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { linkPendingInvitationsForUser } from "@/lib/auth/link-pending-invitations";
+import { createClient } from "@/lib/supabase/server";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
-
-async function linkPendingInvitations(email: string) {
-  const supabase = createServiceClient();
-
-  const { data: pendingInvites } = await supabase
-    .from("pending_invitations")
-    .select("business_id")
-    .eq("email", email);
-
-  if (!pendingInvites || pendingInvites.length === 0) return;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("email", email)
-    .maybeSingle();
-
-  if (!profile) return;
-
-  for (const invite of pendingInvites) {
-    const { error: linkError } = await supabase.from("business_users").upsert(
-      {
-        business_id: invite.business_id,
-        user_id: profile.id,
-        role: "employee",
-      },
-      { onConflict: "business_id,user_id", ignoreDuplicates: true }
-    );
-
-    if (linkError) {
-      console.error("linkPendingInvitations (business_users upsert):", linkError.message);
-    }
-  }
-
-  // Limpiar invitaciones pendientes
-  await supabase
-    .from("pending_invitations")
-    .delete()
-    .eq("email", email);
-}
 
 export type AuthActionState = {
   message?: string;
@@ -74,7 +35,11 @@ export async function loginAction(
   }
 
   // Verificar si tiene invitaciones pendientes → vincularlo automaticamente
-  await linkPendingInvitations(parsed.data.email);
+  const { data: authUser } = await supabase.auth.getUser();
+  await linkPendingInvitationsForUser({
+    userId: authUser.user?.id,
+    email: parsed.data.email,
+  });
 
   redirect("/dashboard");
 }
@@ -94,7 +59,7 @@ export async function registerAction(
   }
 
   const supabase = await createClient();
-  const { error: signUpError } = await supabase.auth.signUp({
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
@@ -107,7 +72,10 @@ export async function registerAction(
   }
 
   // Vincular invitaciones pendientes (el perfil se crea via trigger)
-  await linkPendingInvitations(parsed.data.email);
+  await linkPendingInvitationsForUser({
+    userId: signUpData.user?.id,
+    email: parsed.data.email,
+  });
 
   // Intentamos iniciar sesion automaticamente para ir al dashboard.
   const { error: signInError } = await supabase.auth.signInWithPassword({
