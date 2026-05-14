@@ -1,5 +1,6 @@
 import { cancelInvitationAction, type PendingInvitation } from "@/modules/core/team/actions";
 import { CancelInvitationButton } from "@/components/team/cancel-invitation-button";
+import { ShareInviteButton } from "@/components/team/share-invite-button";
 
 type Props = {
   invitations: PendingInvitation[];
@@ -20,7 +21,10 @@ export function PendingInvitationsList({ invitations }: Props) {
                 Pendiente de registro
               </p>
             </div>
-            <CancelInvitationButton invitationId={inv.id} />
+            <div className="flex items-center gap-2">
+              <ShareInviteButton email={inv.email} />
+              <CancelInvitationButton invitationId={inv.id} />
+            </div>
           </div>
         ))}
       </div>
