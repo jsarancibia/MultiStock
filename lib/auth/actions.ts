@@ -2,15 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { humanizeActionError } from "@/lib/errors/action-error";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/types/database";
 
-async function linkPendingInvitations(
-  supabase: SupabaseClient<Database>,
-  email: string
-) {
+async function linkPendingInvitations(email: string) {
+  const supabase = createServiceClient();
+
   const { data: pendingInvites } = await supabase
     .from("pending_invitations")
     .select("business_id")
@@ -77,7 +74,7 @@ export async function loginAction(
   }
 
   // Verificar si tiene invitaciones pendientes → vincularlo automaticamente
-  await linkPendingInvitations(supabase, parsed.data.email);
+  await linkPendingInvitations(parsed.data.email);
 
   redirect("/dashboard");
 }
@@ -110,7 +107,7 @@ export async function registerAction(
   }
 
   // Vincular invitaciones pendientes (el perfil se crea via trigger)
-  await linkPendingInvitations(supabase, parsed.data.email);
+  await linkPendingInvitations(parsed.data.email);
 
   // Intentamos iniciar sesion automaticamente para ir al dashboard.
   const { error: signInError } = await supabase.auth.signInWithPassword({
