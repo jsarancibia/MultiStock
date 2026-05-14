@@ -11,12 +11,26 @@ export async function getBusinessRole(
   businessId: string
 ): Promise<BusinessRole | null> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("get_business_role", {
-    p_business_id: businessId,
-  });
 
-  if (error || !data) return null;
-  return data as BusinessRole;
+  // 1. Verificar si es owner del negocio
+  const { data: business } = await supabase
+    .from("businesses")
+    .select("owner_id")
+    .eq("id", businessId)
+    .single();
+
+  if (business?.owner_id === userId) return "owner";
+
+  // 2. Verificar en business_users
+  const { data } = await supabase
+    .from("business_users")
+    .select("role")
+    .eq("business_id", businessId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!data) return null;
+  return data.role as BusinessRole;
 }
 
 export async function requireBusinessRole(allowedRoles: BusinessRole[]) {
