@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertDialog } from "@base-ui/react/alert-dialog";
-import { toCanvas } from "qrcode";
+import { toDataURL } from "qrcode";
 import { Button } from "@/components/ui/button";
 import { Share2, Copy, Check, X, Smartphone } from "lucide-react";
 
@@ -14,23 +14,21 @@ type Props = {
 };
 
 export function ShareInviteModal({ open, onOpenChange, email, registerUrl }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (open && canvasRef.current) {
-      try {
-        toCanvas(canvasRef.current, registerUrl, {
-          width: 200,
-          margin: 2,
-          color: {
-            dark: "#18181b",
-            light: "#ffffff",
-          },
-        });
-      } catch {
-        // QR fallback silencioso
-      }
+    if (open) {
+      toDataURL(registerUrl, {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: "#18181b",
+          light: "#ffffff",
+        },
+      })
+        .then((url) => setQrDataUrl(url))
+        .catch(() => setQrDataUrl(null));
     }
   }, [open, registerUrl]);
 
@@ -80,7 +78,13 @@ export function ShareInviteModal({ open, onOpenChange, email, registerUrl }: Pro
 
           {/* QR Code */}
           <div className="mx-auto mt-5 flex w-fit flex-col items-center gap-2 rounded-xl border bg-white p-4">
-            <canvas ref={canvasRef} className="size-[200px] rounded-lg" />
+            {qrDataUrl ? (
+              <img src={qrDataUrl} alt="QR de registro" className="size-[200px] rounded-lg" />
+            ) : (
+              <div className="flex size-[200px] items-center justify-center rounded-lg bg-muted text-xs text-muted-foreground">
+                Generando QR...
+              </div>
+            )}
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Smartphone className="size-3.5" />
               Escanea para registrarse
