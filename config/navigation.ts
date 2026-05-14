@@ -12,6 +12,7 @@ export type AppModule =
   | "audit"
   | "reports"
   | "exports"
+  | "team"
   | "admin";
 
 export type NavigationItem = {
@@ -69,7 +70,7 @@ export const navigationItems: NavigationItem[] = [
   {
     label: "Equipo",
     href: "/equipo",
-    module: "suppliers",
+    module: "team",
   },
 ];
 
@@ -80,6 +81,7 @@ export function getEnabledModules(businessType: BusinessType): Set<AppModule> {
     "audit",
     "reports",
     "exports",
+    "team",
   ]);
   const businessModules = businessTypes[businessType].modules;
 

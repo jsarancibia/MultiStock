@@ -21,7 +21,10 @@ function SubmitButton() {
 }
 
 export function InviteMemberForm() {
-  const [state, formAction] = useActionState(inviteMemberAction, undefined);
+  const wrappedAction = async (_prevState: unknown, formData: FormData) => {
+    return inviteMemberAction(formData);
+  };
+  const [state, formAction] = useActionState(wrappedAction, undefined);
   const [showForm, setShowForm] = useState(false);
 
   if (!showForm) {

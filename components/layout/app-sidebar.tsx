@@ -13,6 +13,7 @@ import {
   Shield,
   Store,
   Truck,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { NavigationItem } from "@/config/navigation";
@@ -35,6 +36,7 @@ export function AppSidebar({ items, alertCount = 0 }: AppSidebarProps) {
     audit: BarChart3,
     reports: BarChart3,
     exports: Store,
+    team: Users,
     admin: Shield,
   };
 

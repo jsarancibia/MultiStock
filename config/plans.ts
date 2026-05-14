@@ -35,7 +35,7 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       monthlySales: 50,
       monthlyStockMovements: 100,
     },
-    modules: ["dashboard", "products", "inventory", "sales", "alerts"],
+    modules: ["dashboard", "products", "inventory", "sales", "alerts", "team"],
     mobileScanner: false,
     features: [
       "1 negocio activo",
@@ -70,7 +70,7 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       monthlySales: null,
       monthlyStockMovements: null,
     },
-    modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports"],
+    modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team"],
     mobileScanner: true,
     features: [
       "1 negocio activo",
@@ -101,7 +101,7 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       monthlySales: null,
       monthlyStockMovements: null,
     },
-    modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports"],
+    modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team"],
     mobileScanner: true,
     features: [
       "1 negocio activo",
