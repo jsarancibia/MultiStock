@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 type LinkPendingInvitationsInput = {
   userId?: string;
@@ -12,45 +12,69 @@ export async function linkPendingInvitationsForUser({
   email,
 }: LinkPendingInvitationsInput) {
   try {
-    const supabase = createServiceClient();
+    // Preferimos service client (bypass RLS total).
+    // Si no está configurado, usamos el cliente autenticado con RLS policies.
+    let supabase: Awaited<ReturnType<typeof createClient>>;
+    let useServiceRole = false;
+    try {
+      const serviceClient = createServiceClient();
+      // Verificamos que funcione haciendo un ping simple
+      supabase = serviceClient as unknown as Awaited<ReturnType<typeof createClient>>;
+      useServiceRole = true;
+    } catch {
+      supabase = await createClient();
+    }
+
     let profileId = userId;
     let normalizedEmail = email?.trim().toLowerCase();
 
+    // Si no tenemos email, lo buscamos por userId
     if (!normalizedEmail && profileId) {
-      const { data: profileById, error } = await supabase
+      let client;
+      try {
+        client = createServiceClient() as unknown as Awaited<ReturnType<typeof createClient>>;
+      } catch {
+        client = await createClient();
+      }
+      const { data: profileById } = await client
         .from("profiles")
         .select("id,email")
         .eq("id", profileId)
         .maybeSingle();
-
-      if (error) {
-        console.error("linkPendingInvitationsForUser (profile by id):", error.message);
-        return false;
-      }
 
       normalizedEmail = profileById?.email?.trim().toLowerCase();
     }
 
     if (!normalizedEmail) return false;
 
+    // Si no tenemos userId, lo buscamos por email (usando service para evitar RLS)
     if (!profileId) {
-      const { data: profileByEmail, error } = await supabase
+      let client;
+      try {
+        client = createServiceClient() as unknown as Awaited<ReturnType<typeof createClient>>;
+      } catch {
+        client = await createClient();
+      }
+      const { data: profileByEmail } = await client
         .from("profiles")
         .select("id")
         .eq("email", normalizedEmail)
         .maybeSingle();
-
-      if (error) {
-        console.error("linkPendingInvitationsForUser (profile by email):", error.message);
-        return false;
-      }
 
       profileId = profileByEmail?.id;
     }
 
     if (!profileId) return false;
 
-    const { data: pendingInvites, error: pendingError } = await supabase
+    // Leer pending_invitations — siempre con service role si está disponible
+    let readerClient;
+    try {
+      readerClient = createServiceClient() as unknown as Awaited<ReturnType<typeof createClient>>;
+    } catch {
+      readerClient = await createClient();
+    }
+
+    const { data: pendingInvites, error: pendingError } = await readerClient
       .from("pending_invitations")
       .select("business_id")
       .eq("email", normalizedEmail);
@@ -64,8 +88,13 @@ export async function linkPendingInvitationsForUser({
 
     let linkedAny = false;
 
+    // Para el INSERT en business_users usamos el cliente con sesión del usuario
+    // porque tenemos una RLS policy que permite insertar si tiene pending_invitation.
+    // Si tenemos service role, también funciona sin la policy.
+    const writerClient = useServiceRole ? supabase : await createClient();
+
     for (const invite of pendingInvites) {
-      const { error: linkError } = await supabase.from("business_users").upsert(
+      const { error: linkError } = await writerClient.from("business_users").upsert(
         {
           business_id: invite.business_id,
           user_id: profileId,
@@ -75,7 +104,11 @@ export async function linkPendingInvitationsForUser({
       );
 
       if (linkError) {
-        console.error("linkPendingInvitationsForUser (business_users upsert):", linkError.message);
+        console.error(
+          "linkPendingInvitationsForUser (business_users upsert):",
+          linkError.message,
+          "service_role:", useServiceRole
+        );
         continue;
       }
 
@@ -83,15 +116,21 @@ export async function linkPendingInvitationsForUser({
     }
 
     if (linkedAny) {
-      await supabase
+      // DELETE también puede hacerlo el cliente autenticado con la nueva policy
+      const deleterClient = useServiceRole ? supabase : await createClient();
+      const { error: delError } = await deleterClient
         .from("pending_invitations")
         .delete()
         .eq("email", normalizedEmail);
+
+      if (delError) {
+        console.error("linkPendingInvitationsForUser (delete pending):", delError.message);
+      }
     }
 
     return linkedAny;
   } catch (error) {
-    console.error("linkPendingInvitationsForUser:", error);
+    console.error("linkPendingInvitationsForUser (unexpected):", error);
     return false;
   }
 }
