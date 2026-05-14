@@ -19,9 +19,7 @@ export function TeamMemberRow({ member }: Props) {
   const roleLabel =
     member.role === "owner"
       ? "Dueño"
-      : member.role === "admin"
-        ? "Admin"
-        : "Empleado";
+      : "Empleado";
 
   const isOwner = member.role === "owner";
 

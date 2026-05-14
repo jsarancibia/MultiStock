@@ -381,6 +381,36 @@ export type Database = {
           { foreignKeyName: "stock_alerts_product_id_fkey"; columns: ["product_id"]; isOneToOne: false; referencedRelation: "products"; referencedColumns: ["id"] },
         ];
       };
+      pending_invitations: {
+        Row: {
+          id: string;
+          business_id: string;
+          email: string;
+          role: string;
+          invited_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          email: string;
+          role?: string;
+          invited_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          email?: string;
+          role?: string;
+          invited_by?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          { foreignKeyName: "pending_invitations_business_id_fkey"; columns: ["business_id"]; isOneToOne: false; referencedRelation: "businesses"; referencedColumns: ["id"] },
+          { foreignKeyName: "pending_invitations_invited_by_fkey"; columns: ["invited_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ];
+      };
       audit_logs: {
         Row: {
           id: string;

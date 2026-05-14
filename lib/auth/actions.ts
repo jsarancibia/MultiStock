@@ -76,6 +76,39 @@ export async function registerAction(
     };
   }
 
+  // Verificar si tiene invitaciones pendientes → salta onboarding
+  const { data: pendingInvites } = await supabase
+    .from("pending_invitations")
+    .select("business_id")
+    .eq("email", parsed.data.email);
+
+  if (pendingInvites && pendingInvites.length > 0) {
+    // Crea los vinculos como employee
+    const user = await supabase.auth.getUser();
+    const userId = user.data.user?.id;
+
+    if (userId) {
+      for (const invite of pendingInvites) {
+        await supabase.from("business_users").upsert(
+          {
+            business_id: invite.business_id,
+            user_id: userId,
+            role: "employee",
+          },
+          { onConflict: "business_id,user_id", ignoreDuplicates: true }
+        );
+      }
+
+      // Limpiar invitaciones pendientes
+      await supabase
+        .from("pending_invitations")
+        .delete()
+        .eq("email", parsed.data.email);
+    }
+
+    redirect("/dashboard");
+  }
+
   redirect("/onboarding");
 }
 

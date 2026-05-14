@@ -1,10 +1,14 @@
-import { listTeamMembers } from "@/modules/core/team/actions";
+import { listTeamMembers, listPendingInvitations } from "@/modules/core/team/actions";
 import { InviteMemberForm } from "@/components/team/invite-member-form";
 import { TeamMemberRow } from "@/components/team/team-member-row";
 import { PageHeader } from "@/components/layout/page-header";
+import { PendingInvitationsList } from "@/components/team/pending-invitations-list";
 
 export async function TeamPage() {
-  const members = await listTeamMembers();
+  const [members, pendingInvites] = await Promise.all([
+    listTeamMembers(),
+    listPendingInvitations(),
+  ]);
 
   return (
     <section className="space-y-6">
@@ -14,6 +18,10 @@ export async function TeamPage() {
       />
 
       <InviteMemberForm />
+
+      {pendingInvites.length > 0 && (
+        <PendingInvitationsList invitations={pendingInvites} />
+      )}
 
       <div className="rounded-lg border border-border bg-card text-card-foreground">
         <div className="divide-y divide-border">
