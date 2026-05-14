@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { inviteMemberAction } from "@/modules/core/team/actions";
 import { Plus, Loader2 } from "lucide-react";
@@ -21,11 +22,22 @@ function SubmitButton() {
 }
 
 export function InviteMemberForm() {
+  const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
   const wrappedAction = async (_prevState: unknown, formData: FormData) => {
     return inviteMemberAction(formData);
   };
   const [state, formAction] = useActionState(wrappedAction, undefined);
   const [showForm, setShowForm] = useState(false);
+
+  // Cuando la invitación es exitosa, cerrar formulario y refrescar
+  useEffect(() => {
+    if (state?.success) {
+      setShowForm(false);
+      formRef.current?.reset();
+      router.refresh();
+    }
+  }, [state, router]);
 
   if (!showForm) {
     return (
@@ -37,7 +49,7 @@ export function InviteMemberForm() {
   }
 
   return (
-    <form action={formAction} className="rounded-lg border border-border bg-card p-4 text-card-foreground">
+    <form ref={formRef} action={formAction} className="rounded-lg border border-border bg-card p-4 text-card-foreground">
       <div className="flex items-end gap-3">
         <div className="flex-1">
           <label htmlFor="email" className="mb-1 block text-sm font-medium">
@@ -57,10 +69,8 @@ export function InviteMemberForm() {
           Cancelar
         </Button>
       </div>
-      {state?.message && (
-        <p className={`mt-2 text-sm ${state.success ? "text-green-600" : "text-red-600"}`}>
-          {state.message}
-        </p>
+      {state?.message && !state.success && (
+        <p className="mt-2 text-sm text-red-600">{state.message}</p>
       )}
     </form>
   );
