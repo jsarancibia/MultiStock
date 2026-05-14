@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { requireBusinessRole } from "@/lib/auth/require-business-role";
 
@@ -121,8 +122,15 @@ export async function inviteMemberAction(formData: FormData) {
     return { message: "Error al crear la invitación. Intenta de nuevo." };
   }
 
+  const origin = (await headers()).get("origin") || "https://multistock-app.vercel.app";
+  const registerUrl = `${origin}/auth/register`;
+
   revalidatePath("/equipo");
-  return { success: true, message: "Invitación enviada correctamente." };
+  return {
+    success: true,
+    message: "Invitación registrada. Comparte el siguiente enlace con el empleado para que se registre.",
+    registerUrl,
+  };
 }
 
 export async function cancelInvitationAction(invitationId: string) {
