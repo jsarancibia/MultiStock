@@ -83,20 +83,27 @@ export async function registerAction(
     .eq("email", parsed.data.email);
 
   if (pendingInvites && pendingInvites.length > 0) {
-    // Crea los vinculos como employee
-    const user = await supabase.auth.getUser();
-    const userId = user.data.user?.id;
+    // Buscar el perfil recién creado por email (más confiable que getUser())
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", parsed.data.email)
+      .maybeSingle();
 
-    if (userId) {
+    if (profile) {
       for (const invite of pendingInvites) {
-        await supabase.from("business_users").upsert(
+        const { error: linkError } = await supabase.from("business_users").upsert(
           {
             business_id: invite.business_id,
-            user_id: userId,
+            user_id: profile.id,
             role: "employee",
           },
           { onConflict: "business_id,user_id", ignoreDuplicates: true }
         );
+
+        if (linkError) {
+          console.error("registerAction (business_users upsert):", linkError.message);
+        }
       }
 
       // Limpiar invitaciones pendientes

@@ -117,6 +117,7 @@ export async function inviteMemberAction(formData: FormData) {
     });
 
   if (inviteError) {
+    console.error("inviteMemberAction (pending_invitations):", inviteError.message);
     return { message: "Error al crear la invitación. Intenta de nuevo." };
   }
 
