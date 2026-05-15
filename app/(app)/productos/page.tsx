@@ -15,6 +15,8 @@ import { listProducts } from "@/modules/core/products/actions";
 import { getBusinessRole } from "@/lib/auth/require-business-role";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
+import { getProductQuota } from "@/lib/billing/get-quota";
+import { PlanUpgradeBanner } from "@/components/billing/plan-upgrade-banner";
 
 type ProductosPageProps = {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -34,11 +36,21 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
   const userBusinessRole = await getBusinessRole(user.id, activeBusiness.id);
   const isEmployee = userBusinessRole === "employee";
 
+  // Cuota de productos para el banner de upgrade
+  const productQuota = await getProductQuota(business);
+
   return (
     <section className="space-y-6">
       <PageHeader
         title="Productos"
         description="Listado general con busqueda y filtros por negocio activo."
+      />
+
+      <PlanUpgradeBanner
+        quota={productQuota}
+        plan={business.subscription_plan}
+        resourceLabel="Productos"
+        resourceUnit="productos activos"
       />
 
       <form className="grid gap-3 rounded-lg border border-border bg-card p-4 text-card-foreground sm:grid-cols-4">

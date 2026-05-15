@@ -2,7 +2,7 @@
 
 import { startTransition, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { BrowserCodeReader, BrowserMultiFormatReader } from "@zxing/browser";
+import { BrowserCodeReader, BrowserMultiFormatOneDReader } from "@zxing/browser";
 import { isValidBarcodeFormat, normalizeBarcode } from "@/lib/barcode/normalize";
 
 export type BarcodeScannerProps = {
@@ -20,7 +20,7 @@ const REARM_MS = 450;
 
 export function BarcodeScanner({ open, onClose, onDetected, continuous = false }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const readerRef = useRef<BrowserMultiFormatReader | null>(null);
+  const readerRef = useRef<BrowserMultiFormatOneDReader | null>(null);
   const controlsRef = useRef<{ stop: () => void } | null>(null);
   const hasDetectedRef = useRef(false);
   const lastEmittedRef = useRef<{ code: string; at: number } | null>(null);
@@ -58,7 +58,10 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
       rearmTimerRef.current = null;
     }
 
-    const reader = new BrowserMultiFormatReader();
+    const reader = new BrowserMultiFormatOneDReader(undefined, {
+      delayBetweenScanAttempts: 200,
+      delayBetweenScanSuccess: 200,
+    });
     readerRef.current = reader;
 
     let cancelled = false;
@@ -219,6 +222,7 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
           <video
             ref={videoRef}
             className="aspect-video w-full shrink-0 rounded-2xl bg-black object-cover shadow-xl ring-1 ring-white/10"
+            autoPlay
             muted
             playsInline
           />
