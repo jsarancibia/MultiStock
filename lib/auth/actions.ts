@@ -71,24 +71,31 @@ export async function registerAction(
     return { message: humanizeActionError(signUpError.message, "No se pudo crear la cuenta.") };
   }
 
-  // Vincular invitaciones pendientes (el perfil se crea via trigger)
-  await linkPendingInvitationsForUser({
-    userId: signUpData.user?.id,
-    email: parsed.data.email,
-  });
-
-  // Intentamos iniciar sesion automaticamente para ir al dashboard.
+  // Intentar auto-login para tener sesión activa antes de vincular invitaciones.
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
   });
 
   if (signInError) {
+    // Si no puede iniciar sesión (ej: correo no confirmado),
+    // intentamos vincular igual usando el userId del signUp (requiere service_role).
+    await linkPendingInvitationsForUser({
+      userId: signUpData.user?.id,
+      email: parsed.data.email,
+    });
     return {
       message:
-        "Cuenta creada. Si no ingresas automaticamente, confirma tu email y luego inicia sesion.",
+        "Cuenta creada. Confirma tu email y luego inicia sesion para acceder al negocio.",
     };
   }
+
+  // Sesión activa: vincular invitaciones pendientes con sesión completa.
+  const { data: authUser } = await supabase.auth.getUser();
+  await linkPendingInvitationsForUser({
+    userId: authUser.user?.id ?? signUpData.user?.id,
+    email: parsed.data.email,
+  });
 
   redirect("/dashboard");
 }
