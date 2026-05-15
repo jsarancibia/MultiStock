@@ -1,12 +1,58 @@
 import type { AppModule } from "@/config/navigation";
-import { canUseModule, getPlanLimits } from "@/config/plans";
+import { canUseModule, getPlanLimits, type SubscriptionPlan } from "@/config/plans";
 import type { ActiveBusiness } from "@/lib/business/get-active-business";
 import type { createClient } from "@/lib/supabase/server";
+import { getUpgradePath } from "@/lib/billing/plan-banner-config";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export function canBusinessUseModule(business: ActiveBusiness, module: AppModule) {
   return canUseModule(business.subscription_plan, module);
+}
+
+const PLAN_NAMES: Record<string, string> = {
+  free: "Gratis",
+  pro: "Pro",
+  super: "Super",
+  enterprise: "Enterprise",
+};
+
+function getNextPlanName(plan: string): string {
+  const path = getUpgradePath(plan as SubscriptionPlan);
+  if (path) return path.nextPlanName;
+  // Fallback para planes que no tienen upgrade definido
+  return "Pro";
+}
+
+async function assertCountLimit(
+  supabase: SupabaseServerClient,
+  business: ActiveBusiness,
+  table: string,
+  limitField: "products" | "monthlySales" | "monthlyStockMovements",
+  filters: Record<string, unknown>,
+  label: string,
+  prefix: string
+): Promise<string | null> {
+  const limit = getPlanLimits(business.subscription_plan)[limitField];
+  if (limit === null) return null;
+
+  let query = supabase
+    .from(table)
+    .select("id", { count: "exact", head: true });
+
+  for (const [key, value] of Object.entries(filters)) {
+    query = (query as any)[key](value);
+  }
+
+  const { count, error } = await query as any;
+
+  if (error) return `No se pudo validar el límite de ${label} del plan.`;
+  if ((count ?? 0) >= limit) {
+    const nextPlan = getNextPlanName(business.subscription_plan);
+    return `${prefix} permite hasta ${limit} ${label}. Actualiza a ${nextPlan} para seguir.`;
+  }
+
+  return null;
 }
 
 export function getModuleUpgradeMessage(moduleLabel: string) {
@@ -28,7 +74,9 @@ export async function assertProductLimit(
 
   if (error) return "No se pudo validar el límite de productos del plan.";
   if ((count ?? 0) >= limit) {
-    return `Tu plan Gratis permite hasta ${limit} productos activos. Actualiza a Pro para seguir cargando productos.`;
+    const planName = PLAN_NAMES[business.subscription_plan] ?? "Gratis";
+    const nextPlan = getNextPlanName(business.subscription_plan);
+    return `Tu plan ${planName} permite hasta ${limit} productos activos. Actualiza a ${nextPlan} para seguir cargando productos.`;
   }
 
   return null;
@@ -53,7 +101,9 @@ export async function assertMonthlySalesLimit(
 
   if (error) return "No se pudo validar el límite mensual de ventas del plan.";
   if ((count ?? 0) >= limit) {
-    return `Tu plan Gratis permite hasta ${limit} ventas mensuales. Actualiza a Pro para seguir registrando ventas este mes.`;
+    const planName = PLAN_NAMES[business.subscription_plan] ?? "Gratis";
+    const nextPlan = getNextPlanName(business.subscription_plan);
+    return `Tu plan ${planName} permite hasta ${limit} ventas mensuales. Actualiza a ${nextPlan} para seguir registrando ventas este mes.`;
   }
 
   return null;
@@ -78,7 +128,33 @@ export async function assertMonthlyStockMovementLimit(
 
   if (error) return "No se pudo validar el límite mensual de movimientos del plan.";
   if ((count ?? 0) >= limit) {
-    return `Tu plan Gratis permite hasta ${limit} movimientos de inventario mensuales. Actualiza a Pro para seguir registrando movimientos este mes.`;
+    const planName = PLAN_NAMES[business.subscription_plan] ?? "Gratis";
+    const nextPlan = getNextPlanName(business.subscription_plan);
+    return `Tu plan ${planName} permite hasta ${limit} movimientos de inventario mensuales. Actualiza a ${nextPlan} para seguir registrando movimientos este mes.`;
+  }
+
+  return null;
+}
+
+export async function assertMemberLimit(
+  supabase: SupabaseServerClient,
+  business: ActiveBusiness
+): Promise<string | null> {
+  const limit = getPlanLimits(business.subscription_plan).members;
+  if (limit === null) return null;
+
+  // business_users incluye al owner + employees, así que el count es el total de miembros
+  const { count, error } = await supabase
+    .from("business_users")
+    .select("id", { count: "exact", head: true })
+    .eq("business_id", business.id);
+
+  if (error) return "No se pudo validar el límite de miembros del plan.";
+
+  if ((count ?? 0) >= limit) {
+    const planName = PLAN_NAMES[business.subscription_plan] ?? "Gratis";
+    const nextPlan = getNextPlanName(business.subscription_plan);
+    return `Tu plan ${planName} permite hasta ${limit} miembros. Actualiza a ${nextPlan} para agregar más usuarios.`;
   }
 
   return null;

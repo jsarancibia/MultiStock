@@ -5,7 +5,7 @@ type AdminBusinessRow = {
   id: string;
   name: string;
   business_type: string;
-  subscription_plan: "free" | "pro" | "business";
+  subscription_plan: "free" | "pro" | "super" | "enterprise";
   owner_email: string | null;
   created_at: string;
 };

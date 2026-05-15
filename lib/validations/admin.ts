@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const adminRoleValues = ["user", "admin"] as const;
-export const adminPlanValues = ["free", "pro", "business"] as const;
+export const adminPlanValues = ["free", "pro", "super", "enterprise"] as const;
 
 export const adminRoleSchema = z.enum(adminRoleValues);
 export const adminPlanSchema = z.enum(adminPlanValues);

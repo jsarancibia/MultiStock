@@ -11,7 +11,8 @@ export const BANNER_PLAN_LIMITS: Record<
 > = {
   free: { products: 50, members: 1 },
   pro: { products: 500, members: 2 },
-  business: { products: 1_500, members: 4 },
+  super: { products: 1_500, members: 4 },
+  enterprise: { products: null, members: null },
 };
 
 export type UpgradePath = {
@@ -50,7 +51,7 @@ export const UPGRADE_PATHS: Record<string, UpgradePath | null> = {
       "Acceso anticipado a nuevas funciones",
     ],
   },
-  business: {
+  super: {
     nextPlanSlug: "enterprise",
     nextPlanName: "Enterprise",
     nextPlanPrice: "$34.990/mes",
@@ -62,6 +63,7 @@ export const UPGRADE_PATHS: Record<string, UpgradePath | null> = {
       "Soporte dedicado prioritario",
     ],
   },
+  enterprise: null,
 };
 
 export function getUpgradePath(plan: SubscriptionPlan): UpgradePath | null {

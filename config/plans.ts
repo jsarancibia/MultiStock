@@ -1,6 +1,6 @@
 import type { AppModule } from "@/config/navigation";
 
-export const subscriptionPlanValues = ["free", "pro", "business"] as const;
+export const subscriptionPlanValues = ["free", "pro", "super", "enterprise"] as const;
 
 export type SubscriptionPlan = (typeof subscriptionPlanValues)[number];
 
@@ -15,6 +15,7 @@ export type PlanDefinition = {
     products: number | null;
     monthlySales: number | null;
     monthlyStockMovements: number | null;
+    members: number | null;
   };
   modules: AppModule[];
   mobileScanner: boolean;
@@ -31,17 +32,18 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
     tag: "Prueba para empezar",
     description: "Para conocer MultiStock con un negocio pequeño y operación básica.",
     limits: {
-      products: 30,
-      monthlySales: 50,
+      products: 50,
+      monthlySales: 100,
       monthlyStockMovements: 100,
+      members: 1,
     },
     modules: ["dashboard", "products", "inventory", "sales", "alerts", "team"],
     mobileScanner: false,
     features: [
       "1 negocio activo",
       "1 cuenta de acceso",
-      "Hasta 30 productos activos",
-      "Hasta 50 ventas mensuales",
+      "Hasta 50 productos activos",
+      "Hasta 100 ventas mensuales",
       "Inventario, ventas y alertas básicas",
       "Escaneo local con cámara del dispositivo",
     ],
@@ -61,26 +63,27 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
   pro: {
     id: "pro",
     name: "Pro",
-    price: "$17.990 mensual (IVA incluido)",
+    price: "$14.990 mensual (IVA incluido)",
     tag: "Plan recomendado",
-    description: "Para negocios que usan MultiStock todos los días.",
+    description: "Para negocios que usan MultiStock todos los días. Dueño + 1 empleado.",
     highlighted: true,
     limits: {
-      products: null,
+      products: 500,
       monthlySales: null,
-      monthlyStockMovements: null,
+      monthlyStockMovements: 1_000,
+      members: 2,
     },
     modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team"],
     mobileScanner: true,
     features: [
       "1 negocio activo",
-      "1 cuenta de acceso",
-      "Productos ilimitados",
-      "Uso continuo del sistema",
+      "2 cuentas de acceso (dueño + 1 empleado)",
+      "Hasta 500 productos activos",
+      "Ventas ilimitadas",
       "Dashboard completo",
       "Productos, inventario, ventas, proveedores y alertas",
       "Escaneo con celular mediante QR",
-      "Reportes simples y exportaciones CSV",
+      "Reportes y exportaciones CSV",
       "Auditoría básica",
     ],
     support: [
@@ -90,28 +93,28 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       "Ayuda para carga inicial de productos",
     ],
   },
-  business: {
-    id: "business",
-    name: "Business",
-    price: "$29.990 mensual (IVA incluido)",
-    tag: "Más acompañamiento",
-    description: "Para negocios con mayor uso o que necesitan más soporte.",
+  super: {
+    id: "super",
+    name: "Super",
+    price: "$24.990 mensual (IVA incluido)",
+    tag: "Para negocios en crecimiento",
+    description: "Para negocios que necesitan más empleados, productos y capacidad.",
     limits: {
-      products: null,
+      products: 1_500,
       monthlySales: null,
       monthlyStockMovements: null,
+      members: 4,
     },
     modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team"],
     mobileScanner: true,
     features: [
       "1 negocio activo",
-      "1 cuenta de acceso",
-      "Productos ilimitados",
-      "Uso intensivo",
+      "Hasta 4 cuentas de acceso (dueño + 3 empleados)",
+      "Hasta 1.500 productos activos",
+      "Ventas y movimientos ilimitados",
       "Todo lo incluido en Pro",
-      "Auditoría completa",
-      "Exportaciones completas",
-      "Reportes actuales y futuros",
+      "Exportaciones Excel con temas premium",
+      "Soporte prioritario por WhatsApp",
       "Acceso anticipado a nuevas funciones",
     ],
     support: [
@@ -122,9 +125,54 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       "Revisión mensual básica de uso",
     ],
   },
+  enterprise: {
+    id: "enterprise",
+    name: "Enterprise",
+    price: "$34.990 mensual (IVA incluido)",
+    tag: "Sin límites",
+    description: "Para negocios grandes que necesitan capacidad ilimitada y soporte dedicado.",
+    limits: {
+      products: null,
+      monthlySales: null,
+      monthlyStockMovements: null,
+      members: null,
+    },
+    modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team"],
+    mobileScanner: true,
+    features: [
+      "Múltiples negocios/sucursales (cuando esté implementado)",
+      "Usuarios ilimitados",
+      "Productos ilimitados",
+      "Ventas y movimientos ilimitados",
+      "Todo lo incluido en Super",
+      "Onboarding dedicado (sesión 60 min + revisión mensual)",
+      "Soporte premium dedicado",
+    ],
+    support: [
+      "Soporte dedicado máximo",
+      "Respuesta objetivo: 1 a 4 horas",
+      "Sesión inicial de configuración de 60 min",
+      "Revisión mensual de uso y métricas",
+    ],
+  },
+};
+
+/**
+ * Mapa de backward compatibility para planes legacy.
+ * 'business' se migró a 'super' en DB vía migración SQL.
+ * Este mapa asegura que si algún código o dato obsoleto
+ * llega con 'business', se interprete como 'super'.
+ */
+const LEGACY_PLAN_MAP: Record<string, SubscriptionPlan> = {
+  business: "super",
 };
 
 export function normalizePlan(plan: string | null | undefined): SubscriptionPlan {
+  if (!plan) return "free";
+  // Backward compatibility: legacy → nuevo
+  const mapped = LEGACY_PLAN_MAP[plan];
+  if (mapped) return mapped;
+  // Válido actual
   return subscriptionPlanValues.includes(plan as SubscriptionPlan)
     ? (plan as SubscriptionPlan)
     : "free";

@@ -52,24 +52,28 @@ export async function getProductQuota(business: ActiveBusiness): Promise<QuotaIn
  */
 export async function getMemberQuota(business: ActiveBusiness): Promise<QuotaInfo> {
   const supabase = await createClient();
-  const bannerLimit = getBannerLimit(business.subscription_plan, "members");
 
-  if (bannerLimit === null) {
+  // Primero intentar desde plan-limits real (members), luego banner config como fallback
+  const planLimit = getPlanLimits(business.subscription_plan).members;
+  const bannerLimit = getBannerLimit(business.subscription_plan, "members");
+  const effectiveLimit = planLimit ?? bannerLimit;
+
+  if (effectiveLimit === null) {
     return { current: 0, limit: null, percentage: 0, isNearLimit: false, isAtLimit: false };
   }
 
+  // business_users incluye al owner + employees, el count es el total de miembros
   const { count } = await supabase
     .from("business_users")
     .select("id", { count: "exact", head: true })
     .eq("business_id", business.id);
 
-  // Owner (1) + employees (count)
-  const current = 1 + (count ?? 0);
-  const percentage = Math.round((current / bannerLimit) * 100);
+  const current = count ?? 0;
+  const percentage = Math.round((current / effectiveLimit) * 100);
 
   return {
     current,
-    limit: bannerLimit,
+    limit: effectiveLimit,
     percentage,
     isNearLimit: percentage >= 80 && percentage < 100,
     isAtLimit: percentage >= 100,

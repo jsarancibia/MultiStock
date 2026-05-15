@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { requireBusinessRole } from "@/lib/auth/require-business-role";
+import { assertMemberLimit } from "@/lib/billing/plan-guards";
 
 export type TeamMember = {
   id: string;
@@ -54,6 +55,10 @@ export async function inviteMemberAction(formData: FormData) {
   if (!email) return { message: "Email requerido." };
 
   const supabase = await createClient();
+
+  // Verificar límite de miembros del plan antes de invitar
+  const limitMessage = await assertMemberLimit(supabase, business);
+  if (limitMessage) return { message: limitMessage };
 
   // 1. Verificar si ya tiene cuenta
   const { data: profile } = await supabase

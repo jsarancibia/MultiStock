@@ -22,7 +22,9 @@ export default async function AdminPage() {
         <AdminStatCard label="Total usuarios" value={dashboard.totalUsers} />
         <AdminStatCard label="Total negocios" value={dashboard.totalBusinesses} />
         <AdminStatCard label="Negocios Free" value={dashboard.businessesByPlan.free} />
-        <AdminStatCard label="Negocios Pro + Business" value={dashboard.businessesByPlan.pro + dashboard.businessesByPlan.business} />
+        <AdminStatCard label="Negocios Pro" value={dashboard.businessesByPlan.pro} />
+        <AdminStatCard label="Negocios Super" value={dashboard.businessesByPlan.super} />
+        <AdminStatCard label="Negocios Enterprise" value={dashboard.businessesByPlan.enterprise} />
       </div>
 
       <PageSurface className="space-y-4">

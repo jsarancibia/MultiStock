@@ -73,7 +73,7 @@ export async function getAdminDashboard() {
       supabase.from("businesses").select("subscription_plan"),
     ]);
 
-  const businessesByPlan = { free: 0, pro: 0, business: 0 };
+  const businessesByPlan: Record<string, number> = { free: 0, pro: 0, super: 0, enterprise: 0 };
   for (const row of planRows ?? []) {
     const plan = adminPlanSchema.safeParse(row.subscription_plan);
     if (plan.success) {

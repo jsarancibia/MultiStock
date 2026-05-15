@@ -10,7 +10,7 @@ const initialState: AdminActionState = {};
 
 type UserPlanSelectProps = {
   userId: string;
-  currentPlan: "free" | "pro" | "business";
+  currentPlan: "free" | "pro" | "super" | "enterprise";
   action: (
     prevState: AdminActionState | undefined,
     formData: FormData
@@ -26,7 +26,8 @@ export function UserPlanSelect({ userId, currentPlan, action }: UserPlanSelectPr
       <select name="plan" defaultValue={currentPlan} className={panelSelectClass}>
         <option value="free">free</option>
         <option value="pro">pro</option>
-        <option value="business">business</option>
+        <option value="super">super</option>
+        <option value="enterprise">enterprise</option>
       </select>
       <Button type="submit" variant="outline" disabled={pending}>
         {pending ? "..." : "Guardar"}

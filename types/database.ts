@@ -7,7 +7,7 @@
 export type BusinessType = "verduleria" | "almacen" | "ferreteria";
 export type BusinessRole = "owner" | "employee";
 export type GlobalRole = "admin" | "user";
-export type SubscriptionPlan = "free" | "pro" | "business";
+export type SubscriptionPlan = "free" | "pro" | "super" | "enterprise";
 export type UnitType = "unit" | "kg" | "g" | "box" | "liter" | "meter";
 export type StockMovementType =
   | "purchase"

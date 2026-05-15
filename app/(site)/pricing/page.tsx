@@ -12,7 +12,12 @@ export const metadata: Metadata = {
   description: "Planes mensuales de MultiStock para negocios pequeños en Chile.",
 };
 
-const plans = [PLAN_DEFINITIONS.free, PLAN_DEFINITIONS.pro, PLAN_DEFINITIONS.business] as const;
+const plans = [
+  PLAN_DEFINITIONS.free,
+  PLAN_DEFINITIONS.pro,
+  PLAN_DEFINITIONS.super,
+  PLAN_DEFINITIONS.enterprise,
+] as const;
 
 export default async function PricingPage() {
   // Si el usuario tiene sesión y no es admin, redirigir al dashboard
@@ -43,7 +48,7 @@ export default async function PricingPage() {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan) => (
             <article
               key={plan.name}
@@ -94,8 +99,9 @@ export default async function PricingPage() {
 
         <div className="mt-8 rounded-2xl border border-border bg-card/60 px-4 py-3 text-sm text-muted-foreground">
           <p>
-            Por ahora no hay checkout automático: si necesitas Pro o Business, el cambio de plan se
-            gestiona manualmente. Mientras tanto, cada cuenta nueva queda asociada al plan Gratis.
+            Por ahora no hay checkout automático: si necesitas Pro, Super o Enterprise, el cambio de
+            plan se gestiona manualmente. Mientras tanto, cada cuenta nueva queda asociada al plan
+            Gratis.
           </p>
         </div>
 
