@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { ActiveBusiness } from "@/lib/business/get-active-business";
-import { getPlanLimits } from "@/config/plans";
-import { getBannerLimit } from "@/lib/billing/plan-banner-config";
+import { getPlanLimits, isEffectivelyUnlimited } from "@/config/plans";
 
 export type QuotaInfo = {
   current: number;
@@ -9,19 +8,33 @@ export type QuotaInfo = {
   percentage: number;
   isNearLimit: boolean;
   isAtLimit: boolean;
+  /** true si el plan se muestra como "ilimitado" comercialmente */
+  effectivelyUnlimited: boolean;
 };
 
 /**
  * Obtiene el conteo actual de productos activos y lo compara
- * con el límite del plan (null = ilimitado).
+ * con el límite del plan.
+ *
+ * Para planes "comercialmente ilimitados" (enterprise) retorna
+ * limit: null, evitando banners de upgrade.
  */
 export async function getProductQuota(business: ActiveBusiness): Promise<QuotaInfo> {
   const supabase = await createClient();
   const planLimit = getPlanLimits(business.subscription_plan).products;
-  const bannerLimit = getBannerLimit(business.subscription_plan, "products");
+  const effectivelyUnlimited = isEffectivelyUnlimited(business.subscription_plan, "products");
 
-  // El límite "real" de la lógica de negocio
-  const effectiveLimit = planLimit ?? bannerLimit;
+  // Si es comercialmente ilimitado, no mostrar medidores
+  if (effectivelyUnlimited) {
+    return {
+      current: 0,
+      limit: null,
+      percentage: 0,
+      isNearLimit: false,
+      isAtLimit: false,
+      effectivelyUnlimited: true,
+    };
+  }
 
   const { count } = await supabase
     .from("products")
@@ -31,35 +44,48 @@ export async function getProductQuota(business: ActiveBusiness): Promise<QuotaIn
 
   const current = count ?? 0;
 
-  if (effectiveLimit === null) {
-    return { current, limit: null, percentage: 0, isNearLimit: false, isAtLimit: false };
+  if (planLimit === null) {
+    return { current, limit: null, percentage: 0, isNearLimit: false, isAtLimit: false, effectivelyUnlimited: false };
   }
 
-  const percentage = Math.round((current / effectiveLimit) * 100);
+  const percentage = Math.round((current / planLimit) * 100);
 
   return {
     current,
-    limit: effectiveLimit,
+    limit: planLimit,
     percentage,
     isNearLimit: percentage >= 80 && percentage < 100,
     isAtLimit: percentage >= 100,
+    effectivelyUnlimited: false,
   };
 }
 
 /**
  * Obtiene el conteo actual de miembros (owner + employees) y lo compara
  * con el límite del plan.
+ *
+ * Para planes "comercialmente ilimitados" (enterprise) retorna
+ * limit: null, evitando banners de upgrade.
  */
 export async function getMemberQuota(business: ActiveBusiness): Promise<QuotaInfo> {
   const supabase = await createClient();
-
-  // Primero intentar desde plan-limits real (members), luego banner config como fallback
   const planLimit = getPlanLimits(business.subscription_plan).members;
-  const bannerLimit = getBannerLimit(business.subscription_plan, "members");
-  const effectiveLimit = planLimit ?? bannerLimit;
+  const effectivelyUnlimited = isEffectivelyUnlimited(business.subscription_plan, "members");
 
-  if (effectiveLimit === null) {
-    return { current: 0, limit: null, percentage: 0, isNearLimit: false, isAtLimit: false };
+  // Si es comercialmente ilimitado, no mostrar medidores
+  if (effectivelyUnlimited) {
+    return {
+      current: 0,
+      limit: null,
+      percentage: 0,
+      isNearLimit: false,
+      isAtLimit: false,
+      effectivelyUnlimited: true,
+    };
+  }
+
+  if (planLimit === null) {
+    return { current: 0, limit: null, percentage: 0, isNearLimit: false, isAtLimit: false, effectivelyUnlimited: false };
   }
 
   // business_users incluye al owner + employees, el count es el total de miembros
@@ -69,13 +95,14 @@ export async function getMemberQuota(business: ActiveBusiness): Promise<QuotaInf
     .eq("business_id", business.id);
 
   const current = count ?? 0;
-  const percentage = Math.round((current / effectiveLimit) * 100);
+  const percentage = Math.round((current / planLimit) * 100);
 
   return {
     current,
-    limit: effectiveLimit,
+    limit: planLimit,
     percentage,
     isNearLimit: percentage >= 80 && percentage < 100,
     isAtLimit: percentage >= 100,
+    effectivelyUnlimited: false,
   };
 }

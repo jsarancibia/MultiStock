@@ -16,6 +16,11 @@ export type PlanDefinition = {
     monthlySales: number | null;
     monthlyStockMovements: number | null;
     members: number | null;
+    /**
+     * Límite de clientes fiados para el futuro módulo de fiado.
+     * 0 = no disponible, null = ilimitado, número = tope técnico.
+     */
+    creditCustomers: number | null;
   };
   modules: AppModule[];
   mobileScanner: boolean;
@@ -36,6 +41,7 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       monthlySales: 100,
       monthlyStockMovements: 100,
       members: 1,
+      creditCustomers: 0,
     },
     modules: ["dashboard", "products", "inventory", "sales", "alerts", "team"],
     mobileScanner: false,
@@ -72,6 +78,7 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       monthlySales: null,
       monthlyStockMovements: 1_000,
       members: 2,
+      creditCustomers: 10,
     },
     modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team"],
     mobileScanner: true,
@@ -100,17 +107,18 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
     tag: "Para negocios en crecimiento",
     description: "Para negocios que necesitan más empleados, productos y capacidad.",
     limits: {
-      products: 1_500,
+      products: 1_000,
       monthlySales: null,
       monthlyStockMovements: null,
       members: 4,
+      creditCustomers: 100,
     },
     modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team"],
     mobileScanner: true,
     features: [
       "1 negocio activo",
       "Hasta 4 cuentas de acceso (dueño + 3 empleados)",
-      "Hasta 1.500 productos activos",
+      "Hasta 1.000 productos activos",
       "Ventas y movimientos ilimitados",
       "Todo lo incluido en Pro",
       "Exportaciones Excel con temas premium",
@@ -129,21 +137,24 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
     id: "enterprise",
     name: "Enterprise",
     price: "$34.990 mensual (IVA incluido)",
-    tag: "Sin límites",
-    description: "Para negocios grandes que necesitan capacidad ilimitada y soporte dedicado.",
+    tag: "Para grandes volúmenes",
+    description: "Para negocios grandes que necesitan capacidad sin preocupaciones y soporte dedicado.",
     limits: {
-      products: null,
+      // Técnicamente tiene límite para proteger infraestructura
+      products: 50_000,
       monthlySales: null,
       monthlyStockMovements: null,
-      members: null,
+      members: 100,
+      creditCustomers: 50_000,
     },
     modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team"],
     mobileScanner: true,
     features: [
-      "Múltiples negocios/sucursales (cuando esté implementado)",
+      "1 negocio activo",
       "Usuarios ilimitados",
       "Productos ilimitados",
       "Ventas y movimientos ilimitados",
+      "Fiado ilimitado (cuando esté disponible)",
       "Todo lo incluido en Super",
       "Onboarding dedicado (sesión 60 min + revisión mensual)",
       "Soporte premium dedicado",
@@ -176,6 +187,32 @@ export function normalizePlan(plan: string | null | undefined): SubscriptionPlan
   return subscriptionPlanValues.includes(plan as SubscriptionPlan)
     ? (plan as SubscriptionPlan)
     : "free";
+}
+
+/**
+ * Planes que comercialmente se muestran como "ilimitados"
+ * aunque tengan un tope técnico interno.
+ */
+const EFFECTIVELY_UNLIMITED: Record<string, { products: boolean; members: boolean; creditCustomers: boolean }> = {
+  enterprise: { products: true, members: true, creditCustomers: true },
+};
+
+/**
+ * Indica si un recurso específico se comporta como "ilimitado" en la UI
+ * y en los mensajes de usuario, aunque tenga un tope técnico.
+ */
+export function isEffectivelyUnlimited(
+  plan: SubscriptionPlan,
+  resource: "products" | "members" | "creditCustomers"
+): boolean {
+  return EFFECTIVELY_UNLIMITED[plan]?.[resource] ?? false;
+}
+
+/**
+ * Retorna true para planes que NO tienen un plan superior al cual hacer upgrade.
+ */
+export function isTopTier(plan: SubscriptionPlan): boolean {
+  return plan === "enterprise";
 }
 
 export function canUseModule(plan: SubscriptionPlan, module: AppModule) {

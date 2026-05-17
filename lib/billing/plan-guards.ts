@@ -1,5 +1,5 @@
 import type { AppModule } from "@/config/navigation";
-import { canUseModule, getPlanLimits, type SubscriptionPlan } from "@/config/plans";
+import { canUseModule, getPlanLimits, isTopTier, type SubscriptionPlan } from "@/config/plans";
 import type { ActiveBusiness } from "@/lib/business/get-active-business";
 import type { createClient } from "@/lib/supabase/server";
 import { getUpgradePath } from "@/lib/billing/plan-banner-config";
@@ -18,10 +18,10 @@ const PLAN_NAMES: Record<string, string> = {
 };
 
 function getNextPlanName(plan: string): string {
+  if (isTopTier(plan as SubscriptionPlan)) return "";
   const path = getUpgradePath(plan as SubscriptionPlan);
   if (path) return path.nextPlanName;
-  // Fallback para planes que no tienen upgrade definido
-  return "Pro";
+  return "";
 }
 
 async function assertCountLimit(
@@ -48,6 +48,10 @@ async function assertCountLimit(
 
   if (error) return `No se pudo validar el límite de ${label} del plan.`;
   if ((count ?? 0) >= limit) {
+    // Enterprise: mensaje elegante sin revelar números
+    if (isTopTier(business.subscription_plan)) {
+      return `Tu negocio alcanzó un volumen muy alto de ${label}. Contacta soporte para ampliar capacidad.`;
+    }
     const nextPlan = getNextPlanName(business.subscription_plan);
     return `${prefix} permite hasta ${limit} ${label}. Actualiza a ${nextPlan} para seguir.`;
   }
@@ -74,6 +78,10 @@ export async function assertProductLimit(
 
   if (error) return "No se pudo validar el límite de productos del plan.";
   if ((count ?? 0) >= limit) {
+    // Enterprise: mensaje elegante sin revelar el tope técnico
+    if (isTopTier(business.subscription_plan)) {
+      return "Tu negocio alcanzó un volumen muy alto de productos. Contacta soporte para ampliar capacidad.";
+    }
     const planName = PLAN_NAMES[business.subscription_plan] ?? "Gratis";
     const nextPlan = getNextPlanName(business.subscription_plan);
     return `Tu plan ${planName} permite hasta ${limit} productos activos. Actualiza a ${nextPlan} para seguir cargando productos.`;
@@ -101,6 +109,9 @@ export async function assertMonthlySalesLimit(
 
   if (error) return "No se pudo validar el límite mensual de ventas del plan.";
   if ((count ?? 0) >= limit) {
+    if (isTopTier(business.subscription_plan)) {
+      return "Tu negocio alcanzó un volumen muy alto de ventas este mes. Contacta soporte para ampliar capacidad.";
+    }
     const planName = PLAN_NAMES[business.subscription_plan] ?? "Gratis";
     const nextPlan = getNextPlanName(business.subscription_plan);
     return `Tu plan ${planName} permite hasta ${limit} ventas mensuales. Actualiza a ${nextPlan} para seguir registrando ventas este mes.`;
@@ -128,6 +139,9 @@ export async function assertMonthlyStockMovementLimit(
 
   if (error) return "No se pudo validar el límite mensual de movimientos del plan.";
   if ((count ?? 0) >= limit) {
+    if (isTopTier(business.subscription_plan)) {
+      return "Tu negocio alcanzó un volumen muy alto de movimientos este mes. Contacta soporte para ampliar capacidad.";
+    }
     const planName = PLAN_NAMES[business.subscription_plan] ?? "Gratis";
     const nextPlan = getNextPlanName(business.subscription_plan);
     return `Tu plan ${planName} permite hasta ${limit} movimientos de inventario mensuales. Actualiza a ${nextPlan} para seguir registrando movimientos este mes.`;
@@ -152,6 +166,9 @@ export async function assertMemberLimit(
   if (error) return "No se pudo validar el límite de miembros del plan.";
 
   if ((count ?? 0) >= limit) {
+    if (isTopTier(business.subscription_plan)) {
+      return "Tu negocio alcanzó un volumen muy alto de usuarios. Contacta soporte para ampliar capacidad.";
+    }
     const planName = PLAN_NAMES[business.subscription_plan] ?? "Gratis";
     const nextPlan = getNextPlanName(business.subscription_plan);
     return `Tu plan ${planName} permite hasta ${limit} miembros. Actualiza a ${nextPlan} para agregar más usuarios.`;

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { TrendingUp, ArrowUpRight, AlertTriangle, Mail } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -21,11 +20,12 @@ type PlanUpgradeBannerProps = {
  *
  * - < 80%: no se muestra
  * - ≥ 80% y < 100%: banner ámbar "estás cerca del límite"
- * - ≥ 100%: banner rojo/ámbar intenso "llegaste al límite"
- *
- * Muestra progreso visual con barra, qué ganas upgradeando, y botón a /pricing.
+ * - ≥ 100%: banner rojo "llegaste al límite"
+ * - Enterprise o planes comercialmente ilimitados: nunca se muestra
  */
 export function PlanUpgradeBanner({ quota, plan, resourceLabel, resourceUnit }: PlanUpgradeBannerProps) {
+  // No mostrar si el plan es comercialmente ilimitado
+  if (quota.effectivelyUnlimited) return null;
   if (!quota.limit) return null;
 
   const upgradePath = getUpgradePath(plan);
