@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Check, Info, Mail, X, Package, Users, TrendingUp } from "lucide-react";
+import { Check, Info, Mail, X } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { PLAN_DEFINITIONS, isEffectivelyUnlimited } from "@/config/plans";
+import { PLAN_DEFINITIONS } from "@/config/plans";
 import { cn } from "@/lib/utils";
 import { getCurrentProfile } from "@/lib/auth/is-admin";
 import { gmailLink, SALES_EMAIL } from "@/lib/email-links";
@@ -19,33 +19,6 @@ const plans = [
   PLAN_DEFINITIONS.super,
   PLAN_DEFINITIONS.enterprise,
 ] as const;
-
-/** Retorna un arreglo de estadísticas clave por plan */
-function getPlanStats(plan: typeof plans[number]) {
-  return [
-    {
-      icon: Package,
-      label: "Productos",
-      value: isEffectivelyUnlimited(plan.id, "products")
-        ? "Ilimitados"
-        : plan.limits.products?.toLocaleString("es-CL") ?? "Ilimitados",
-    },
-    {
-      icon: TrendingUp,
-      label: "Ventas mensuales",
-      value: plan.limits.monthlySales === null
-        ? "Ilimitadas"
-        : `Hasta ${plan.limits.monthlySales}`,
-    },
-    {
-      icon: Users,
-      label: "Usuarios",
-      value: isEffectivelyUnlimited(plan.id, "members")
-        ? "Ilimitados"
-        : plan.limits.members?.toLocaleString("es-CL") ?? "Ilimitados",
-    },
-  ];
-}
 
 export default async function PricingPage() {
   // Si el usuario tiene sesión y no es admin, redirigir al dashboard
@@ -77,90 +50,74 @@ export default async function PricingPage() {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {plans.map((plan) => {
-            const stats = getPlanStats(plan);
-            return (
-              <article
-                key={plan.name}
-                className={cn(
-                  "flex flex-col rounded-2xl border p-6 shadow-sm",
-                  plan.highlighted
-                    ? "border-primary/40 bg-primary/[0.04] ring-1 ring-primary/20"
-                    : "border-border/80 bg-card/50"
-                )}
-              >
-                <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                  {plan.name}
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">{plan.tag}</p>
-                <p className="mt-4 text-3xl font-semibold tracking-tight">{plan.price}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
+          {plans.map((plan) => (
+            <article
+              key={plan.name}
+              className={cn(
+                "flex flex-col rounded-2xl border p-6 shadow-sm",
+                plan.highlighted
+                  ? "border-primary/40 bg-primary/[0.04] ring-1 ring-primary/20"
+                  : "border-border/80 bg-card/50"
+              )}
+            >
+              <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                {plan.name}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">{plan.tag}</p>
+              <p className="mt-4 text-3xl font-semibold tracking-tight">{plan.price}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
 
-                {/* Estadísticas clave */}
-                <div className="mt-5 grid grid-cols-2 gap-3">
-                  {stats.map((stat) => (
-                    <div key={stat.label} className="rounded-lg border border-border/60 bg-background/40 p-2.5">
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <stat.icon className="size-3" aria-hidden />
-                        <span>{stat.label}</span>
-                      </div>
-                      <p className="mt-0.5 text-sm font-medium text-foreground">{stat.value}</p>
-                    </div>
-                  ))}
-                </div>
+              <ul className="mt-5 space-y-2.5 text-sm text-foreground/90">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex gap-2">
+                    <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
 
-                <ul className="mt-5 space-y-2.5 text-sm text-foreground/90">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex gap-2">
-                      <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-                      {feature}
+              {plan.limitations?.length ? (
+                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+                  {plan.limitations.map((limitation) => (
+                    <li key={limitation} className="flex gap-2">
+                      <X className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
+                      {limitation}
                     </li>
                   ))}
                 </ul>
+              ) : null}
 
-                {plan.limitations?.length ? (
-                  <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                    {plan.limitations.map((limitation) => (
-                      <li key={limitation} className="flex gap-2">
-                        <X className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
-                        {limitation}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
+              <div className="mt-5 rounded-xl border border-border/80 bg-background/60 p-3 text-sm">
+                <p className="font-medium">Soporte incluido</p>
+                <ul className="mt-2 space-y-1.5 text-muted-foreground">
+                  {plan.support.map((item) => (
+                    <li key={item}>- {item}</li>
+                  ))}
+                </ul>
+              </div>
 
-                <div className="mt-5 rounded-xl border border-border/80 bg-background/60 p-3 text-sm">
-                  <p className="font-medium">Soporte incluido</p>
-                  <ul className="mt-2 space-y-1.5 text-muted-foreground">
-                    {plan.support.map((item) => (
-                      <li key={item}>- {item}</li>
-                    ))}
-                  </ul>
+              {plan.id !== "free" && (
+                <div className="mt-auto pt-4">
+                  <a
+                    href={gmailLink(
+                      SALES_EMAIL,
+                      `Quiero contratar MultiStock ${plan.name}`,
+                      `Hola MultiStock,\n\nQuiero contratar el plan ${plan.name} de MultiStock.\n\nDatos del negocio:\n- Nombre del negocio:\n- Rubro: (almacén / verdulería / ferretería)\n- Ciudad:\n- Cantidad aproximada de productos:\n- Cantidad de trabajadores que usarán el sistema:\n\nDatos de contacto:\n- Nombre:\n- Teléfono/WhatsApp:\n- Correo:\n\nQuedo atento(a).`
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn(
+                      buttonVariants({ variant: plan.highlighted ? "default" : "outline" }),
+                      "w-full gap-2"
+                    )}
+                  >
+                    <Mail className="size-4" />
+                    Contratar {plan.name}
+                  </a>
                 </div>
-
-                {plan.id !== "free" && (
-                  <div className="mt-auto pt-4">
-                    <a
-                      href={gmailLink(
-                        SALES_EMAIL,
-                        `Quiero contratar MultiStock ${plan.name}`,
-                        `Hola MultiStock,\n\nQuiero contratar el plan ${plan.name} de MultiStock.\n\nDatos del negocio:\n- Nombre del negocio:\n- Rubro: (almacén / verdulería / ferretería)\n- Ciudad:\n- Cantidad aproximada de productos:\n- Cantidad de trabajadores que usarán el sistema:\n\nDatos de contacto:\n- Nombre:\n- Teléfono/WhatsApp:\n- Correo:\n\nQuedo atento(a).`
-                      )}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={cn(
-                        buttonVariants({ variant: plan.highlighted ? "default" : "outline" }),
-                        "w-full gap-2"
-                      )}
-                    >
-                      <Mail className="size-4" />
-                      Contratar {plan.name}
-                    </a>
-                  </div>
-                )}
-              </article>
-            );
-          })}
+              )}
+            </article>
+          ))}
         </div>
 
         <div className="mt-8 rounded-2xl border border-border bg-card/60 px-4 py-3 text-sm text-muted-foreground">
