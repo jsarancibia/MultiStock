@@ -146,8 +146,10 @@ export function PlanUpgradeBanner({ quota, plan, resourceLabel, resourceUnit }: 
             href={gmailLink(
               SALES_EMAIL,
               `Quiero actualizar mi plan ${plan}`,
-              `Hola, quiero actualizar mi plan ${plan} de MultiStock.\n\nMi correo:\n`
+              `Hola MultiStock,\n\nQuiero actualizar mi plan ${plan} de MultiStock.\n\nDatos del negocio:\n- Nombre del negocio:\n- Rubro: (almacén / verdulería / ferretería)\n- Ciudad:\n- Cantidad aproximada de productos:\n- Cantidad de trabajadores que usarán el sistema:\n\nDatos de contacto:\n- Nombre:\n- Teléfono/WhatsApp:\n- Correo:\n\nQuedo atento(a).`
             )}
+            target="_blank"
+            rel="noopener noreferrer"
             className={cn(
               buttonVariants({ size: "sm" }),
               "mt-1 inline-flex items-center gap-1.5"

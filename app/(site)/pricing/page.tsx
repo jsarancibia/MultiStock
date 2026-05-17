@@ -153,8 +153,10 @@ export default async function PricingPage() {
                       href={gmailLink(
                         SALES_EMAIL,
                         `Quiero contratar MultiStock ${plan.name}`,
-                        `Hola, quiero contratar el plan ${plan.name} de MultiStock.\n\nMi correo:\n`
+                        `Hola MultiStock,\n\nQuiero contratar el plan ${plan.name} de MultiStock.\n\nDatos del negocio:\n- Nombre del negocio:\n- Rubro: (almacén / verdulería / ferretería)\n- Ciudad:\n- Cantidad aproximada de productos:\n- Cantidad de trabajadores que usarán el sistema:\n\nDatos de contacto:\n- Nombre:\n- Teléfono/WhatsApp:\n- Correo:\n\nQuedo atento(a).`
                       )}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className={cn(
                         buttonVariants({ variant: plan.highlighted ? "default" : "outline" }),
                         "w-full gap-2"
@@ -177,8 +179,10 @@ export default async function PricingPage() {
               href={gmailLink(
                 SALES_EMAIL,
                 "Quiero contratar MultiStock",
-                "Hola, quiero contratar un plan de MultiStock.\n\nMi correo:\n"
+                "Hola MultiStock,\n\nQuiero contratar un plan de MultiStock.\n\nDatos del negocio:\n- Nombre del negocio:\n- Rubro: (almacén / verdulería / ferretería)\n- Ciudad:\n- Cantidad aproximada de productos:\n- Cantidad de trabajadores que usarán el sistema:\n\nDatos de contacto:\n- Nombre:\n- Teléfono/WhatsApp:\n- Correo:\n\nQuedo atento(a)."
               )}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-primary hover:underline"
             >
               Escríbenos a {SALES_EMAIL}
