@@ -61,6 +61,8 @@ const wizardSteps: WizardStep[] = [
   { id: "confirmar", label: "Confirmar" },
 ];
 
+const QUICK_SALE_BUSINESS_TYPES: BusinessType[] = ["almacen", "verduleria"];
+
 export function ProductForm({
   businessType,
   categories,
@@ -88,7 +90,12 @@ export function ProductForm({
       : null;
 
   const showAdvanced = !quickMode || isEditing;
-  const maxSteps = showAdvanced ? wizardSteps.length : 1;
+  // Ferretería no necesita el paso de venta rápida
+  const filteredSteps = businessType === "ferreteria"
+    ? wizardSteps.filter((s) => s.id !== "venta-rapida")
+    : wizardSteps;
+  const maxSteps = showAdvanced ? filteredSteps.length : 1;
+  const currentStepId = showAdvanced ? filteredSteps[currentStep]?.id ?? "basicos" : "basicos";
 
   const defaultUnitType = initialProduct?.unit_type ?? "unit";
   const defaultCostPrice = initialProduct?.cost_price ?? "0";
@@ -177,7 +184,7 @@ export function ProductForm({
       {/* Wizard stepper (solo en modo avanzado/creación) */}
       {showAdvanced && !isEditing ? (
         <WizardStepper
-          steps={wizardSteps}
+          steps={filteredSteps}
           currentStep={currentStep}
           onStepClick={(step) => {
             if (step <= currentStep) {
@@ -243,9 +250,9 @@ export function ProductForm({
           />
         </div>
 
-        {/* Paso 3 — Venta rápida (solo en modo avanzado) */}
-        {showAdvanced ? (
-          <div className={showAllSections || currentStep === 2 ? "" : "hidden"}>
+        {/* Paso 3 — Venta rápida (solo en modo avanzado, solo para almacén/verdulería) */}
+        {showAdvanced && QUICK_SALE_BUSINESS_TYPES.includes(businessType) ? (
+          <div className={showAllSections || currentStepId === "venta-rapida" ? "" : "hidden"}>
             <ProductQuickSaleSection
               defaultFastRotation={defaultFastRotation}
               defaultPinned={defaultPinned}
@@ -255,7 +262,7 @@ export function ProductForm({
 
         {/* Paso 4 — Confirmación (solo en modo avanzado + creación) */}
         {showAdvanced && !isEditing && confirmSnapshot ? (
-          <div className={currentStep === 3 ? "" : "hidden"}>
+          <div className={currentStepId === "confirmar" ? "" : "hidden"}>
             <ProductConfigSection
               businessType={businessType}
               metadata={metadata}
