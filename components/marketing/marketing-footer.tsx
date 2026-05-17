@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { Mail } from "lucide-react";
+
+const SALES_EMAIL = process.env.NEXT_PUBLIC_SALES_EMAIL ?? "multistock.dev@gmail.com";
 
 export function MarketingFooter() {
   return (
@@ -21,6 +24,13 @@ export function MarketingFooter() {
             <Link className="text-muted-foreground hover:text-foreground" href="/demo">
               Demo
             </Link>
+            <a
+              href={`mailto:${SALES_EMAIL}`}
+              className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
+            >
+              <Mail className="size-3.5" />
+              Contacto
+            </a>
             <Link className="text-muted-foreground hover:text-foreground" href="/auth/login">
               Ingresar
             </Link>

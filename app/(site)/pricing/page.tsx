@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Check, Info, X } from "lucide-react";
+import { Check, Info, Mail, X } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { PLAN_DEFINITIONS } from "@/config/plans";
 import { cn } from "@/lib/utils";
 import { getCurrentProfile } from "@/lib/auth/is-admin";
+
+const SALES_EMAIL = process.env.NEXT_PUBLIC_SALES_EMAIL ?? "multistock.dev@gmail.com";
 
 export const metadata: Metadata = {
   title: "Precios",
@@ -93,15 +95,36 @@ export default async function PricingPage() {
                   ))}
                 </ul>
               </div>
+
+              {plan.id !== "free" && (
+                <div className="mt-auto pt-4">
+                  <a
+                    href={`mailto:${SALES_EMAIL}?subject=Quiero%20contratar%20MultiStock%20${encodeURIComponent(plan.name)}&body=Hola,%20quiero%20contratar%20el%20plan%20${encodeURIComponent(plan.name)}%20de%20MultiStock.%0A%0AMi%20correo%3A%0A%0A`}
+                    className={cn(
+                      buttonVariants({ variant: plan.highlighted ? "default" : "outline" }),
+                      "w-full gap-2"
+                    )}
+                  >
+                    <Mail className="size-4" />
+                    Contratar {plan.name}
+                  </a>
+                </div>
+              )}
             </article>
           ))}
         </div>
 
         <div className="mt-8 rounded-2xl border border-border bg-card/60 px-4 py-3 text-sm text-muted-foreground">
           <p>
-            Por ahora no hay checkout automático: si necesitas Pro, Super o Enterprise, el cambio de
-            plan se gestiona manualmente. Mientras tanto, cada cuenta nueva queda asociada al plan
-            Gratis.
+            El cambio de plan se gestiona manualmente por ahora.{" "}
+            <a
+              href={`mailto:${SALES_EMAIL}?subject=Quiero%20contratar%20MultiStock&body=Hola,%20quiero%20contratar%20un%20plan%20de%20MultiStock.%0A%0AMi%20correo%3A%0A%0A`}
+              className="font-medium text-primary hover:underline"
+            >
+              Escríbenos a {SALES_EMAIL}
+            </a>{" "}
+            y te asignamos el plan que necesites. Mientras tanto, cada cuenta nueva queda asociada al
+            plan Gratis.
           </p>
         </div>
 
