@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Check, Info, Mail, X, Package, Users, CreditCard, TrendingUp } from "lucide-react";
+import { Check, Info, Mail, X, Package, Users, TrendingUp } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { PLAN_DEFINITIONS, isEffectivelyUnlimited } from "@/config/plans";
 import { cn } from "@/lib/utils";
@@ -43,15 +43,6 @@ function getPlanStats(plan: typeof plans[number]) {
       value: isEffectivelyUnlimited(plan.id, "members")
         ? "Ilimitados"
         : plan.limits.members?.toLocaleString("es-CL") ?? "Ilimitados",
-    },
-    {
-      icon: CreditCard,
-      label: "Fiado (próximamente)",
-      value: plan.limits.creditCustomers === 0
-        ? "No disponible"
-        : isEffectivelyUnlimited(plan.id, "creditCustomers")
-          ? "Ilimitado"
-          : `Hasta ${plan.limits.creditCustomers} personas`,
     },
   ];
 }
