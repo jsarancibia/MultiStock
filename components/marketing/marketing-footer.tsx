@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Mail } from "lucide-react";
-
-const SALES_EMAIL = process.env.NEXT_PUBLIC_SALES_EMAIL ?? "multistock.dev@gmail.com";
+import { gmailLink, SALES_EMAIL } from "@/lib/email-links";
 
 export function MarketingFooter() {
   return (
@@ -25,7 +24,9 @@ export function MarketingFooter() {
               Demo
             </Link>
             <a
-              href={`mailto:${SALES_EMAIL}`}
+              href={gmailLink(SALES_EMAIL, "Contacto MultiStock", "")}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
             >
               <Mail className="size-3.5" />

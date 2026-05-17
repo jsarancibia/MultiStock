@@ -4,8 +4,7 @@ import { cn } from "@/lib/utils";
 import type { QuotaInfo } from "@/lib/billing/get-quota";
 import { getUpgradePath } from "@/lib/billing/plan-banner-config";
 import type { SubscriptionPlan } from "@/config/plans";
-
-const SALES_EMAIL = process.env.NEXT_PUBLIC_SALES_EMAIL ?? "multistock.dev@gmail.com";
+import { gmailLink, SALES_EMAIL } from "@/lib/email-links";
 
 type PlanUpgradeBannerProps = {
   quota: QuotaInfo;
@@ -144,7 +143,11 @@ export function PlanUpgradeBanner({ quota, plan, resourceLabel, resourceUnit }: 
 
           {/* Botón */}
           <a
-            href={`mailto:${SALES_EMAIL}?subject=Quiero%20actualizar%20mi%20plan%20${encodeURIComponent(plan)}&body=Hola,%20quiero%20actualizar%20mi%20plan%20${encodeURIComponent(plan)}%20de%20MultiStock.%0A%0AMi%20correo%3A%0A%0A`}
+            href={gmailLink(
+              SALES_EMAIL,
+              `Quiero actualizar mi plan ${plan}`,
+              `Hola, quiero actualizar mi plan ${plan} de MultiStock.\n\nMi correo:\n`
+            )}
             className={cn(
               buttonVariants({ size: "sm" }),
               "mt-1 inline-flex items-center gap-1.5"

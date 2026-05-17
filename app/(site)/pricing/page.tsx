@@ -6,8 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { PLAN_DEFINITIONS, isEffectivelyUnlimited } from "@/config/plans";
 import { cn } from "@/lib/utils";
 import { getCurrentProfile } from "@/lib/auth/is-admin";
-
-const SALES_EMAIL = process.env.NEXT_PUBLIC_SALES_EMAIL ?? "multistock.dev@gmail.com";
+import { gmailLink, SALES_EMAIL } from "@/lib/email-links";
 
 export const metadata: Metadata = {
   title: "Precios",
@@ -151,7 +150,11 @@ export default async function PricingPage() {
                 {plan.id !== "free" && (
                   <div className="mt-auto pt-4">
                     <a
-                      href={`mailto:${SALES_EMAIL}?subject=Quiero%20contratar%20MultiStock%20${encodeURIComponent(plan.name)}&body=Hola,%20quiero%20contratar%20el%20plan%20${encodeURIComponent(plan.name)}%20de%20MultiStock.%0A%0AMi%20correo%3A%0A%0A`}
+                      href={gmailLink(
+                        SALES_EMAIL,
+                        `Quiero contratar MultiStock ${plan.name}`,
+                        `Hola, quiero contratar el plan ${plan.name} de MultiStock.\n\nMi correo:\n`
+                      )}
                       className={cn(
                         buttonVariants({ variant: plan.highlighted ? "default" : "outline" }),
                         "w-full gap-2"
@@ -171,7 +174,11 @@ export default async function PricingPage() {
           <p>
             El cambio de plan se gestiona manualmente por ahora.{" "}
             <a
-              href={`mailto:${SALES_EMAIL}?subject=Quiero%20contratar%20MultiStock&body=Hola,%20quiero%20contratar%20un%20plan%20de%20MultiStock.%0A%0AMi%20correo%3A%0A%0A`}
+              href={gmailLink(
+                SALES_EMAIL,
+                "Quiero contratar MultiStock",
+                "Hola, quiero contratar un plan de MultiStock.\n\nMi correo:\n"
+              )}
               className="font-medium text-primary hover:underline"
             >
               Escríbenos a {SALES_EMAIL}
