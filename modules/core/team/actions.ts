@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { createAuditLog } from "@/lib/audit/create-audit-log";
 import { createClient } from "@/lib/supabase/server";
 import { requireBusinessRole } from "@/lib/auth/require-business-role";
 import { assertMemberLimit } from "@/lib/billing/plan-guards";
@@ -157,9 +158,21 @@ export async function cancelInvitationAction(invitationId: string) {
 }
 
 export async function removeMemberAction(userId: string) {
-  const { business } = await requireBusinessRole(["owner"]);
+  const { business, user } = await requireBusinessRole(["owner"]);
 
   const supabase = await createClient();
+
+  const { data: member } = await supabase
+    .from("business_users")
+    .select("role, profiles!inner(full_name, email)")
+    .eq("business_id", business.id)
+    .eq("user_id", userId)
+    .single();
+
+  const memberName = (member?.profiles as { full_name: string | null; email: string | null } | undefined)?.full_name ?? undefined;
+  const memberEmail = (member?.profiles as { full_name: string | null; email: string | null } | undefined)?.email ?? undefined;
+  const memberRole = member?.role;
+
   const { error } = await supabase
     .from("business_users")
     .delete()
@@ -169,6 +182,20 @@ export async function removeMemberAction(userId: string) {
   if (error) {
     return { message: "Error al eliminar miembro." };
   }
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "team_member",
+    entityId: userId,
+    action: "deleted",
+    summary: `Miembro eliminado: ${memberName ?? "Sin nombre"}`,
+    beforeData: {
+      name: memberName,
+      email: memberEmail,
+      role: memberRole,
+    },
+  });
 
   revalidatePath("/equipo");
   return { success: true, message: "Miembro eliminado correctamente." };

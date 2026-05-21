@@ -8,7 +8,8 @@ export type AuditEntityType =
   | "supplier"
   | "category"
   | "stock_alert"
-  | "business";
+  | "business"
+  | "team_member";
 
 export type AuditAction =
   | "created"
