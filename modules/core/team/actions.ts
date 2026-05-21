@@ -164,10 +164,10 @@ export async function removeMemberAction(userId: string) {
 
   const { data: member } = await supabase
     .from("business_users")
-    .select("role, profiles!inner(full_name, email)")
+    .select("role, profiles(full_name, email)")
     .eq("business_id", business.id)
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
 
   const memberName = (member?.profiles as { full_name: string | null; email: string | null } | undefined)?.full_name ?? undefined;
   const memberEmail = (member?.profiles as { full_name: string | null; email: string | null } | undefined)?.email ?? undefined;
