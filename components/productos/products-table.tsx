@@ -27,12 +27,14 @@ type ProductRow = {
   categories: { name: string } | null;
   suppliers: { name: string } | null;
   supplier_id: string | null;
+  category_id: string | null;
 };
 
 type ProductsTableProps = {
   businessType: BusinessType;
   products: ProductRow[];
   suppliers: { id: string; name: string }[];
+  categories: { id: string; name: string }[];
   isEmployee?: boolean;
 };
 
@@ -40,7 +42,7 @@ function meta(m: unknown) {
   return m && typeof m === "object" ? (m as Record<string, unknown>) : {};
 }
 
-export function ProductsTable({ businessType, products, suppliers, isEmployee = false }: ProductsTableProps) {
+export function ProductsTable({ businessType, products, suppliers, categories, isEmployee = false }: ProductsTableProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState(false);
@@ -98,10 +100,12 @@ export function ProductsTable({ businessType, products, suppliers, isEmployee = 
                     <InlineProductEditor
                       productId={product.id}
                       initialSupplierId={product.supplier_id}
+                      initialCategoryId={product.category_id}
                       initialSalePrice={product.sale_price}
                       initialCostPrice={product.cost_price}
                       initialActive={product.active}
                       suppliers={suppliers}
+                      categories={categories}
                       onSaved={() => setEditingId(null)}
                       onCancel={() => setEditingId(null)}
                     />
@@ -154,7 +158,7 @@ export function ProductsTable({ businessType, products, suppliers, isEmployee = 
                 <td className="px-3 py-2">{formatCurrency(product.sale_price)}</td>
                 <td className="px-3 py-2">{product.active ? "Activo" : "Inactivo"}</td>
                 <td className="px-3 py-2">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     {!isEmployee && (
                       <Button
                         type="button"

@@ -45,6 +45,57 @@ export async function getSupplierById(supplierId: string) {
   return data;
 }
 
+export type QuickSupplierActionState = {
+  message?: string;
+  errors?: Record<string, string[]>;
+  createdId?: string;
+  createdName?: string;
+};
+
+export async function createSupplierQuickAction(
+  _prevState: QuickSupplierActionState | undefined,
+  formData: FormData
+): Promise<QuickSupplierActionState | undefined> {
+  const user = await requireUser();
+  const business = await requireActiveBusiness(user.id);
+
+  const name = (formData.get("name") as string)?.trim();
+  if (!name) {
+    return { message: "El nombre del proveedor es obligatorio." };
+  }
+
+  const supabase = await createClient();
+  const { data: created, error } = await supabase
+    .from("suppliers")
+    .insert({
+      business_id: business.id,
+      name,
+    })
+    .select("id")
+    .single();
+
+  if (error || !created) {
+    return {
+      message: humanizeActionError(
+        error?.message,
+        "No se pudo crear el proveedor."
+      ),
+    };
+  }
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "supplier",
+    entityId: created.id,
+    action: "created",
+    summary: `Proveedor creado desde producto: ${name}`,
+    afterData: { name },
+  });
+
+  return { message: "Proveedor creado.", createdId: created.id, createdName: name };
+}
+
 export async function createSupplierAction(
   _prevState: SupplierActionState | undefined,
   formData: FormData

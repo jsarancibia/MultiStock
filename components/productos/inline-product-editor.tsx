@@ -8,14 +8,17 @@ import { FormMessage } from "@/components/ui/form-message";
 import { quickUpdateProductAction } from "@/modules/core/products/actions";
 import type { ProductActionState } from "@/modules/core/products/actions";
 import { Loader2 } from "lucide-react";
+import { marginPercentOnCost } from "@/lib/business/business-type-config";
 
 type InlineProductEditorProps = {
   productId: string;
   initialSupplierId: string | null;
+  initialCategoryId: string | null;
   initialSalePrice: string;
   initialCostPrice: string;
   initialActive: boolean;
   suppliers: { id: string; name: string }[];
+  categories: { id: string; name: string }[];
   onSaved: () => void;
   onCancel: () => void;
 };
@@ -25,10 +28,12 @@ const initialState: ProductActionState = {};
 export function InlineProductEditor({
   productId,
   initialSupplierId,
+  initialCategoryId,
   initialSalePrice,
   initialCostPrice,
   initialActive,
   suppliers,
+  categories,
   onSaved,
   onCancel,
 }: InlineProductEditorProps) {
@@ -38,6 +43,10 @@ export function InlineProductEditor({
     initialState,
   );
 
+  const margin = marginPercentOnCost(
+    Number(initialCostPrice),
+    Number(initialSalePrice),
+  );
   const success = state?.success;
 
   // Si la acción fue exitosa, llamamos onSaved y refrescamos datos del servidor
@@ -66,6 +75,24 @@ export function InlineProductEditor({
             {suppliers.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label htmlFor={`category-${productId}`} className="text-xs font-medium text-foreground">
+            Categoria
+          </label>
+          <select
+            id={`category-${productId}`}
+            name="categoryId"
+            className={panelSelectClass}
+            defaultValue={initialCategoryId ?? ""}
+          >
+            <option value="">Sin categoria</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
               </option>
             ))}
           </select>
@@ -114,6 +141,13 @@ export function InlineProductEditor({
             required
           />
         </div>
+        {margin !== null && (
+          <div className="flex items-end pb-1">
+            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+              Margen: {margin.toFixed(0)}%
+            </span>
+          </div>
+        )}
       </div>
 
       <FormMessage message={state?.message} />

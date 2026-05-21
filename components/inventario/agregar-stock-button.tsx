@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { panelInputClass } from "@/components/ui/form-field-styles";
 import { FormMessage } from "@/components/ui/form-message";
@@ -13,7 +13,7 @@ type Props = {
   currentStock: string;
 };
 
-type ActionState = { message?: string };
+type ActionState = { success?: boolean; message?: string };
 
 const initialState: ActionState = {};
 
@@ -21,6 +21,13 @@ export function AgregarStockButton({ productId, productName, currentStock }: Pro
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(agregarStockRapidoAction, initialState);
   const [qty, setQty] = useState("");
+
+  useEffect(() => {
+    if (state?.success) {
+      setOpen(false);
+      setQty("");
+    }
+  }, [state]);
 
   if (!open) {
     return (

@@ -52,6 +52,7 @@ export const productFiltersSchema = z.object({
 
 export const quickProductUpdateSchema = z.object({
   supplierId: z.string().uuid().optional().or(z.literal("")),
+  categoryId: z.string().uuid().optional().or(z.literal("")),
   salePrice: z.coerce.number().min(0, "Precio inválido."),
   costPrice: z.coerce.number().min(0, "Costo inválido."),
   active: z.coerce.boolean().default(true),

@@ -118,6 +118,7 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
         businessType={business.business_type}
         products={products}
         suppliers={suppliers.map((s) => ({ id: s.id, name: s.name }))}
+        categories={categories.map((c) => ({ id: c.id, name: c.name }))}
         isEmployee={isEmployee}
       />
 

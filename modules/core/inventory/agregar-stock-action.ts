@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createStockMovement } from "@/modules/core/stock-movements/actions";
 
-export type AgregarStockState = { message?: string };
+export type AgregarStockState = { success?: boolean; message?: string };
 
 export async function agregarStockRapidoAction(
   _prev: AgregarStockState | undefined,
@@ -23,5 +23,5 @@ export async function agregarStockRapidoAction(
   if (!result.ok) return { message: result.message };
 
   revalidatePath("/inventario");
-  return { message: `+${quantity} unidades agregadas.` };
+  return { success: true, message: `+${quantity} unidades agregadas.` };
 }

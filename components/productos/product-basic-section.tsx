@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
 import { createCategoryAction } from "@/modules/core/categories/actions";
+import { createSupplierQuickAction } from "@/modules/core/suppliers/actions";
 
 type Option = { id: string; name: string };
 
@@ -50,12 +51,26 @@ export function ProductBasicSection({
   const [pendingCatId, setPendingCatId] = useState<string | null>(null);
   const categoryRef = useRef<HTMLSelectElement>(null);
 
+  const [showNewSupplier, setShowNewSupplier] = useState(false);
+  const [newSupName, setNewSupName] = useState("");
+  const [localSuppliers, setLocalSuppliers] = useState(suppliers);
+  const [supPending, setSupPending] = useState(false);
+  const [pendingSupId, setPendingSupId] = useState<string | null>(null);
+  const supplierRef = useRef<HTMLSelectElement>(null);
+
   useEffect(() => {
     if (pendingCatId && categoryRef.current) {
       categoryRef.current.value = pendingCatId;
       setPendingCatId(null);
     }
   }, [pendingCatId]);
+
+  useEffect(() => {
+    if (pendingSupId && supplierRef.current) {
+      supplierRef.current.value = pendingSupId;
+      setPendingSupId(null);
+    }
+  }, [pendingSupId]);
 
   async function handleCreateCategory() {
     if (!newCatName.trim()) return;
@@ -73,6 +88,24 @@ export function ProductBasicSection({
       setShowNewCategory(false);
     }
     setCatPending(false);
+  }
+
+  async function handleCreateSupplier() {
+    if (!newSupName.trim()) return;
+    setSupPending(true);
+    const fd = new FormData();
+    fd.set("name", newSupName.trim());
+    const result = await createSupplierQuickAction(undefined, fd);
+    if (result?.createdId && result?.createdName) {
+      setLocalSuppliers((prev) => [
+        ...prev,
+        { id: result.createdId!, name: result.createdName! },
+      ]);
+      setPendingSupId(result.createdId);
+      setNewSupName("");
+      setShowNewSupplier(false);
+    }
+    setSupPending(false);
   }
 
   return (
@@ -190,17 +223,63 @@ export function ProductBasicSection({
               <select
                 id="supplierId"
                 name="supplierId"
+                ref={supplierRef}
                 className={panelSelectClass}
                 defaultValue={supplierIdDefault}
+                onChange={(e) => {
+                  if (e.target.value === "__new__") {
+                    setShowNewSupplier(true);
+                  }
+                }}
               >
                 <option value="">Sin proveedor</option>
-                {suppliers.map((supplier) => (
+                {localSuppliers.map((supplier) => (
                   <option key={supplier.id} value={supplier.id}>
                     {supplier.name}
                   </option>
                 ))}
+                <option value="__new__" className="font-medium text-primary">
+                  + Nuevo proveedor
+                </option>
               </select>
             </div>
+
+            {showNewSupplier && (
+              <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3 sm:col-span-2">
+                <label className="text-sm font-medium text-foreground">
+                  Nombre del nuevo proveedor
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    className={panelInputClass}
+                    value={newSupName}
+                    onChange={(e) => setNewSupName(e.target.value)}
+                    placeholder="Ej: Distribuidora XYZ"
+                    autoFocus
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={supPending || !newSupName.trim()}
+                    onClick={handleCreateSupplier}
+                  >
+                    {supPending ? "..." : "Crear"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowNewSupplier(false);
+                      setNewSupName("");
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-1">
               <label htmlFor="sku" className="text-sm font-medium text-foreground">

@@ -113,7 +113,7 @@ export async function listProducts(rawFilters: Record<string, string | undefined
   let query = supabase
     .from("products")
     .select(
-      "id,name,sku,barcode,unit_type,sale_price,cost_price,current_stock,min_stock,active,created_at,metadata,supplier_id,categories(name),suppliers(name)"
+      "id,name,sku,barcode,unit_type,sale_price,cost_price,current_stock,min_stock,active,created_at,metadata,supplier_id,category_id,categories(name),suppliers(name)"
     )
     .eq("business_id", business.id)
     .order("created_at", { ascending: false });
@@ -527,6 +527,7 @@ export async function quickUpdateProductAction(
 
   const parsed = quickProductUpdateSchema.safeParse({
     supplierId: formData.get("supplierId"),
+    categoryId: formData.get("categoryId"),
     salePrice: formData.get("salePrice"),
     costPrice: formData.get("costPrice"),
     active: formData.get("active") === "on" || formData.get("active") === "true",
@@ -549,6 +550,7 @@ export async function quickUpdateProductAction(
     .from("products")
     .update({
       supplier_id: parsed.data.supplierId || null,
+      category_id: parsed.data.categoryId || null,
       sale_price: String(parsed.data.salePrice),
       cost_price: String(parsed.data.costPrice),
       active: parsed.data.active,
