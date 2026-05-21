@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { panelInputClass, panelSelectClass } from "@/components/ui/form-field-styles";
@@ -43,10 +43,10 @@ export function InlineProductEditor({
     initialState,
   );
 
-  const margin = marginPercentOnCost(
-    Number(initialCostPrice),
-    Number(initialSalePrice),
-  );
+  const [saleDraft, setSaleDraft] = useState(initialSalePrice);
+  const [costDraft, setCostDraft] = useState(initialCostPrice);
+
+  const liveMargin = marginPercentOnCost(Number(costDraft), Number(saleDraft));
   const success = state?.success;
 
   // Si la acción fue exitosa, llamamos onSaved y refrescamos datos del servidor
@@ -122,7 +122,8 @@ export function InlineProductEditor({
             step="0.01"
             min="0"
             className={panelInputClass}
-            defaultValue={initialSalePrice}
+            value={saleDraft}
+            onChange={(e) => setSaleDraft(e.target.value)}
             required
           />
         </div>
@@ -137,17 +138,16 @@ export function InlineProductEditor({
             step="0.01"
             min="0"
             className={panelInputClass}
-            defaultValue={initialCostPrice}
+            value={costDraft}
+            onChange={(e) => setCostDraft(e.target.value)}
             required
           />
         </div>
-        {margin !== null && (
-          <div className="flex items-end pb-1">
-            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-              Margen: {margin.toFixed(0)}%
-            </span>
-          </div>
-        )}
+        <div className="flex items-end pb-1">
+          <span className={`text-sm font-semibold ${liveMargin !== null ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+            Margen: {liveMargin !== null ? `${liveMargin.toFixed(0)}%` : "—"}
+          </span>
+        </div>
       </div>
 
       <FormMessage message={state?.message} />
