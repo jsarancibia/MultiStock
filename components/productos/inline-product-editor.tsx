@@ -143,11 +143,31 @@ export function InlineProductEditor({
             required
           />
         </div>
-        <div className="flex items-end pb-1">
-          <span className={`text-sm font-semibold ${liveMargin !== null ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
-            Margen: {liveMargin !== null ? `${liveMargin.toFixed(0)}%` : "—"}
-          </span>
-        </div>
+        {liveMargin !== null ? (
+          <div className="col-span-2 mt-1 rounded-lg border border-emerald-200 bg-emerald-50 p-2 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+            <div className="flex items-center justify-center gap-4">
+              <div className="text-center">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                  Margen
+                </p>
+                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-300">
+                  {liveMargin.toFixed(0)}%
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="col-span-2 mt-1 rounded-lg border border-border bg-muted/30 p-2">
+            <div className="flex items-center justify-center gap-4">
+              <div className="text-center">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                  Margen
+                </p>
+                <p className="text-sm font-bold text-muted-foreground">—</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <FormMessage message={state?.message} />
