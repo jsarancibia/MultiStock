@@ -7,7 +7,7 @@ type SaleRow = {
   payment_method: string | null;
 };
 
-function formatTimeHms(value: string): string {
+function formatTimeHms(value: string, timeZone?: string): string {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return new Intl.DateTimeFormat("es-CL", {
@@ -15,6 +15,7 @@ function formatTimeHms(value: string): string {
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
+    timeZone,
   }).format(d);
 }
 
@@ -42,7 +43,7 @@ export async function buildSalesExcel(
     ],
     columns,
     rows: rows.map((s) => ({
-      hora: formatTimeHms(s.created_at),
+      hora: formatTimeHms(s.created_at, ctx.timeZone),
       total: Number(s.total ?? 0),
       metodo_pago:
         s.payment_method && s.payment_method in paymentMethodLabels

@@ -71,7 +71,7 @@ export function renderCorporateFooter(
     const rightCell = ws.getCell(footerRow, mid + 1);
     applyStyle(rightCell, styles.footer);
     const exporterInfo = ctx.exporterEmail ? `  ·  ${ctx.exporterEmail}` : "";
-    rightCell.value = `Generado: ${formatExportDate(ctx.exportedAt)}${exporterInfo}`;
+    rightCell.value = `Generado: ${formatExportDate(ctx.exportedAt, ctx.timeZone)}${exporterInfo}`;
     rightCell.alignment = { horizontal: "right", vertical: "middle" };
   }
 

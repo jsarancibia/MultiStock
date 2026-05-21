@@ -47,6 +47,7 @@ export async function GET(_request: Request, { params }: Params) {
     businessTypeLabel,
     exportedAt: new Date(),
     exporterEmail: user.email,
+    timeZone: process.env.APP_TIMEZONE || "America/Santiago",
   };
 
   let buffer: Buffer;

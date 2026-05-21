@@ -51,12 +51,13 @@ export function numFmtFor(
 /**
  * Formatea una fecha como string legible en español (para usar en metadatos, no en celdas de datos).
  */
-export function formatExportDate(date: Date): string {
+export function formatExportDate(date: Date, timeZone?: string): string {
   return new Intl.DateTimeFormat("es-CL", {
     day: "2-digit",
     month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone,
   }).format(date);
 }

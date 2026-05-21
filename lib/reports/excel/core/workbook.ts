@@ -55,6 +55,7 @@ export type ExcelReportContext = {
   businessTypeLabel: string;
   exportedAt: Date;
   exporterEmail?: string | null;
+  timeZone?: string;
 };
 
 /**
@@ -156,6 +157,7 @@ async function addDataSheet(
     businessName: ctx.businessName,
     businessTypeLabel: ctx.businessTypeLabel,
     exportedAt: ctx.exportedAt,
+    timeZone: ctx.timeZone,
   };
 
   let nextRow = applyBrandHeader(ws, layoutCtx, colCount, logoId, styles);

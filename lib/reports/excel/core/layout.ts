@@ -32,6 +32,7 @@ export type LayoutContext = {
   businessName: string;
   businessTypeLabel: string;
   exportedAt: Date;
+  timeZone?: string;
 };
 
 /**
@@ -114,7 +115,7 @@ export function applyBrandHeader(
       ws.mergeCells(3, descSplit + 1, 3, colCount);
       const dateCell = ws.getCell(3, descSplit + 1);
       applyStyle(dateCell, sMeta);
-      dateCell.value = `Exportado: ${formatExportDate(ctx.exportedAt)}`;
+      dateCell.value = `Exportado: ${formatExportDate(ctx.exportedAt, ctx.timeZone)}`;
     }
 
     currentRow = 4;
@@ -122,7 +123,7 @@ export function applyBrandHeader(
     ws.mergeCells(3, 1, 3, colCount);
     const metaCell = ws.getCell(3, 1);
     applyStyle(metaCell, sMeta);
-    metaCell.value = `Exportado: ${formatExportDate(ctx.exportedAt)}`;
+    metaCell.value = `Exportado: ${formatExportDate(ctx.exportedAt, ctx.timeZone)}`;
     ws.getRow(3).height = 16;
 
     currentRow = 4;
