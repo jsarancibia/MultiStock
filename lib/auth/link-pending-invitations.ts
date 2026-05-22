@@ -58,7 +58,7 @@ export async function linkPendingInvitationsForUser({
       const { data: profileByEmail } = await client
         .from("profiles")
         .select("id")
-        .eq("email", normalizedEmail)
+        .ilike("email", normalizedEmail)
         .maybeSingle();
 
       profileId = profileByEmail?.id;
@@ -77,7 +77,7 @@ export async function linkPendingInvitationsForUser({
     const { data: pendingInvites, error: pendingError } = await readerClient
       .from("pending_invitations")
       .select("business_id")
-      .eq("email", normalizedEmail);
+      .ilike("email", normalizedEmail);
 
     if (pendingError) {
       console.error("linkPendingInvitationsForUser (pending_invitations):", pendingError.message);
@@ -121,7 +121,7 @@ export async function linkPendingInvitationsForUser({
       const { error: delError } = await deleterClient
         .from("pending_invitations")
         .delete()
-        .eq("email", normalizedEmail);
+        .ilike("email", normalizedEmail);
 
       if (delError) {
         console.error("linkPendingInvitationsForUser (delete pending):", delError.message);

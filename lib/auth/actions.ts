@@ -25,8 +25,10 @@ export async function loginAction(
   }
 
   const supabase = await createClient();
+  const normalizedEmail = parsed.data.email.toLowerCase();
+
   const { error } = await supabase.auth.signInWithPassword({
-    email: parsed.data.email,
+    email: normalizedEmail,
     password: parsed.data.password,
   });
 
@@ -38,7 +40,7 @@ export async function loginAction(
   const { data: authUser } = await supabase.auth.getUser();
   await linkPendingInvitationsForUser({
     userId: authUser.user?.id,
-    email: parsed.data.email,
+    email: normalizedEmail,
   });
 
   redirect("/dashboard");
@@ -59,8 +61,10 @@ export async function registerAction(
   }
 
   const supabase = await createClient();
+  const normalizedEmail = parsed.data.email.toLowerCase();
+
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: parsed.data.email,
+    email: normalizedEmail,
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.fullName },
@@ -73,7 +77,7 @@ export async function registerAction(
 
   // Intentar auto-login para tener sesión activa antes de vincular invitaciones.
   const { error: signInError } = await supabase.auth.signInWithPassword({
-    email: parsed.data.email,
+    email: normalizedEmail,
     password: parsed.data.password,
   });
 
@@ -82,7 +86,7 @@ export async function registerAction(
     // intentamos vincular igual usando el userId del signUp (requiere service_role).
     await linkPendingInvitationsForUser({
       userId: signUpData.user?.id,
-      email: parsed.data.email,
+      email: normalizedEmail,
     });
     return {
       message:
@@ -94,7 +98,7 @@ export async function registerAction(
   const { data: authUser } = await supabase.auth.getUser();
   await linkPendingInvitationsForUser({
     userId: authUser.user?.id ?? signUpData.user?.id,
-    email: parsed.data.email,
+    email: normalizedEmail,
   });
 
   redirect("/dashboard");
