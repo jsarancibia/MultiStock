@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Users, Building2, CreditCard } from "lucide-react";
+import { Users, Building2 } from "lucide-react";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { PageSurface } from "@/components/ui/page-surface";
 import { buttonVariants } from "@/components/ui/button";
@@ -46,13 +46,6 @@ export default async function AdminPage() {
             >
               <Building2 className="size-4" />
               Ver negocios
-            </Link>
-            <Link
-              className={cn(buttonVariants({ variant: "default" }), "gap-2")}
-              href="/pricing"
-            >
-              <CreditCard className="size-4" />
-              Ver planes
             </Link>
           </div>
         </div>
