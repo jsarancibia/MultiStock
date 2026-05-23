@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { Users, Building2, CreditCard } from "lucide-react";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { PageSurface } from "@/components/ui/page-surface";
+import { buttonVariants } from "@/components/ui/button";
 import { getAdminDashboard } from "@/modules/admin/actions";
-import { formatSystemDateTime } from "@/lib/utils";
+import { cn, formatSystemDateTime } from "@/lib/utils";
 
 function formatDate(value: string) {
   return formatSystemDateTime(value);
@@ -30,12 +32,27 @@ export default async function AdminPage() {
       <PageSurface className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-foreground">Últimos registros</h2>
-          <div className="flex gap-3 text-sm">
-            <Link className="text-primary hover:underline" href="/admin/users">
+          <div className="flex flex-wrap gap-3 text-sm">
+            <Link
+              className={cn(buttonVariants({ variant: "outline" }), "gap-2")}
+              href="/admin/users"
+            >
+              <Users className="size-4" />
               Ver usuarios
             </Link>
-            <Link className="text-primary hover:underline" href="/admin/businesses">
+            <Link
+              className={cn(buttonVariants({ variant: "outline" }), "gap-2")}
+              href="/admin/businesses"
+            >
+              <Building2 className="size-4" />
               Ver negocios
+            </Link>
+            <Link
+              className={cn(buttonVariants({ variant: "default" }), "gap-2")}
+              href="/pricing"
+            >
+              <CreditCard className="size-4" />
+              Ver planes
             </Link>
           </div>
         </div>

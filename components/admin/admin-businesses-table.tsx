@@ -1,4 +1,6 @@
 import { PageSurface } from "@/components/ui/page-surface";
+import { UserPlanSelect } from "@/components/admin/user-plan-select";
+import { updateUserPlanAction } from "@/modules/admin/actions";
 import { formatSystemDateTime } from "@/lib/utils";
 
 type AdminBusinessRow = {
@@ -6,6 +8,7 @@ type AdminBusinessRow = {
   name: string;
   business_type: string;
   subscription_plan: "free" | "pro" | "super" | "enterprise";
+  owner_id: string;
   owner_email: string | null;
   created_at: string;
 };
@@ -28,6 +31,7 @@ export function AdminBusinessesTable({ businesses }: AdminBusinessesTableProps) 
             <th className="px-4 py-3">Dueño</th>
             <th className="px-4 py-3">Rubro</th>
             <th className="px-4 py-3">Plan</th>
+            <th className="px-4 py-3">Cambiar plan</th>
             <th className="px-4 py-3">Creado</th>
           </tr>
         </thead>
@@ -40,12 +44,19 @@ export function AdminBusinessesTable({ businesses }: AdminBusinessesTableProps) 
               </td>
               <td className="px-4 py-3 text-muted-foreground">{business.business_type}</td>
               <td className="px-4 py-3 text-muted-foreground">{business.subscription_plan}</td>
+              <td className="px-4 py-3">
+                <UserPlanSelect
+                  userId={business.owner_id}
+                  currentPlan={business.subscription_plan}
+                  action={updateUserPlanAction}
+                />
+              </td>
               <td className="px-4 py-3 text-muted-foreground">{formatDate(business.created_at)}</td>
             </tr>
           ))}
           {businesses.length === 0 ? (
             <tr>
-              <td className="px-4 py-6 text-muted-foreground" colSpan={5}>
+              <td className="px-4 py-6 text-muted-foreground" colSpan={6}>
                 No hay negocios registrados.
               </td>
             </tr>
