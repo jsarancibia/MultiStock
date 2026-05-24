@@ -13,6 +13,7 @@ type ConfirmDialogProps = {
   confirmLabel?: string;
   cancelLabel?: string;
   onConfirm: () => void;
+  onCancel?: () => void;
   variant?: "default" | "destructive";
 };
 
@@ -24,6 +25,7 @@ export function ConfirmDialog({
   confirmLabel = "Cancelar",
   cancelLabel = "Seguir editando",
   onConfirm,
+  onCancel,
   variant = "destructive",
 }: ConfirmDialogProps) {
   return (
@@ -59,7 +61,14 @@ export function ConfirmDialog({
             </div>
           </div>
           <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <AlertDialog.Close render={<Button variant="outline" />}>
+            <AlertDialog.Close
+              render={
+                <Button
+                  variant="outline"
+                  onClick={onCancel}
+                />
+              }
+            >
               {cancelLabel}
             </AlertDialog.Close>
             <AlertDialog.Close

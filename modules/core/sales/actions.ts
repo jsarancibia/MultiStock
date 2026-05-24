@@ -179,5 +179,6 @@ export async function createSaleAction(
     metadata: { payment_method: parsed.data.paymentMethod, lines: parsed.data.items.length },
   });
 
-  redirect(`/ventas/${saleId}`);
+  const shouldPrint = String(formData.get("shouldPrint") ?? "0") === "1";
+  redirect(`/ventas/${saleId}${shouldPrint ? "?print=1" : ""}`);
 }

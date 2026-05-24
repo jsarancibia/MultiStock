@@ -2,21 +2,29 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { buttonVariants } from "@/components/ui/button";
+import { BoletaPrintWrapper } from "@/components/ventas/boleta-print-wrapper";
 import { paymentMethodLabels } from "@/lib/validations/sale";
 import { cn, formatCurrency, formatQuantity, formatSystemDateTime } from "@/lib/utils";
+import { requireUser } from "@/lib/auth/session";
+import { requireActiveBusiness } from "@/lib/business/get-active-business";
 import { getSaleById } from "@/modules/core/sales/actions";
 
 type VentaDetallePageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ print?: string }>;
 };
 
-export default async function VentaDetallePage({ params }: VentaDetallePageProps) {
+export default async function VentaDetallePage({ params, searchParams }: VentaDetallePageProps) {
   const { id } = await params;
+  const { print } = await searchParams;
   const sale = await getSaleById(id);
 
   if (!sale) {
     notFound();
   }
+
+  const user = await requireUser();
+  const business = await requireActiveBusiness(user.id);
 
   const paymentKey = sale.payment_method as keyof typeof paymentMethodLabels | null;
   const paymentLabel =
@@ -57,6 +65,11 @@ export default async function VentaDetallePage({ params }: VentaDetallePageProps
         >
           Ver historial de ventas
         </Link>
+        <BoletaPrintWrapper
+          sale={sale}
+          businessName={business.name}
+          autoPrint={print === "1"}
+        />
       </div>
 
       <div className="overflow-x-auto rounded-lg border">

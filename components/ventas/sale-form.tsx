@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useActionState } from "react";
 import type { BusinessType } from "@/config/business-types";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormMessage } from "@/components/ui/form-message";
 import { PageNavigation } from "@/components/ui/page-navigation";
 import { useBeforeUnload } from "@/lib/hooks/use-before-unload";
@@ -52,6 +54,10 @@ export function SaleForm({
   const [items, setItems] = useState<SaleCartItem[]>([]);
   const [clientError, setClientError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [shouldPrint, setShouldPrint] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const dialogAnswered = useRef(false);
   useBeforeUnload(isDirty);
 
   const total = useMemo(
@@ -153,10 +159,17 @@ export function SaleForm({
       <PageNavigation backHref={backHref} />
 
       <form
+        ref={formRef}
         action={formAction}
         onSubmit={(event) => {
           if (!validateBeforeSubmit()) {
             event.preventDefault();
+            return;
+          }
+          if (!dialogAnswered.current) {
+            event.preventDefault();
+            setShowPrintDialog(true);
+            return;
           }
         }}
         onChange={() => setIsDirty(true)}
@@ -164,6 +177,7 @@ export function SaleForm({
       >
         <input type="hidden" name="paymentMethod" value={paymentMethod} />
         <input type="hidden" name="items" value={payload} />
+        <input type="hidden" name="shouldPrint" value={shouldPrint ? "1" : "0"} />
 
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="space-y-4 lg:col-span-2">
@@ -218,6 +232,34 @@ export function SaleForm({
           </aside>
         </div>
       </form>
+
+      <ConfirmDialog
+        open={showPrintDialog}
+        onOpenChange={(open) => {
+          if (!open) setShowPrintDialog(false);
+        }}
+        title="¿Desea imprimir boleta?"
+        description="Puede imprimir la boleta ahora o hacerlo después desde el detalle de la venta."
+        confirmLabel="Sí, imprimir"
+        cancelLabel="No, solo confirmar"
+        variant="default"
+        onConfirm={() => {
+          flushSync(() => {
+            setShouldPrint(true);
+            setShowPrintDialog(false);
+          });
+          dialogAnswered.current = true;
+          formRef.current?.requestSubmit();
+        }}
+        onCancel={() => {
+          flushSync(() => {
+            setShouldPrint(false);
+            setShowPrintDialog(false);
+          });
+          dialogAnswered.current = true;
+          formRef.current?.requestSubmit();
+        }}
+      />
     </div>
   );
 }
