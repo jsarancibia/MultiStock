@@ -15,31 +15,55 @@ export type BoletaData = {
   total: number;
 };
 
+const W = 40;
+
+const COL_NAME = 20;
+const COL_QTY = 6;
+const COL_PRICE = 12;
+
 function padEnd(text: string, length: number): string {
-  return text.length >= length ? text.slice(0, length) : text + " ".repeat(length - text.length);
+  if (text.length > length) return text.slice(0, length - 1) + "\u2026";
+  return text + " ".repeat(length - text.length);
 }
 
 function padStart(text: string, length: number): string {
-  return text.length >= length ? text.slice(0, length) : " ".repeat(length - text.length) + text;
+  if (text.length > length) return text.slice(0, length);
+  return " ".repeat(length - text.length) + text;
 }
 
-function formatItemLine(boleta: BoletaData): string {
-  const maxName = 20;
-  const maxQty = 4;
-  const maxPrice = 10;
+function center(text: string): string {
+  const total = W - text.length;
+  if (total <= 0) return text.slice(0, W);
+  const left = Math.floor(total / 2);
+  return " ".repeat(left) + text + " ".repeat(total - left);
+}
 
-  return boleta.items
+function formatHeader(): string {
+  const nameHeader = padEnd("PRODUCTO", COL_NAME);
+  const qtyHeader = padStart("CANT", COL_QTY);
+  const priceHeader = padStart("TOTAL", COL_PRICE);
+  return `${nameHeader} ${qtyHeader} ${priceHeader}`;
+}
+
+function formatItemLine(items: BoletaItem[]): string {
+  return items
     .map((item) => {
-      const name = padEnd(item.name.slice(0, maxName), maxName);
+      const name = padEnd(item.name, COL_NAME);
       const qty = item.quantity % 1 === 0
         ? String(Math.round(item.quantity))
         : String(Number(item.quantity.toFixed(3)));
-      const qtyPadded = padStart(qty, maxQty);
+      const qtyPadded = padStart(qty, COL_QTY);
       const price = formatCurrency(item.total);
-      const pricePadded = padStart(price, maxPrice);
+      const pricePadded = padStart(price, COL_PRICE);
       return `${name} ${qtyPadded} ${pricePadded}`;
     })
     .join("\n");
+}
+
+function formatTotalLine(label: string, totalFormatted: string): string {
+  const priceColStart = COL_NAME + 1 + COL_QTY + 1;
+  const labelPadded = padEnd(label, priceColStart);
+  return labelPadded + padStart(totalFormatted, W - priceColStart);
 }
 
 function formatDateForBoleta(iso: string): string {
@@ -66,92 +90,73 @@ const PAYMENT_LABELS: Record<string, string> = {
 };
 
 export function buildBoletaHTML(data: BoletaData): string {
-  const line = "=".repeat(34);
-  const midLine = "-".repeat(34);
+  const line = "=".repeat(W);
+  const midLine = "-".repeat(W);
   const dateFormatted = formatDateForBoleta(data.date);
   const paymentLabel = PAYMENT_LABELS[data.paymentMethod] ?? data.paymentMethod;
   const receiptNum = data.saleId.slice(0, 6).toUpperCase();
-  const itemsLines = formatItemLine(data);
-  const totalFormatted = padStart(formatCurrency(data.total), 10);
+  const itemsLines = formatItemLine(data.items);
+  const totalStr = formatCurrency(data.total);
+  const header = formatHeader();
+
+  const content = [
+    line,
+    center("MULTISTOCK"),
+    center(data.businessName),
+    line,
+    "",
+    "BOLETA DE VENTA",
+    `N\u00B0 ${receiptNum}`,
+    `Fecha: ${dateFormatted}`,
+    `M\u00E9todo pago: ${paymentLabel}`,
+    "",
+    midLine,
+    header,
+    midLine,
+    itemsLines,
+    midLine,
+    "",
+    formatTotalLine("Subtotal:", totalStr),
+    midLine,
+    formatTotalLine("TOTAL:", totalStr),
+    line,
+    "",
+    center("\u00A1Gracias por su compra!"),
+    center("Vuelva pronto"),
+    line,
+  ].join("\n");
 
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Boleta ${receiptNum}</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; }
   html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body {
-    font-family: "Consolas", "Courier New", "Liberation Mono", monospace;
-    font-size: 13px;
-    line-height: 1.3;
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    line-height: 1.2;
     color: #000;
     background: #fff;
-    padding: 12px 8px;
-    max-width: 320px;
-    margin: 0 auto;
+    padding: 2mm;
+    white-space: pre;
   }
   @page {
-    size: auto;
-    margin: 0mm;
+    size: 80mm auto;
+    margin: 0;
   }
-  @media print {
-    body {
-      max-width: none;
-      padding: 4mm 2mm;
-    }
-    .no-print { display: none !important; }
-  }
-  .line { white-space: pre; font-weight: bold; }
-  .title { white-space: pre; font-weight: bold; text-align: center; }
-  .section { white-space: pre; }
-  .center { text-align: center; white-space: pre-line; }
-  .footer { text-align: center; white-space: pre-line; margin-top: 8px; }
-  .close-btn {
-    display: block;
-    margin: 12px auto 0;
-    padding: 8px 24px;
-    font-size: 14px;
-    font-family: system-ui, sans-serif;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background: #f5f5f5;
+  .no-print { display: none; }
+  @media screen {
+    .no-print { display: block; margin: 12px auto 0; padding: 8px 24px;
+      font-size: 14px; font-family: system-ui, sans-serif; cursor: pointer;
+      border: 1px solid #ccc; border-radius: 6px; background: #f5f5f5; }
   }
 </style>
 </head>
-<body>
-<div class="title">
-${line}
-         MULTISTOCK
-      ${data.businessName}
-${line}
-</div>
-<div class="section">
-BOLETA DE VENTA
-N\u00B0 ${receiptNum}
-Fecha: ${dateFormatted}
-M\u00E9todo pago: ${paymentLabel}
-</div>
-<div class="line">${midLine}</div>
-<div class="section">
-PRODUCTO               CANT   TOTAL
-${midLine}
-${itemsLines}
-</div>
-<div class="line">${midLine}</div>
-<div class="section">
-Subtotal:            ${totalFormatted}
-${midLine}
-TOTAL:               ${totalFormatted}
-</div>
-<div class="title">${line}</div>
-<div class="footer">\u00A1Gracias por su compra!
-Vuelva pronto</div>
-<div class="title">${line}</div>
-<button class="close-btn no-print" onclick="window.close()">Cerrar</button>
+<body>${content}
+<button class="no-print" onclick="window.close()">Cerrar</button>
 <script>
   window.onload = function() {
     window.print();
