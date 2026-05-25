@@ -2,25 +2,30 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   AlertTriangle,
+  ArrowRight,
   BarChart3,
   Bell,
   Boxes,
   CheckCircle2,
+  Clock,
   FileDown,
   Package,
   Scale,
   Search,
   ShieldCheck,
   ShoppingCart,
+  Sparkles,
   Store,
   Truck,
   Wrench,
+  Zap,
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getActiveBusiness } from "@/lib/business/get-active-business";
 import { buttonVariants } from "@/components/ui/button";
 import { DashboardMockup } from "@/components/marketing/dashboard-mockup";
 import { HeroActions } from "@/components/marketing/hero-actions";
+import { SectionReveal } from "@/components/marketing/section-reveal";
 import { cn } from "@/lib/utils";
 
 const benefits = [
@@ -139,16 +144,29 @@ const businessScenes = [
 ] as const;
 
 const included = [
-  "Inventario",
-  "Ventas simples",
-  "Proveedores",
-  "Alertas",
-  "Reportes",
-  "Exportaciones CSV",
-  "Auditoría",
+  { label: "Inventario", icon: CheckCircle2 },
+  { label: "Ventas simples", icon: CheckCircle2 },
+  { label: "Proveedores", icon: CheckCircle2 },
+  { label: "Alertas", icon: CheckCircle2 },
+  { label: "Reportes", icon: CheckCircle2 },
+  { label: "Exportaciones CSV", icon: CheckCircle2 },
+  { label: "Auditoría", icon: CheckCircle2 },
 ] as const;
 
-const upcoming = ["Caja simple", "Sucursales", "Roles avanzados", "Pagos SaaS", "App móvil"] as const;
+const upcoming = [
+  { label: "Caja simple", icon: Clock },
+  { label: "Sucursales", icon: Clock },
+  { label: "Roles avanzados", icon: Clock },
+  { label: "Pagos SaaS", icon: Clock },
+  { label: "App móvil", icon: Clock },
+] as const;
+
+const stats = [
+  { value: "<5 min", label: "Configuración", icon: Zap },
+  { value: "$0", label: "Para empezar", icon: Sparkles },
+  { value: "3 rubros", label: "Adaptable", icon: Store },
+  { value: "Español", label: "Soporte", icon: ShieldCheck },
+] as const;
 
 function ProductSceneCard({ scene }: { scene: (typeof businessScenes)[number] }) {
   return (
@@ -201,211 +219,272 @@ export default async function HomePage() {
 
   return (
     <main className="overflow-hidden">
-      <section className="relative border-b border-border/60 bg-gradient-to-b from-background via-muted/15 to-background">
-        <div className="pointer-events-none absolute left-[-12rem] top-12 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-        <div className="pointer-events-none absolute right-[-14rem] top-28 h-96 w-96 rounded-full bg-amber-900/15 blur-3xl" />
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24">
+      <section className="relative border-b border-border/60 bg-gradient-to-b from-primary/5 via-muted/15 to-background">
+        <div className="pointer-events-none absolute left-[-10rem] top-0 h-[28rem] w-[28rem] rounded-full bg-primary/15 blur-3xl" />
+        <div className="pointer-events-none absolute right-[-14rem] top-24 h-[28rem] w-[28rem] rounded-full bg-amber-900/15 blur-3xl" />
+        <div className="pointer-events-none absolute left-[40%] top-60 h-[20rem] w-[20rem] rounded-full bg-emerald-400/10 blur-3xl" />
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:py-28">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-center">
-            <div className="space-y-6">
-              <span className="inline-flex w-fit rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+            <div className="space-y-7">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
+                <Store className="size-3.5" aria-hidden />
                 Para verdulerías, almacenes y ferreterías
               </span>
-              <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                Controla stock, ventas y alertas sin complicarte.
+              <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+                Controla stock, ventas y alertas{" "}
+                <span className="gradient-text bg-gradient-to-r from-primary via-emerald-400 to-green-500">
+                  sin complicarte.
+                </span>
               </h1>
-              <p className="text-lg text-muted-foreground sm:text-xl">
-                MultiStock ordena productos, inventario, proveedores, movimientos y ventas en un solo panel.
-                Ideal para comercios chicos que necesitan claridad sin software pesado.
+              <p className="max-w-lg text-lg leading-relaxed text-muted-foreground sm:text-xl">
+                MultiStock ordena productos, inventario, proveedores, movimientos y
+                ventas en un solo panel. Ideal para comercios chicos que necesitan
+                claridad sin software pesado.
               </p>
               <HeroActions />
             </div>
             <div className="relative order-first lg:order-none">
-              <div className="absolute -inset-2 rounded-[1.375rem] bg-gradient-to-br from-primary/20 via-transparent to-muted/50 blur-xl" />
-              <div className="relative">
               <DashboardMockup />
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-b border-border/60 py-16 sm:py-20" aria-labelledby="problemas-titulo">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-10 max-w-2xl">
-            <h2 id="problemas-titulo" className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Deja de controlar tu negocio con hojas sueltas
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              MultiStock conecta las tareas del día: lo que cargas en productos impacta en inventario, ventas,
-              alertas y reportes.
-            </p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {problems.map((item) => (
-              <article key={item.title} className="rounded-2xl border border-border/80 bg-card/45 p-5">
-                <item.icon className="mb-4 size-6 text-primary" aria-hidden />
-                <h3 className="font-semibold">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-border/60 bg-muted/10 py-16 sm:py-20" aria-labelledby="funciona-titulo">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-10 text-center">
-            <h2 id="funciona-titulo" className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Del registro al control real del stock
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              El flujo está pensado para entrar rápido en operación, sin configuraciones largas antes de vender.
-            </p>
-          </div>
-          <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-            {steps.map((step, index) => (
-              <li key={step} className="rounded-2xl border border-border/80 bg-card/45 p-4">
-                <span className="mb-3 flex size-8 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary">
-                  {index + 1}
-                </span>
-                <p className="text-sm font-medium">{step}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      <section className="py-16 sm:py-20" aria-labelledby="beneficios-titulo">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-10 text-center sm:mb-14">
-            <h2
-              id="beneficios-titulo"
-              className="text-2xl font-semibold tracking-tight sm:text-3xl"
-            >
-              Todo lo esencial, sin ruido
-            </h2>
-            <p className="mt-2 text-muted-foreground">
-              Lo necesario para operar ventas, inventario y reposición sin agregar pasos innecesarios.
-            </p>
-          </div>
-          <ul className="grid gap-6 sm:grid-cols-2">
-            {benefits.map((item) => (
-              <li
-                key={item.title}
-                className="rounded-2xl border border-border/90 bg-card/45 p-6 shadow-sm transition hover:border-primary/35 hover:bg-card/65 hover:shadow-md"
-              >
-                <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
-                  <item.icon className="size-5" aria-hidden />
+      <SectionReveal>
+        <section className="border-b border-border/60 bg-muted/5 py-8 sm:py-10" aria-label="Estadísticas de confianza">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+              {stats.map(({ value, label, icon: Icon }) => (
+                <div key={label} className="flex flex-col items-center gap-2 text-center">
+                  <Icon className="size-5 text-primary" aria-hidden />
+                  <span className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                    {value}
+                  </span>
+                  <span className="text-sm text-muted-foreground">{label}</span>
                 </div>
-                <h3 className="font-semibold">{item.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  {item.description}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+              ))}
+            </div>
+          </div>
+        </section>
+      </SectionReveal>
 
-      <section className="border-y border-border/60 bg-muted/10 py-16 sm:py-20" aria-labelledby="rubros-titulo">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-10 max-w-2xl">
-            <h2 id="rubros-titulo" className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Una misma plataforma, adaptada al rubro
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Las “fotos” de producto muestran cómo se siente cada negocio: fresco, almacén de rotación y catálogo técnico.
-            </p>
+      <SectionReveal delay={100}>
+        <section className="border-b border-border/60 py-16 sm:py-20" aria-labelledby="problemas-titulo">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="mb-10 max-w-2xl">
+              <h2 id="problemas-titulo" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                Deja de controlar tu negocio con hojas sueltas
+              </h2>
+              <p className="mt-3 text-muted-foreground">
+                MultiStock conecta las tareas del día: lo que cargas en productos impacta en inventario, ventas, alertas y reportes.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {problems.map((item) => (
+                <article
+                  key={item.title}
+                  className="group rounded-2xl border border-border/80 bg-card/45 p-5 transition hover:border-primary/35 hover:bg-card/65 hover:shadow-md"
+                >
+                  <div className="mb-4 flex size-9 items-center justify-center rounded-lg bg-red-500/10">
+                    <item.icon className="size-5 text-red-500/70" aria-hidden />
+                  </div>
+                  <h3 className="font-semibold">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+                </article>
+              ))}
+            </div>
           </div>
-          <div className="grid gap-6 lg:grid-cols-3">
-            {businessScenes.map((scene) => (
-              <ProductSceneCard key={scene.title} scene={scene} />
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      </SectionReveal>
 
-      <section className="py-16 sm:py-20" aria-labelledby="modulos-titulo">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="mb-10 text-center">
-            <h2 id="modulos-titulo" className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Módulos listos para el día a día
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              Todo consulta el negocio activo y mantiene la información separada por comercio.
-            </p>
+      <SectionReveal delay={100}>
+        <section className="border-b border-border/60 bg-muted/10 py-16 sm:py-20" aria-labelledby="funciona-titulo">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="mb-10 text-center">
+              <h2 id="funciona-titulo" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                Del registro al control real del stock
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+                El flujo está pensado para entrar rápido en operación, sin configuraciones largas antes de vender.
+              </p>
+            </div>
+            <ol className="flex flex-col gap-2 sm:flex-row sm:gap-0">
+              {steps.map((step, index) => (
+                <li key={step} className="flex flex-1 items-center gap-3 sm:flex-col sm:gap-0">
+                  <div className="flex flex-1 items-center gap-3 rounded-2xl border border-border/80 bg-card/45 p-4 transition hover:border-primary/35 hover:bg-card/65 hover:shadow-md sm:flex-col sm:text-center sm:p-5">
+                    <span className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/10 text-sm font-bold text-primary ring-1 ring-primary/25">
+                      {index + 1}
+                    </span>
+                    <p className="text-sm font-medium sm:mt-3">{step}</p>
+                  </div>
+                  {index < steps.length - 1 && (
+                    <ArrowRight className="mx-1 hidden size-5 shrink-0 text-primary/30 sm:block" aria-hidden />
+                  )}
+                </li>
+              ))}
+            </ol>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {modules.map((module) => (
-              <article key={module.title} className="rounded-2xl border border-border/80 bg-card/45 p-5">
-                <module.icon className="mb-4 size-6 text-primary" aria-hidden />
-                <h3 className="font-semibold">{module.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{module.description}</p>
+        </section>
+      </SectionReveal>
+
+      <SectionReveal delay={100}>
+        <section className="py-16 sm:py-20" aria-labelledby="beneficios-titulo">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="mb-10 text-center sm:mb-14">
+              <h2 id="beneficios-titulo" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                Todo lo esencial, sin ruido
+              </h2>
+              <p className="mt-2 text-muted-foreground">
+                Lo necesario para operar ventas, inventario y reposición sin agregar pasos innecesarios.
+              </p>
+            </div>
+            <ul className="grid gap-6 sm:grid-cols-2">
+              {benefits.map((item) => (
+                <li
+                  key={item.title}
+                  className="rounded-2xl border border-border/90 bg-card/45 p-6 shadow-sm transition hover:border-primary/35 hover:bg-card/65 hover:shadow-md"
+                >
+                  <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                    <item.icon className="size-5" aria-hidden />
+                  </div>
+                  <h3 className="font-semibold">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      </SectionReveal>
+
+      <SectionReveal delay={100}>
+        <section className="border-y border-border/60 bg-muted/10 py-16 sm:py-20" aria-labelledby="rubros-titulo">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="mb-10 max-w-2xl">
+              <h2 id="rubros-titulo" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                Una misma plataforma, adaptada al rubro
+              </h2>
+              <p className="mt-3 text-muted-foreground">
+                Las &ldquo;fotos&rdquo; de producto muestran cómo se siente cada negocio: fresco, almacén de rotación y catálogo técnico.
+              </p>
+            </div>
+            <div className="grid gap-6 lg:grid-cols-3">
+              {businessScenes.map((scene) => (
+                <ProductSceneCard key={scene.title} scene={scene} />
+              ))}
+            </div>
+          </div>
+        </section>
+      </SectionReveal>
+
+      <SectionReveal delay={100}>
+        <section className="py-16 sm:py-20" aria-labelledby="modulos-titulo">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="mb-10 text-center">
+              <h2 id="modulos-titulo" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                Módulos listos para el día a día
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+                Todo consulta el negocio activo y mantiene la información separada por comercio.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {modules.map((module) => (
+                <article
+                  key={module.title}
+                  className="group rounded-2xl border border-border/80 bg-card/45 p-5 transition hover:border-primary/35 hover:bg-card/65 hover:shadow-md"
+                >
+                  <div className="mb-4 flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary transition group-hover:bg-primary/25">
+                    <module.icon className="size-5" aria-hidden />
+                  </div>
+                  <h3 className="font-semibold">{module.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{module.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      </SectionReveal>
+
+      <SectionReveal delay={100}>
+        <section className="border-y border-border/60 bg-muted/10 py-16 sm:py-20" aria-labelledby="incluye-titulo">
+          <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-2">
+            <div>
+              <h2 id="incluye-titulo" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                Claro desde el inicio
+              </h2>
+              <p className="mt-3 text-muted-foreground">
+                La versión actual se enfoca en inventario, ventas simples y visibilidad operativa. Lo avanzado queda para fases posteriores.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <article className="rounded-2xl border border-primary/25 bg-primary/5 p-6">
+                <h3 className="mb-4 flex items-center gap-2 text-base font-semibold">
+                  <CheckCircle2 className="size-5 text-primary" aria-hidden />
+                  Incluye hoy
+                </h3>
+                <ul className="space-y-3">
+                  {included.map(({ label, icon: Icon }) => (
+                    <li key={label} className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                      <Icon className="size-4 shrink-0 text-primary/70" aria-hidden />
+                      {label}
+                    </li>
+                  ))}
+                </ul>
               </article>
-            ))}
+              <article className="rounded-2xl border border-border/80 bg-card/45 p-6">
+                <h3 className="mb-4 flex items-center gap-2 text-base font-semibold">
+                  <Clock className="size-5 text-muted-foreground" aria-hidden />
+                  Próximamente
+                </h3>
+                <ul className="space-y-3">
+                  {upcoming.map(({ label, icon: Icon }) => (
+                    <li key={label} className="flex items-center gap-2.5 text-sm text-muted-foreground/70">
+                      <Icon className="size-4 shrink-0" aria-hidden />
+                      {label}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </SectionReveal>
 
-      <section className="border-y border-border/60 bg-muted/10 py-16 sm:py-20" aria-labelledby="incluye-titulo">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-2">
-          <div>
-            <h2 id="incluye-titulo" className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Claro desde el inicio
+      <SectionReveal delay={100}>
+        <section className="relative bg-gradient-to-b from-primary/5 via-primary/10 to-background py-20 sm:py-24">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_80%,rgba(56,210,140,0.12),transparent_60%)]" />
+          <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Empieza a ordenar tu stock hoy
             </h2>
-            <p className="mt-3 text-muted-foreground">
-              La versión actual se enfoca en inventario, ventas simples y visibilidad operativa. Lo avanzado queda para
-              fases posteriores.
+            <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+              Prueba el flujo completo: cuenta, negocio, rubro, productos, inventario, ventas, alertas y dashboard.
             </p>
+            <p className="mt-2 text-sm font-medium text-primary">Sin compromiso. Cancelá cuando quieras.</p>
+            <div className="mt-6 flex flex-wrap justify-center gap-4">
+              <Link
+                href="/auth/register"
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "min-h-12 px-8 text-[1rem] font-semibold shadow-lg shadow-primary/30 transition hover:shadow-xl hover:shadow-primary/40"
+                )}
+              >
+                Crear cuenta gratis
+                <ArrowRight className="ml-2 size-4" aria-hidden />
+              </Link>
+              <Link
+                href="/demo"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "lg" }),
+                  "min-h-12 px-6 text-[1rem] font-medium"
+                )}
+              >
+                Ver demo guiada
+              </Link>
+            </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <article className="rounded-2xl border border-primary/25 bg-primary/5 p-5">
-              <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                <CheckCircle2 className="size-5 text-primary" aria-hidden />
-                Incluye hoy
-              </h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                {included.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </article>
-            <article className="rounded-2xl border border-border/80 bg-card/45 p-5">
-              <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                <ShieldCheck className="size-5 text-muted-foreground" aria-hidden />
-                Próximamente
-              </h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                {upcoming.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Empieza a ordenar tu stock hoy
-          </h2>
-          <p className="mt-2 max-w-xl mx-auto text-muted-foreground">
-            Prueba el flujo completo: cuenta, negocio, rubro, productos, inventario, ventas, alertas y dashboard.
-          </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link href="/auth/register" className={cn(buttonVariants({ size: "lg" }), "shadow-md shadow-primary/25")}>
-              Crear cuenta gratis
-            </Link>
-            <Link
-              href="/demo"
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
-            >
-              Ver demo guiada
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      </SectionReveal>
     </main>
   );
 }
