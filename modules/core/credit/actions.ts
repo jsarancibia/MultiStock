@@ -335,7 +335,7 @@ export async function deactivateCreditCustomerAction(customerId: string) {
     afterData: { active: false },
   });
 
-  revalidatePath("/fiados");
+  revalidatePath("/fiados", "layout");
   return { success: true };
 }
 
@@ -375,7 +375,7 @@ export async function deleteCreditCustomerAction(customerId: string) {
     beforeData: { name: row.name },
   });
 
-  revalidatePath("/fiados");
+  revalidatePath("/fiados", "layout");
   return { success: true };
 }
 
@@ -423,7 +423,7 @@ export async function registerPaymentAction(
     },
   });
 
-  revalidatePath("/fiados");
+  revalidatePath("/fiados", "layout");
   return { message: "Pago registrado correctamente." };
 }
 
@@ -479,7 +479,8 @@ export async function quickCreateCustomerAction(
     afterData: { name: parsed.data.name, credit_limit: parsed.data.creditLimit },
   });
 
-  revalidatePath("/fiados");
+  revalidatePath("/fiados", "layout");
+  revalidatePath("/ventas/nueva");
   return { customerId: customer.id };
 }
 

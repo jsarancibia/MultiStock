@@ -14,8 +14,10 @@ type EliminarClienteProps = {
 
 async function handleDelete(customerId: string) {
   "use server";
-  await deleteCreditCustomerAction(customerId);
-  redirect("/fiados");
+  const result = await deleteCreditCustomerAction(customerId);
+  if ("success" in result && result.success) {
+    redirect("/fiados");
+  }
 }
 
 export default async function EliminarClientePage({ params }: EliminarClienteProps) {
