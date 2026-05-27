@@ -471,3 +471,34 @@ export async function quickCreateCustomerAction(
   revalidatePath("/fiados");
   return { customerId: customer.id };
 }
+
+export type CreditCustomerBasic = {
+  id: string;
+  name: string;
+  current_balance: number;
+  credit_limit: number;
+  active: boolean;
+};
+
+export async function listCreditCustomersBasic(): Promise<CreditCustomerBasic[]> {
+  const user = await requireUser();
+  const business = await requireActiveBusiness(user.id);
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("credit_customers")
+    .select("id,name,current_balance,credit_limit,active")
+    .eq("business_id", business.id)
+    .eq("active", true)
+    .order("name");
+
+  if (error) return [];
+
+  return (data as unknown as CreditCustomerRow[]).map((c) => ({
+    id: c.id,
+    name: c.name,
+    current_balance: Number(c.current_balance),
+    credit_limit: Number(c.credit_limit),
+    active: c.active,
+  }));
+}

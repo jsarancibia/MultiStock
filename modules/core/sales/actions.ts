@@ -151,21 +151,48 @@ export async function createSaleAction(
     unit_price: item.unitPrice,
   }));
 
-  // Orden alfabético de claves = orden de tipos que PostgREST usa para resolver la RPC (uuid, uuid, jsonb, text).
-  const { data: saleId, error: rpcError } = await supabase.rpc("create_sale_with_items", {
-    p_business_id: business.id,
-    p_created_by: user.id,
-    p_items: payloadItems,
-    p_payment_method: parsed.data.paymentMethod,
-  });
+  let saleId: string;
 
-  if (rpcError || !saleId) {
-    return {
-      message: humanizeActionError(
-        rpcError?.message,
-        "No se pudo registrar la venta."
-      ),
-    };
+  if (parsed.data.paymentMethod === "credit") {
+    const creditCustomerId = String(formData.get("creditCustomerId") ?? "").trim();
+    if (!creditCustomerId) {
+      return { message: "Debes seleccionar un cliente fiado." };
+    }
+    const { data: creditSaleId, error: creditError } = await supabase.rpc("create_credit_sale", {
+      p_business_id: business.id,
+      p_created_by: user.id,
+      p_items: payloadItems,
+      p_payment_method: "credit",
+      p_customer_id: creditCustomerId,
+    });
+
+    if (creditError || !creditSaleId) {
+      return {
+        message: humanizeActionError(
+          creditError?.message,
+          "No se pudo registrar la venta fiado."
+        ),
+      };
+    }
+    saleId = creditSaleId as string;
+  } else {
+    // Orden alfabético de claves = orden de tipos que PostgREST usa para resolver la RPC (uuid, uuid, jsonb, text).
+    const { data: normalSaleId, error: rpcError } = await supabase.rpc("create_sale_with_items", {
+      p_business_id: business.id,
+      p_created_by: user.id,
+      p_items: payloadItems,
+      p_payment_method: parsed.data.paymentMethod,
+    });
+
+    if (rpcError || !normalSaleId) {
+      return {
+        message: humanizeActionError(
+          rpcError?.message,
+          "No se pudo registrar la venta."
+        ),
+      };
+    }
+    saleId = normalSaleId as string;
   }
 
   const itemsTotal = parsed.data.items.reduce((acc, it) => acc + it.quantity * it.unitPrice, 0);

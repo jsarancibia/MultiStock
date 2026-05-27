@@ -13,7 +13,9 @@ import { QuickProductButtons } from "@/components/ventas/quick-product-buttons";
 import { ProductSearch, type SaleProductOption } from "@/components/ventas/product-search";
 import { SaleItemsTable, type SaleCartItem } from "@/components/ventas/sale-items-table";
 import { SaleSummary } from "@/components/ventas/sale-summary";
+import { CreditCustomerSelect } from "@/components/ventas/credit-customer-select";
 import type { SaleConfig } from "@/lib/business/sale-config";
+import type { CreditCustomerBasic } from "@/modules/core/credit/actions";
 import { allowsDecimalQuantity, exceedsStock } from "@/lib/business/unit-quantity";
 import type { SaleActionState } from "@/modules/core/sales/actions";
 
@@ -29,6 +31,8 @@ type SaleFormProps = {
   ) => Promise<SaleActionState | undefined>;
   /** Ruta a la que volver. Por defecto "/ventas". */
   backHref?: string;
+  /** Clientes fiado disponibles para venta a crédito */
+  creditCustomers?: CreditCustomerBasic[];
 };
 
 const initialState: SaleActionState = {};
@@ -48,10 +52,12 @@ export function SaleForm({
   allowMobileBarcodeLink = true,
   action,
   backHref = "/ventas",
+  creditCustomers = [],
 }: SaleFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "debit" | "credit" | "transfer" | "other">("cash");
   const [items, setItems] = useState<SaleCartItem[]>([]);
+  const [customerId, setCustomerId] = useState("");
   const [clientError, setClientError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
@@ -142,6 +148,11 @@ export function SaleForm({
       }
     }
 
+    if (paymentMethod === "credit" && !customerId) {
+      setClientError("Selecciona un cliente fiado para la venta a crédito.");
+      return false;
+    }
+
     setClientError(null);
     return true;
   }
@@ -178,6 +189,7 @@ export function SaleForm({
         <input type="hidden" name="paymentMethod" value={paymentMethod} />
         <input type="hidden" name="items" value={payload} />
         <input type="hidden" name="shouldPrint" value={shouldPrint ? "1" : "0"} />
+        <input type="hidden" name="creditCustomerId" value={customerId} />
 
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="space-y-4 lg:col-span-2">
@@ -220,6 +232,15 @@ export function SaleForm({
                 itemsCount={items.length}
                 onPaymentMethodChange={setPaymentMethod}
               />
+
+              {paymentMethod === "credit" && (
+                <CreditCustomerSelect
+                  customers={creditCustomers}
+                  value={customerId}
+                  onChange={setCustomerId}
+                />
+              )}
+
               <FormMessage message={clientError} />
               <FormMessage message={state?.message} />
               <Button className="w-full" type="submit" disabled={pending || !items.length}>

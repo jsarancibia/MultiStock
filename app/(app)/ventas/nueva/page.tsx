@@ -4,15 +4,18 @@ import { PageHeader } from "@/components/layout/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageSurface } from "@/components/ui/page-surface";
-import { canUseMobileScanner } from "@/config/plans";
+import { canUseMobileScanner, getPlanLimits } from "@/config/plans";
 import { cn } from "@/lib/utils";
 import { SaleForm } from "@/components/ventas/sale-form";
 import { getSaleConfig } from "@/lib/business/sale-config";
 import { createSaleAction, getSaleFormData } from "@/modules/core/sales/actions";
+import { listCreditCustomersBasic } from "@/modules/core/credit/actions";
 
 export default async function NuevaVentaPage() {
   const { business, products } = await getSaleFormData();
   const saleConfig = getSaleConfig(business.business_type);
+  const planLimit = getPlanLimits(business.subscription_plan).creditCustomers;
+  const creditCustomers = planLimit !== 0 ? await listCreditCustomersBasic() : [];
 
   const pinnedProducts = saleConfig.showQuickButtons
     ? products.filter((product) => product.pinned)
@@ -53,6 +56,7 @@ export default async function NuevaVentaPage() {
           pinnedProducts={pinnedProducts}
           action={createSaleAction}
           allowMobileBarcodeLink={canUseMobileScanner(business.subscription_plan)}
+          creditCustomers={creditCustomers}
         />
       </section>
     </PageSurface>
