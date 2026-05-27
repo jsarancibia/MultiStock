@@ -26,7 +26,7 @@ export const creditCustomerSchema = z.object({
 export const creditPaymentSchema = z.object({
   customerId: z.string().uuid(),
   amount: z.coerce.number("El monto debe ser un número").positive("El monto debe ser mayor a cero"),
-  paymentMethod: z.enum(["cash", "transfer", "mercado_pago", "khipu", "other"], {
+  paymentMethod: z.enum(["efectivo", "debito", "credito", "transferencia", "otro"], {
     message: "Selecciona un método de pago válido",
   }),
   description: z

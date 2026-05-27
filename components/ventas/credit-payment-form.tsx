@@ -29,9 +29,9 @@ export function PaymentForm({ customerId }: PaymentFormProps) {
             name="amount"
             type="number"
             min="1"
-            step="100"
+            step="1"
             required
-            placeholder="0"
+            placeholder="$0"
             className={panelInputClass}
           />
         </div>
@@ -42,11 +42,11 @@ export function PaymentForm({ customerId }: PaymentFormProps) {
           </label>
           <select id="paymentMethod" name="paymentMethod" required className={panelSelectClass}>
             <option value="">Seleccionar...</option>
-            <option value="cash">Efectivo</option>
-            <option value="transfer">Transferencia</option>
-            <option value="mercado_pago">Mercado Pago</option>
-            <option value="khipu">Khipu</option>
-            <option value="other">Otro</option>
+            <option value="efectivo">Efectivo</option>
+            <option value="debito">Débito</option>
+            <option value="credito">Crédito</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="otro">Otro</option>
           </select>
         </div>
 

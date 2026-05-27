@@ -54,7 +54,7 @@ export function FiadosTable({ customers, isOwner }: FiadosTableProps) {
 
   return (
     <div className="overflow-x-auto rounded-lg border">
-      <table className="w-full min-w-[700px] text-sm">
+      <table className="w-full min-w-[900px] text-sm">
         <thead className="bg-muted/50 text-left">
           <tr>
             <th className="px-3 py-2 font-medium">Cliente</th>
@@ -64,6 +64,7 @@ export function FiadosTable({ customers, isOwner }: FiadosTableProps) {
             <th className="px-3 py-2 font-medium text-right">Límite</th>
             <th className="px-3 py-2 font-medium text-right">Disponible</th>
             <th className="px-3 py-2 font-medium">Estado</th>
+            <th className="px-3 py-2 font-medium">Última compra</th>
             <th className="px-3 py-2 font-medium">Último pago</th>
             <th className="px-3 py-2 font-medium">Acciones</th>
           </tr>
@@ -91,11 +92,14 @@ export function FiadosTable({ customers, isOwner }: FiadosTableProps) {
                 </td>
                 <td className="px-3 py-2">{statusBadge(customer)}</td>
                 <td className="px-3 py-2 text-muted-foreground">
+                  {customer.last_sale_at
+                    ? new Date(customer.last_sale_at).toLocaleDateString("es-CL")
+                    : "—"}
+                </td>
+                <td className="px-3 py-2 text-muted-foreground">
                   {customer.last_payment_at
                     ? new Date(customer.last_payment_at).toLocaleDateString("es-CL")
-                    : customer.last_sale_at
-                      ? new Date(customer.last_sale_at).toLocaleDateString("es-CL")
-                      : "—"}
+                    : "—"}
                 </td>
                 <td className="px-3 py-2">
                   <Link
