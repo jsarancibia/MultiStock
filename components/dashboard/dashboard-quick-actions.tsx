@@ -1,24 +1,12 @@
-import { Bell, Box, Move, ShoppingCart } from "lucide-react";
+import { Bell, Move } from "lucide-react";
 import { ActionCard } from "@/components/ui/action-card";
 
 const actions = [
-  {
-    href: "/productos/nuevo",
-    label: "Nuevo producto",
-    sub: "Alta rápida con rubro",
-    icon: Box,
-  },
   {
     href: "/inventario/movimientos/nuevo",
     label: "Registrar movimiento",
     sub: "Compra, ajuste o merma",
     icon: Move,
-  },
-  {
-    href: "/ventas/nueva",
-    label: "Nueva venta",
-    sub: "Carrito y totales",
-    icon: ShoppingCart,
   },
   {
     href: "/alertas",

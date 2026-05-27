@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { FormMessage } from "@/components/ui/form-message";
 import { panelInputClass, panelSelectClass } from "@/components/ui/form-field-styles";
@@ -10,10 +10,12 @@ const initialState: CreditActionState = {};
 
 type PaymentFormProps = {
   customerId: string;
+  currentBalance: number;
 };
 
-export function PaymentForm({ customerId }: PaymentFormProps) {
+export function PaymentForm({ customerId, currentBalance }: PaymentFormProps) {
   const [state, formAction, pending] = useActionState(registerPaymentAction, initialState);
+  const amountRef = useRef<HTMLInputElement>(null);
 
   return (
     <form action={formAction} className="space-y-3">
@@ -25,15 +27,28 @@ export function PaymentForm({ customerId }: PaymentFormProps) {
             Monto ($) <span className="text-red-500">*</span>
           </label>
           <input
+            ref={amountRef}
             id="amount"
             name="amount"
             type="number"
             min="1"
             step="1"
+            max={currentBalance}
             required
-            placeholder="$0"
+            placeholder={`Debe $${currentBalance.toLocaleString("es-CL")}`}
             className={panelInputClass}
           />
+          <button
+            type="button"
+            className="text-xs text-primary underline mt-1"
+            onClick={() => {
+              if (amountRef.current) {
+                amountRef.current.value = String(currentBalance);
+              }
+            }}
+          >
+            Pagar deuda completa (${currentBalance.toLocaleString("es-CL")})
+          </button>
         </div>
 
         <div className="space-y-1">

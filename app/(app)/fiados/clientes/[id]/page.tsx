@@ -137,7 +137,7 @@ export default async function CustomerDetailPage({ params }: CustomerDetailProps
       {customer.current_balance > 0 && (
         <PageSurface>
           <h3 className="text-sm font-semibold mb-3">Registrar pago</h3>
-          <PaymentForm customerId={customer.id} />
+          <PaymentForm customerId={customer.id} currentBalance={customer.current_balance} />
         </PageSurface>
       )}
 

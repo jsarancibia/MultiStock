@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 import type { BusinessType } from "@/config/business-types";
 import { BarcodeScanButton } from "@/components/barcode/barcode-scan-button";
 import { HidBarcodeListener } from "@/components/barcode/hid-barcode-listener";
-import { MobileBarcodeLink } from "@/components/barcode/mobile-barcode-link";
 import {
   formSecondaryButtonClass,
   panelInputClass,
@@ -204,12 +203,7 @@ export function ProductSearch({
           placeholder={placeholder}
         />
         <div
-          className={cn(
-            "grid min-w-0 gap-2",
-            allowMobileBarcodeLink
-              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-              : "grid-cols-1 sm:grid-cols-2"
-          )}
+          className="grid min-w-0 gap-2 grid-cols-1"
         >
           <BarcodeScanButton
             className={cn(formSecondaryButtonClass, "min-h-10 w-full justify-center sm:w-full")}
@@ -218,16 +212,9 @@ export function ProductSearch({
             label={isScanPending ? "Buscando..." : "Escanear código"}
             onDetected={applyScannedBarcode}
           />
-          {allowMobileBarcodeLink ? (
-            <MobileBarcodeLink
-              className={cn(formSecondaryButtonClass, "min-h-10 w-full justify-center sm:w-full")}
-              disabled={isScanPending}
-              onDetected={applyScannedBarcode}
-            />
-          ) : null}
           <HidBarcodeListener
             containerClassName="min-w-0"
-            className={cn(formSecondaryButtonClass, "min-h-10 w-full justify-center sm:w-full")}
+            className={cn(formSecondaryButtonClass, "min-h-10 w-full justify-center sm:w-full hidden")}
             continuous
             disabled={isScanPending}
             onDetected={applyScannedBarcode}

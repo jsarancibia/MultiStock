@@ -53,7 +53,7 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
         resourceUnit="productos activos"
       />
 
-      <form className="grid gap-3 rounded-lg border border-border bg-card p-4 text-card-foreground sm:grid-cols-4">
+      <form id="product-filters" className="grid gap-3 rounded-lg border border-border bg-card p-4 text-card-foreground sm:grid-cols-4">
         <input
           name="q"
           placeholder={
@@ -68,6 +68,7 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
           name="categoryId"
           defaultValue={params.categoryId ?? ""}
           className={panelSelectClass}
+          onChange={() => (document.getElementById("product-filters") as HTMLFormElement).requestSubmit()}
         >
           <option value="">Todas las categorias</option>
           {categories.map((category) => (
@@ -76,7 +77,9 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
             </option>
           ))}
         </select>
-        <select name="supplierId" defaultValue={params.supplierId ?? ""} className={panelSelectClass}>
+        <select name="supplierId" defaultValue={params.supplierId ?? ""} className={panelSelectClass}
+          onChange={() => (document.getElementById("product-filters") as HTMLFormElement).requestSubmit()}
+        >
           <option value="">Todos los proveedores</option>
           {suppliers.map((supplier) => (
             <option key={supplier.id} value={supplier.id}>
@@ -84,7 +87,9 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
             </option>
           ))}
         </select>
-        <select name="status" defaultValue={params.status ?? "all"} className={panelSelectClass}>
+        <select name="status" defaultValue={params.status ?? "all"} className={panelSelectClass}
+          onChange={() => (document.getElementById("product-filters") as HTMLFormElement).requestSubmit()}
+        >
           <option value="all">Todos</option>
           <option value="active">Activos</option>
           <option value="inactive">Inactivos</option>
@@ -93,6 +98,7 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
           name="focus"
           defaultValue={params.focus ?? "all"}
           className={cn(panelSelectClass, "sm:col-span-2")}
+          onChange={() => (document.getElementById("product-filters") as HTMLFormElement).requestSubmit()}
         >
           {getProductFocusFilterOptions(business.business_type).map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -100,10 +106,6 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
             </option>
           ))}
         </select>
-        <div className="sm:col-span-2" />
-        <Button type="submit" variant="outline">
-          Aplicar filtros
-        </Button>
       </form>
 
       {!isEmployee && (

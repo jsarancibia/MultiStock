@@ -57,10 +57,6 @@ export function AppHeader({
 
         {/* Actions */}
         <div className="flex w-full min-w-0 flex-wrap items-center justify-end gap-2 sm:w-auto sm:gap-2">
-          <span className="inline-flex items-center rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800 ring-1 ring-emerald-100/80 dark:border-emerald-800/60 dark:bg-emerald-950/50 dark:text-emerald-300">
-            Operación activa
-          </span>
-
           {switcher}
 
           <ThemeToggle />

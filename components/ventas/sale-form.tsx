@@ -1,11 +1,9 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { flushSync } from "react-dom";
 import { useActionState } from "react";
 import type { BusinessType } from "@/config/business-types";
 import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormMessage } from "@/components/ui/form-message";
 import { PageNavigation } from "@/components/ui/page-navigation";
 import { useBeforeUnload } from "@/lib/hooks/use-before-unload";
@@ -70,10 +68,8 @@ export function SaleForm({
   const [customerId, setCustomerId] = useState("");
   const [clientError, setClientError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
-  const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [shouldPrint, setShouldPrint] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const dialogAnswered = useRef(false);
   useBeforeUnload(isDirty);
 
   const total = useMemo(
@@ -163,9 +159,25 @@ export function SaleForm({
       return false;
     }
 
+    if (paymentMethod === "fiado" && customerId) {
+      const customer = creditCustomers.find((c) => c.id === customerId);
+      if (customer && customer.credit_limit > 0 && customer.current_balance + total > customer.credit_limit) {
+        const disponible = customer.credit_limit - customer.current_balance;
+        setClientError(
+          `La venta ($${total.toLocaleString("es-CL")}) excede el crédito disponible de ${customer.name} ($${disponible.toLocaleString("es-CL")}).`
+        );
+        return false;
+      }
+    }
+
     setClientError(null);
     return true;
   }
+
+  const selectedCreditCustomer = useMemo(
+    () => (paymentMethod === "fiado" && customerId ? creditCustomers.find((c) => c.id === customerId) : undefined),
+    [paymentMethod, customerId, creditCustomers]
+  );
 
   const payload = JSON.stringify(
     items.map((item) => ({
@@ -185,11 +197,6 @@ export function SaleForm({
         onSubmit={(event) => {
           if (!validateBeforeSubmit()) {
             event.preventDefault();
-            return;
-          }
-          if (!dialogAnswered.current) {
-            event.preventDefault();
-            setShowPrintDialog(true);
             return;
           }
         }}
@@ -242,6 +249,11 @@ export function SaleForm({
                 itemsCount={items.length}
                 onPaymentMethodChange={handlePaymentMethodChange}
                 allowCredit={allowCredit}
+                shouldPrint={shouldPrint}
+                onShouldPrintChange={setShouldPrint}
+                creditCustomerName={selectedCreditCustomer?.name}
+                creditCustomerBalance={selectedCreditCustomer?.current_balance}
+                creditCustomerLimit={selectedCreditCustomer?.credit_limit}
               />
 
               {paymentMethod === "fiado" && (
@@ -264,34 +276,6 @@ export function SaleForm({
           </aside>
         </div>
       </form>
-
-      <ConfirmDialog
-        open={showPrintDialog}
-        onOpenChange={(open) => {
-          if (!open) setShowPrintDialog(false);
-        }}
-        title="¿Desea imprimir boleta?"
-        description="Puede imprimir la boleta ahora o hacerlo después desde el detalle de la venta."
-        confirmLabel="Sí, imprimir"
-        cancelLabel="No, solo confirmar"
-        variant="default"
-        onConfirm={() => {
-          flushSync(() => {
-            setShouldPrint(true);
-            setShowPrintDialog(false);
-          });
-          dialogAnswered.current = true;
-          formRef.current?.requestSubmit();
-        }}
-        onCancel={() => {
-          flushSync(() => {
-            setShouldPrint(false);
-            setShowPrintDialog(false);
-          });
-          dialogAnswered.current = true;
-          formRef.current?.requestSubmit();
-        }}
-      />
     </div>
   );
 }
