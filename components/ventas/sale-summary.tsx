@@ -9,14 +9,25 @@ type SaleSummaryProps = {
   total: number;
   itemsCount: number;
   onPaymentMethodChange: (value: (typeof paymentMethodValues)[number]) => void;
+  allowCredit?: boolean;
 };
+
+const paymentMethodOptions = paymentMethodValues.map((v) => ({
+  value: v,
+  label: paymentMethodLabels[v],
+}));
 
 export function SaleSummary({
   paymentMethod,
   total,
   itemsCount,
   onPaymentMethodChange,
+  allowCredit = true,
 }: SaleSummaryProps) {
+  const options = allowCredit
+    ? paymentMethodOptions
+    : paymentMethodOptions.filter((o) => o.value !== "credit");
+
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card p-4 text-card-foreground">
       <h2 className="font-medium text-foreground">Resumen de venta</h2>
@@ -34,9 +45,9 @@ export function SaleSummary({
           }
           className={panelSelectClass}
         >
-          {paymentMethodValues.map((method) => (
-            <option key={method} value={method}>
-              {paymentMethodLabels[method]}
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit/create-audit-log";
-import { assertMonthlySalesLimit } from "@/lib/billing/plan-guards";
+import { assertMonthlySalesLimit, assertCreditCustomerLimit } from "@/lib/billing/plan-guards";
 import { humanizeActionError } from "@/lib/errors/action-error";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/utils";
@@ -154,6 +154,9 @@ export async function createSaleAction(
   let saleId: string;
 
   if (parsed.data.paymentMethod === "credit") {
+    const limitMessage = await assertCreditCustomerLimit(supabase, business);
+    if (limitMessage) return { message: limitMessage };
+
     const creditCustomerId = String(formData.get("creditCustomerId") ?? "").trim();
     if (!creditCustomerId) {
       return { message: "Debes seleccionar un cliente fiado." };
@@ -203,7 +206,13 @@ export async function createSaleAction(
     entityId: saleId,
     action: "sale_confirmed",
     summary: `Venta ${formatCurrency(itemsTotal)} · ${parsed.data.items.length} línea(s) · pago ${parsed.data.paymentMethod}`,
-    metadata: { payment_method: parsed.data.paymentMethod, lines: parsed.data.items.length },
+    metadata: {
+      payment_method: parsed.data.paymentMethod,
+      lines: parsed.data.items.length,
+      ...(parsed.data.paymentMethod === "credit"
+        ? { credit_customer_id: String(formData.get("creditCustomerId") ?? "") }
+        : {}),
+    },
   });
 
   const shouldPrint = String(formData.get("shouldPrint") ?? "0") === "1";

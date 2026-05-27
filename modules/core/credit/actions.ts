@@ -396,7 +396,7 @@ export async function registerPaymentAction(
 
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors };
 
-  const { error: rpcError } = await supabase.rpc("register_credit_payment", {
+  const { data: txId, error: rpcError } = await supabase.rpc("register_credit_payment", {
     p_business_id: business.id,
     p_customer_id: parsed.data.customerId,
     p_amount: parsed.data.amount,
@@ -412,7 +412,7 @@ export async function registerPaymentAction(
   await createAuditLog({
     businessId: business.id,
     userId: user.id,
-    entityId: null,
+    entityId: txId as string | null,
     entityType: "credit_transaction",
     action: "payment_registered",
     summary: `Pago registrado · $${parsed.data.amount} · ${parsed.data.paymentMethod}`,
@@ -432,6 +432,7 @@ export async function quickCreateCustomerAction(
   formData: FormData
 ): Promise<{ customerId?: string; message?: string; errors?: Record<string, string[]> } | undefined> {
   const { business } = await requireBusinessRole(["owner", "employee"]);
+  const user = await requireUser();
   const supabase = await createClient();
 
   const parsed = creditCustomerSchema.safeParse({
@@ -458,15 +459,25 @@ export async function quickCreateCustomerAction(
       notes: parsed.data.notes,
       active: true,
     })
-    .select("id")
+    .select("id,name")
     .single();
 
-  if (error) {
+  if (error || !customer) {
     if (error?.code === "23505") {
       return { message: "Ya existe un cliente con ese RUT en este negocio." };
     }
     return { message: humanizeActionError(error?.message, "No se pudo crear el cliente.") };
   }
+
+  await createAuditLog({
+    businessId: business.id,
+    userId: user.id,
+    entityType: "credit_customer",
+    entityId: customer.id,
+    action: "created",
+    summary: `Cliente fiado creado (via venta): ${customer.name}`,
+    afterData: { name: parsed.data.name, credit_limit: parsed.data.creditLimit },
+  });
 
   revalidatePath("/fiados");
   return { customerId: customer.id };

@@ -53,6 +53,21 @@ export function CreditCustomerSelect({ customers, value, onChange }: CreditCusto
     );
   }
 
+  if (showCreate) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-medium">Cliente fiado</p>
+        <QuickCreateForm
+          onCreated={(id) => {
+            onChange(id);
+            setShowCreate(false);
+          }}
+          onCancel={() => setShowCreate(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium">Cliente fiado</p>
@@ -128,15 +143,6 @@ export function CreditCustomerSelect({ customers, value, onChange }: CreditCusto
         </div>
       )}
 
-      {showCreate && (
-        <QuickCreateForm
-          onCreated={(id) => {
-            onChange(id);
-            setShowCreate(false);
-          }}
-          onCancel={() => setShowCreate(false)}
-        />
-      )}
     </div>
   );
 }

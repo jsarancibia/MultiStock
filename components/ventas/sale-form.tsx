@@ -33,6 +33,8 @@ type SaleFormProps = {
   backHref?: string;
   /** Clientes fiado disponibles para venta a crédito */
   creditCustomers?: CreditCustomerBasic[];
+  /** Si el plan permite fiado */
+  allowCredit?: boolean;
 };
 
 const initialState: SaleActionState = {};
@@ -53,9 +55,17 @@ export function SaleForm({
   action,
   backHref = "/ventas",
   creditCustomers = [],
+  allowCredit = true,
 }: SaleFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "debit" | "credit" | "transfer" | "other">("cash");
+
+  function handlePaymentMethodChange(value: typeof paymentMethod) {
+    setPaymentMethod(value);
+    if (value !== "credit") {
+      setCustomerId("");
+    }
+  }
   const [items, setItems] = useState<SaleCartItem[]>([]);
   const [customerId, setCustomerId] = useState("");
   const [clientError, setClientError] = useState<string | null>(null);
@@ -230,7 +240,8 @@ export function SaleForm({
                 paymentMethod={paymentMethod}
                 total={total}
                 itemsCount={items.length}
-                onPaymentMethodChange={setPaymentMethod}
+                onPaymentMethodChange={handlePaymentMethodChange}
+                allowCredit={allowCredit}
               />
 
               {paymentMethod === "credit" && (

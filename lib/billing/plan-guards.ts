@@ -161,7 +161,8 @@ export async function assertCreditCustomerLimit(
   const { count, error } = await supabase
     .from("credit_customers")
     .select("id", { count: "exact", head: true })
-    .eq("business_id", business.id);
+    .eq("business_id", business.id)
+    .eq("active", true);
 
   if (error) return "No se pudo validar el límite de clientes fiado del plan.";
   if ((count ?? 0) >= limit) {
