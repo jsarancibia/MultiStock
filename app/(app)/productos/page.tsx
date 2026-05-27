@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { Package } from "lucide-react";
 import { CategoryForm } from "@/components/forms/category-form";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProductsTable } from "@/components/productos/products-table";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { buttonVariants } from "@/components/ui/button";
 import {
   panelInputClass,
   panelSelectClass,
@@ -43,7 +46,7 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
     <section className="space-y-6">
       <PageHeader
         title="Productos"
-        description="Listado general con busqueda y filtros por negocio activo."
+        description="Listado general con búsqueda y filtros por negocio activo."
       />
 
       <PlanUpgradeBanner
@@ -116,13 +119,28 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
         </div>
       )}
 
-      <ProductsTable
-        businessType={business.business_type}
-        products={products}
-        suppliers={suppliers.map((s) => ({ id: s.id, name: s.name }))}
-        categories={categories.map((c) => ({ id: c.id, name: c.name }))}
-        isEmployee={isEmployee}
-      />
+      {products.length === 0 ? (
+        <EmptyState
+          icon={<Package aria-hidden />}
+          title="No hay productos"
+          description={params.q || params.categoryId || params.supplierId ? "No se encontraron productos con los filtros actuales." : "Crea tu primer producto para empezar a vender."}
+          action={
+            !isEmployee ? (
+              <Link href="/productos/nuevo" className={cn(buttonVariants())}>
+                Crear producto
+              </Link>
+            ) : undefined
+          }
+        />
+      ) : (
+        <ProductsTable
+          businessType={business.business_type}
+          products={products}
+          suppliers={suppliers.map((s) => ({ id: s.id, name: s.name }))}
+          categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+          isEmployee={isEmployee}
+        />
+      )}
 
       {!isEmployee && (
         <CategoryForm action={createCategoryAction} businessType={business.business_type} />

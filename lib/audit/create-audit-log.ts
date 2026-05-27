@@ -22,6 +22,7 @@ export type AuditAction =
   | "price_changed"
   | "sale_confirmed"
   | "alert_resolved"
+  | "alert_bulk_resolved"
   | "sale_credited"
   | "payment_registered"
   | "limit_changed"

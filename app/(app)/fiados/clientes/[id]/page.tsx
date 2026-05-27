@@ -163,7 +163,7 @@ export default async function CustomerDetailPage({ params }: CustomerDetailProps
                 {transactions.map(({ tx, creator_name }, idx) => (
                   <tr key={tx.id} className="border-t hover:bg-muted/20">
                     <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
-                      {new Date(tx.created_at).toLocaleString("es-CL", { timeZone: "America/Santiago" })}
+                      {new Date(tx.created_at).toLocaleString("es-CL", { timeZone: "America/Santiago", hour: "2-digit", minute: "2-digit" })}
                     </td>
                     <td className="px-3 py-2">
                       <span className={transactionColor(tx.type)}>

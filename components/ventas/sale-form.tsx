@@ -149,7 +149,7 @@ export function SaleForm({
         return false;
       }
       if (item.unitPrice < 0 || !Number.isFinite(item.unitPrice)) {
-        setClientError(`Precio unitario invalido para ${item.name}.`);
+        setClientError(`Precio unitario inválido para ${item.name}.`);
         return false;
       }
     }

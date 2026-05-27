@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
+import { BackButton } from "@/components/ui/back-button";
 import { buttonVariants } from "@/components/ui/button";
 import { BoletaPrintWrapper } from "@/components/ventas/boleta-print-wrapper";
 import { paymentMethodLabels } from "@/lib/validations/sale";
@@ -34,6 +35,7 @@ export default async function VentaDetallePage({ params, searchParams }: VentaDe
 
   return (
     <section className="space-y-6">
+      <BackButton href="/ventas" />
       <PageHeader
         title={`Venta ${sale.id.slice(0, 8)}`}
         description={`Registrada el ${formatSystemDateTime(sale.created_at)}`}

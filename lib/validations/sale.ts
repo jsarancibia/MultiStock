@@ -12,19 +12,19 @@ export const paymentMethodLabels: Record<(typeof paymentMethodValues)[number], s
 };
 
 export const saleItemSchema = z.object({
-  productId: z.string().uuid("Producto invalido."),
+  productId: z.string().uuid("Producto inválido."),
   quantity: z.coerce
-    .number({ message: "Cantidad invalida." })
+    .number({ message: "Cantidad inválida." })
     .positive("La cantidad debe ser mayor a cero.")
     .refine(
       (q) => Number.isFinite(q) && Math.abs(q - Number(q.toFixed(4))) < 1e-9,
-      "La cantidad admite como maximo 4 decimales."
+      "La cantidad admite como máximo 4 decimales."
     ),
   unitPrice: z.coerce.number().min(0, "El precio unitario no puede ser negativo."),
 });
 
 export const createSaleSchema = z.object({
-  paymentMethod: z.enum(paymentMethodValues, { message: "Metodo de pago invalido." }),
+  paymentMethod: z.enum(paymentMethodValues, { message: "Método de pago inválido." }),
   items: z.array(saleItemSchema).min(1, "Debes agregar al menos un producto."),
 });
 

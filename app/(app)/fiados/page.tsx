@@ -77,10 +77,14 @@ export default async function FiadosPage() {
             clientes sin deuda pendiente
           </p>
         </div>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-card-foreground">
-          <p className="text-xs text-red-600 uppercase tracking-wide font-medium">Morosos (+30 días)</p>
-          <p className="text-2xl font-bold mt-1 text-red-700">{delinquent.length}</p>
-          <p className="text-xs text-red-600 mt-1">
+        <div className={delinquent.length > 0
+          ? "rounded-lg border border-red-200 bg-red-50 p-4 text-card-foreground"
+          : "rounded-lg border border-border bg-card p-4 text-card-foreground"}>
+          <p className={delinquent.length > 0
+            ? "text-xs text-red-600 uppercase tracking-wide font-medium"
+            : "text-xs text-muted-foreground uppercase tracking-wide"}>Morosos (+30 días)</p>
+          <p className={delinquent.length > 0 ? "text-2xl font-bold mt-1 text-red-700" : "text-2xl font-bold mt-1"}>{delinquent.length}</p>
+          <p className="text-xs text-muted-foreground mt-1">
             sin pago en más de 30 días
           </p>
         </div>

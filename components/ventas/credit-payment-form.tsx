@@ -80,8 +80,8 @@ export function PaymentForm({ customerId, currentBalance }: PaymentFormProps) {
 
       <FormMessage message={state?.message} />
 
-      <Button type="submit" disabled={pending}>
-        {pending ? "Registrando..." : "Registrar pago"}
+      <Button type="submit" loading={pending}>
+        Registrar pago
       </Button>
     </form>
   );

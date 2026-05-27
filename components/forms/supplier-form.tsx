@@ -58,7 +58,7 @@ export function SupplierForm({
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
             <label htmlFor="phone" className="text-sm font-medium text-foreground">
-              Telefono
+              Teléfono
             </label>
             <input id="phone" name="phone" className={panelInputClass} defaultValue={initialSupplier?.phone ?? ""} />
           </div>
@@ -71,7 +71,7 @@ export function SupplierForm({
         </div>
         <div className="space-y-1">
           <label htmlFor="address" className="text-sm font-medium text-foreground">
-            Direccion
+            Dirección
           </label>
           <input id="address" name="address" className={panelInputClass} defaultValue={initialSupplier?.address ?? ""} />
         </div>

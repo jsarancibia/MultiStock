@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { BackButton } from "@/components/ui/back-button";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
-import { getProductById, deactivateProductAction } from "@/modules/core/products/actions";
+import { getProductById } from "@/modules/core/products/actions";
 
 type ProductDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -37,11 +37,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <Button variant="outline">Editar</Button>
         </Link>
         {product.active ? (
-          <form action={deactivateProductAction.bind(null, product.id)}>
-            <Button variant="destructive" type="submit">
-              Desactivar
-            </Button>
-          </form>
+          <Link href={`/productos/${product.id}/desactivar`}>
+            <Button variant="destructive">Desactivar</Button>
+          </Link>
         ) : null}
       </div>
     </section>

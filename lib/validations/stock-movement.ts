@@ -9,8 +9,8 @@ export const stockMovementTypeValues = [
 ] as const;
 
 export const stockMovementSchema = z.object({
-  productId: z.string().uuid("Producto invalido."),
-  type: z.enum(stockMovementTypeValues, { message: "Tipo de movimiento invalido." }),
+  productId: z.string().uuid("Producto inválido."),
+  type: z.enum(stockMovementTypeValues, { message: "Tipo de movimiento inválido." }),
   quantity: z.coerce
     .number()
     .refine((value) => value !== 0, "La cantidad no puede ser cero."),

@@ -125,6 +125,7 @@ export function CreditCustomerSelect({ customers, value, onChange }: CreditCusto
                     <span className="font-medium">{c.name}</span>
                     <span className={debtColor}>
                       ${c.current_balance.toLocaleString("es-CL")}
+                      {c.credit_limit > 0 && <span className="text-muted-foreground"> / ${c.credit_limit.toLocaleString("es-CL")}</span>}
                     </span>
                   </button>
                 );

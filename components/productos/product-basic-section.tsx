@@ -174,7 +174,7 @@ export function ProductBasicSection({
                   </option>
                 ))}
                 <option value="__new__" className="font-medium text-primary">
-                  + Nueva categoria
+                  + Nueva categoría
                 </option>
               </select>
             </div>
@@ -182,7 +182,7 @@ export function ProductBasicSection({
             {showNewCategory && (
               <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3 sm:col-span-2">
                 <label className="text-sm font-medium text-foreground">
-                  Nombre de la nueva categoria
+                  Nombre de la nueva categoría
                 </label>
                 <div className="flex gap-2">
                   <input
