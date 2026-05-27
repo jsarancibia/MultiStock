@@ -1,12 +1,13 @@
 import { z } from "zod";
 
-export const paymentMethodValues = ["cash", "debit", "credit", "transfer", "other"] as const;
+export const paymentMethodValues = ["cash", "debit", "credit", "transfer", "fiado", "other"] as const;
 
 export const paymentMethodLabels: Record<(typeof paymentMethodValues)[number], string> = {
   cash: "Efectivo",
   debit: "Debito",
-  credit: "Credito",
+  credit: "Credito (tarjeta)",
   transfer: "Transferencia",
+  fiado: "Fiado",
   other: "Otro",
 };
 

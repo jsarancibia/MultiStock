@@ -153,7 +153,7 @@ export async function createSaleAction(
 
   let saleId: string;
 
-  if (parsed.data.paymentMethod === "credit") {
+  if (parsed.data.paymentMethod === "fiado") {
     const limitMessage = await assertCreditCustomerLimit(supabase, business);
     if (limitMessage) return { message: limitMessage };
 
@@ -165,7 +165,7 @@ export async function createSaleAction(
       p_business_id: business.id,
       p_created_by: user.id,
       p_items: payloadItems,
-      p_payment_method: "credit",
+      p_payment_method: "fiado",
       p_customer_id: creditCustomerId,
     });
 
@@ -209,7 +209,7 @@ export async function createSaleAction(
     metadata: {
       payment_method: parsed.data.paymentMethod,
       lines: parsed.data.items.length,
-      ...(parsed.data.paymentMethod === "credit"
+      ...(parsed.data.paymentMethod === "fiado"
         ? { credit_customer_id: String(formData.get("creditCustomerId") ?? "") }
         : {}),
     },

@@ -26,7 +26,7 @@ export function SaleSummary({
 }: SaleSummaryProps) {
   const options = allowCredit
     ? paymentMethodOptions
-    : paymentMethodOptions.filter((o) => o.value !== "credit");
+    : paymentMethodOptions.filter((o) => o.value !== "fiado");
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card p-4 text-card-foreground">

@@ -58,11 +58,11 @@ export function SaleForm({
   allowCredit = true,
 }: SaleFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "debit" | "credit" | "transfer" | "other">("cash");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "debit" | "credit" | "transfer" | "fiado" | "other">("cash");
 
   function handlePaymentMethodChange(value: typeof paymentMethod) {
     setPaymentMethod(value);
-    if (value !== "credit") {
+    if (value !== "fiado") {
       setCustomerId("");
     }
   }
@@ -158,8 +158,8 @@ export function SaleForm({
       }
     }
 
-    if (paymentMethod === "credit" && !customerId) {
-      setClientError("Selecciona un cliente fiado para la venta a crédito.");
+    if (paymentMethod === "fiado" && !customerId) {
+      setClientError("Selecciona un cliente fiado para la venta.");
       return false;
     }
 
@@ -244,7 +244,7 @@ export function SaleForm({
                 allowCredit={allowCredit}
               />
 
-              {paymentMethod === "credit" && (
+              {paymentMethod === "fiado" && (
                 <CreditCustomerSelect
                   customers={creditCustomers}
                   value={customerId}
