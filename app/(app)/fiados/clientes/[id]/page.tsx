@@ -84,6 +84,14 @@ export default async function CustomerDetailPage({ params }: CustomerDetailProps
               Editar
             </Link>
           )}
+          {isOwner && customer.current_balance === 0 && (
+            <Link
+              href={`/fiados/clientes/${customer.id}/eliminar`}
+              className={cn(buttonVariants({ variant: "destructive" }))}
+            >
+              Eliminar
+            </Link>
+          )}
         </div>
       </div>
 
