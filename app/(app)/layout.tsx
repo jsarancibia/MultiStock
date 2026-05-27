@@ -43,7 +43,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
     : baseNavigation;
 
   // Filtrar navegación según rol: employee solo ve módulos esenciales
-  const employeeModules = ["dashboard", "products", "inventory", "sales"];
+  const employeeModules = ["dashboard", "products", "inventory", "sales", "fiados"];
   const userBusinessRole = !userIsAdmin ? await getBusinessRole(user.id, business.id) : null;
   const finalNavigation = userBusinessRole === "employee"
     ? navigation.filter((item) => employeeModules.includes(item.module))
