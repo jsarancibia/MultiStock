@@ -13,19 +13,19 @@ export const businessTypes: Record<
 > = {
   verduleria: {
     label: "Verduleria",
-    modules: ["products", "inventory", "sales", "suppliers", "waste"],
+    modules: ["products", "inventory", "sales", "suppliers", "waste", "fiados"],
     productFields: ["expiration", "weight_sale", "waste_enabled"],
     dashboard: "verduleria",
   },
   almacen: {
     label: "Almacen",
-    modules: ["products", "inventory", "sales", "suppliers", "margins"],
+    modules: ["products", "inventory", "sales", "suppliers", "margins", "fiados"],
     productFields: ["category_margin", "fast_rotation"],
     dashboard: "almacen",
   },
   ferreteria: {
     label: "Ferreteria",
-    modules: ["products", "inventory", "sales", "suppliers", "technical_specs"],
+    modules: ["products", "inventory", "sales", "suppliers", "technical_specs", "fiados"],
     productFields: ["brand", "variant", "technical_specs"],
     dashboard: "ferreteria",
   },

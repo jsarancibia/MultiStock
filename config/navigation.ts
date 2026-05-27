@@ -13,6 +13,7 @@ export type AppModule =
   | "reports"
   | "exports"
   | "team"
+  | "fiados"
   | "admin";
 
 export type NavigationItem = {
@@ -41,6 +42,11 @@ export const navigationItems: NavigationItem[] = [
     label: "Ventas",
     href: "/ventas",
     module: "sales",
+  },
+  {
+    label: "Fiados",
+    href: "/fiados",
+    module: "fiados",
   },
   {
     label: "Proveedores",
@@ -89,6 +95,7 @@ export function getEnabledModules(businessType: BusinessType): Set<AppModule> {
   if (businessModules.includes("inventory")) enabled.add("inventory");
   if (businessModules.includes("sales")) enabled.add("sales");
   if (businessModules.includes("suppliers")) enabled.add("suppliers");
+  if (businessModules.includes("fiados")) enabled.add("fiados");
 
   return enabled;
 }

@@ -9,7 +9,9 @@ export type AuditEntityType =
   | "category"
   | "stock_alert"
   | "business"
-  | "team_member";
+  | "team_member"
+  | "credit_customer"
+  | "credit_transaction";
 
 export type AuditAction =
   | "created"
@@ -19,7 +21,12 @@ export type AuditAction =
   | "stock_changed"
   | "price_changed"
   | "sale_confirmed"
-  | "alert_resolved";
+  | "alert_resolved"
+  | "sale_credited"
+  | "payment_registered"
+  | "limit_changed"
+  | "credit_adjusted"
+  | "voided";
 
 type CreateAuditLogInput = {
   businessId: string;

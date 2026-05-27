@@ -14,6 +14,7 @@ import {
   Store,
   Truck,
   Users,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { NavigationItem } from "@/config/navigation";
@@ -37,6 +38,7 @@ export function AppSidebar({ items, alertCount = 0 }: AppSidebarProps) {
     reports: BarChart3,
     exports: Store,
     team: Users,
+    fiados: Wallet,
     admin: Shield,
   };
 

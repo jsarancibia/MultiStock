@@ -411,6 +411,100 @@ export type Database = {
           { foreignKeyName: "pending_invitations_invited_by_fkey"; columns: ["invited_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
         ];
       };
+      credit_customers: {
+        Row: {
+          id: string;
+          business_id: string;
+          rut: string | null;
+          name: string;
+          phone: string | null;
+          credit_limit: string;
+          current_balance: string;
+          notes: string | null;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          rut?: string | null;
+          name: string;
+          phone?: string | null;
+          credit_limit?: string;
+          current_balance?: string;
+          notes?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          rut?: string | null;
+          name?: string;
+          phone?: string | null;
+          credit_limit?: string;
+          current_balance?: string;
+          notes?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          { foreignKeyName: "credit_customers_business_id_fkey"; columns: ["business_id"]; isOneToOne: false; referencedRelation: "businesses"; referencedColumns: ["id"] },
+        ];
+      };
+      credit_transactions: {
+        Row: {
+          id: string;
+          business_id: string;
+          customer_id: string;
+          type: string;
+          amount: string;
+          balance_before: string;
+          balance_after: string;
+          reference_sale_id: string | null;
+          payment_method: string | null;
+          description: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_id: string;
+          customer_id: string;
+          type: string;
+          amount: string;
+          balance_before: string;
+          balance_after: string;
+          reference_sale_id?: string | null;
+          payment_method?: string | null;
+          description?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_id?: string;
+          customer_id?: string;
+          type?: string;
+          amount?: string;
+          balance_before?: string;
+          balance_after?: string;
+          reference_sale_id?: string | null;
+          payment_method?: string | null;
+          description?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          { foreignKeyName: "credit_transactions_business_id_fkey"; columns: ["business_id"]; isOneToOne: false; referencedRelation: "businesses"; referencedColumns: ["id"] },
+          { foreignKeyName: "credit_transactions_customer_id_fkey"; columns: ["customer_id"]; isOneToOne: false; referencedRelation: "credit_customers"; referencedColumns: ["id"] },
+          { foreignKeyName: "credit_transactions_reference_sale_id_fkey"; columns: ["reference_sale_id"]; isOneToOne: false; referencedRelation: "sales"; referencedColumns: ["id"] },
+          { foreignKeyName: "credit_transactions_created_by_fkey"; columns: ["created_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ];
+      };
       audit_logs: {
         Row: {
           id: string;
@@ -470,6 +564,42 @@ export type Database = {
           p_payment_method: string;
         };
         Returns: string;
+      };
+      create_credit_sale: {
+        Args: {
+          p_business_id: string;
+          p_created_by: string;
+          p_items: Json;
+          p_payment_method: string;
+          p_customer_id: string;
+        };
+        Returns: string;
+      };
+      register_credit_payment: {
+        Args: {
+          p_business_id: string;
+          p_customer_id: string;
+          p_amount: number;
+          p_payment_method: string;
+          p_description: string | null;
+          p_created_by: string;
+        };
+        Returns: string;
+      };
+      void_credit_transaction: {
+        Args: {
+          p_business_id: string;
+          p_transaction_id: string;
+          p_reason: string;
+          p_created_by: string;
+        };
+        Returns: string;
+      };
+      reconcile_customer_balance: {
+        Args: {
+          p_customer_id: string;
+        };
+        Returns: Json;
       };
     };
     Enums: Record<string, never>;

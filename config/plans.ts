@@ -16,10 +16,6 @@ export type PlanDefinition = {
     monthlySales: number | null;
     monthlyStockMovements: number | null;
     members: number | null;
-    /**
-     * Límite de clientes fiados para el futuro módulo de fiado.
-     * 0 = no disponible, null = ilimitado, número = tope técnico.
-     */
     creditCustomers: number | null;
   };
   modules: AppModule[];
@@ -59,6 +55,7 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       "Sin auditoría",
       "Sin escaneo con celular mediante QR",
       "Sin módulo de proveedores",
+      "Sin fiado",
     ],
     support: [
       "Centro de ayuda básico",
@@ -80,7 +77,7 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       members: 2,
       creditCustomers: 10,
     },
-    modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team"],
+    modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team", "fiados"],
     mobileScanner: true,
     features: [
       "1 negocio activo",
@@ -89,6 +86,7 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       "Ventas ilimitadas",
       "Dashboard completo",
       "Productos, inventario, ventas, proveedores y alertas",
+      "Fiado: hasta 10 clientes",
       "Escaneo con celular mediante QR",
       "Reportes y exportaciones CSV",
       "Auditoría básica",
@@ -111,7 +109,7 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       monthlySales: null,
       monthlyStockMovements: null,
       members: 4,
-      creditCustomers: 100,
+      creditCustomers: 50,
     },
     modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team"],
     mobileScanner: true,
@@ -145,7 +143,7 @@ export const PLAN_DEFINITIONS: Record<SubscriptionPlan, PlanDefinition> = {
       monthlySales: null,
       monthlyStockMovements: null,
       members: 100,
-      creditCustomers: 50_000,
+      creditCustomers: null,
     },
     modules: ["dashboard", "products", "inventory", "sales", "suppliers", "alerts", "audit", "reports", "exports", "team"],
     mobileScanner: true,

@@ -150,6 +150,32 @@ export async function assertMonthlyStockMovementLimit(
   return null;
 }
 
+export async function assertCreditCustomerLimit(
+  supabase: SupabaseServerClient,
+  business: ActiveBusiness
+): Promise<string | null> {
+  const limit = getPlanLimits(business.subscription_plan).creditCustomers;
+  if (limit === null) return null;
+  if (limit === 0) return "Fiado no está disponible en tu plan actual.";
+
+  const { count, error } = await supabase
+    .from("credit_customers")
+    .select("id", { count: "exact", head: true })
+    .eq("business_id", business.id);
+
+  if (error) return "No se pudo validar el límite de clientes fiado del plan.";
+  if ((count ?? 0) >= limit) {
+    if (isTopTier(business.subscription_plan)) {
+      return "Tu negocio alcanzó un volumen muy alto de clientes fiado. Contacta soporte para ampliar capacidad.";
+    }
+    const planName = PLAN_NAMES[business.subscription_plan] ?? "Gratis";
+    const nextPlan = getNextPlanName(business.subscription_plan);
+    return `Tu plan ${planName} permite hasta ${limit} clientes fiado. Actualiza a ${nextPlan} para agregar más.`;
+  }
+
+  return null;
+}
+
 export async function assertMemberLimit(
   supabase: SupabaseServerClient,
   business: ActiveBusiness
