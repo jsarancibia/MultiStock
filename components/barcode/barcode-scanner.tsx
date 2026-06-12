@@ -32,6 +32,8 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
   const [status, setStatus] = useState<ScanStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [lastOkRead, setLastOkRead] = useState<string | null>(null);
+  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+  const [currentDeviceId, setCurrentDeviceId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     onDetectedRef.current = onDetected;
@@ -78,7 +80,7 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
       setErrorMessage(null);
 
       reader
-        .decodeFromVideoDevice(undefined, video, (result, _err, controls) => {
+        .decodeFromVideoDevice(currentDeviceId, video, (result, _err, controls) => {
           if (cancelled || hasDetectedRef.current) return;
           if (!result) return;
           const text = result.getText();
@@ -128,6 +130,11 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
           }
           controlsRef.current = controls;
           setStatus("scanning");
+          navigator.mediaDevices.enumerateDevices().then((devices) => {
+            if (cancelled) return;
+            const cameras = devices.filter((d) => d.kind === "videoinput");
+            setVideoDevices((prev) => (prev.length !== cameras.length ? cameras : prev));
+          });
         })
         .catch((err: unknown) => {
           if (cancelled) return;
@@ -161,7 +168,7 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
       readerRef.current = null;
       BrowserCodeReader.releaseAllStreams();
     };
-  }, [open, continuous]);
+  }, [open, continuous, currentDeviceId]);
 
   if (!open) return null;
 
@@ -176,6 +183,13 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
     invalid_read: "Ese código no es válido. Probá de nuevo.",
     error: errorMessage ?? "Error",
   };
+
+  function switchCamera() {
+    if (videoDevices.length < 2) return;
+    const currentIndex = videoDevices.findIndex((d) => d.deviceId === currentDeviceId);
+    const nextIndex = (currentIndex + 1) % videoDevices.length;
+    setCurrentDeviceId(videoDevices[nextIndex].deviceId);
+  }
 
   function stopScannerAndClose() {
     if (rearmTimerRef.current) {
@@ -219,13 +233,38 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
 
       <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-zinc-950">
         <div className="mx-auto flex w-full max-w-lg flex-1 flex-col items-stretch gap-4 px-4 py-5">
-          <video
-            ref={videoRef}
-            className="aspect-video w-full shrink-0 rounded-2xl bg-black object-cover shadow-xl ring-1 ring-white/10"
-            autoPlay
-            muted
-            playsInline
-          />
+          <div className="relative shrink-0">
+            <video
+              ref={videoRef}
+              className="aspect-video w-full rounded-2xl bg-black object-cover shadow-xl ring-1 ring-white/10"
+              autoPlay
+              muted
+              playsInline
+            />
+            {videoDevices.length >= 2 && (
+              <button
+                type="button"
+                onClick={switchCamera}
+                aria-label="Cambiar cámara"
+                className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-zinc-950/70 text-white shadow-lg ring-1 ring-white/20 backdrop-blur transition hover:bg-zinc-900/80 active:scale-95"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <polyline points="1 4 1 10 7 10" />
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                  <path d="M17 20v-1a4 4 0 0 0-4-4h-2" />
+                  <path d="M13 19l2 2 2-2" />
+                </svg>
+              </button>
+            )}
+          </div>
 
           <div className="rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3.5 shadow-lg shadow-black/40">
             <p className="text-center text-[15px] font-normal leading-relaxed text-zinc-100">
