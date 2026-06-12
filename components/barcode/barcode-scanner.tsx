@@ -79,6 +79,12 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
       setStatus("preparing");
       setErrorMessage(null);
 
+      BrowserCodeReader.listVideoInputDevices()
+        .then((cameras) => {
+          if (!cancelled) setVideoDevices(cameras);
+        })
+        .catch(() => {});
+
       reader
         .decodeFromVideoDevice(currentDeviceId, video, (result, _err, controls) => {
           if (cancelled || hasDetectedRef.current) return;
@@ -130,17 +136,21 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
           }
           controlsRef.current = controls;
           setStatus("scanning");
-          navigator.mediaDevices.enumerateDevices().then((devices) => {
-            if (cancelled) return;
-            const cameras = devices.filter((d) => d.kind === "videoinput");
-            setVideoDevices((prev) => (prev.length !== cameras.length ? cameras : prev));
-          });
+          BrowserCodeReader.listVideoInputDevices()
+            .then((cameras) => {
+              if (!cancelled) setVideoDevices(cameras);
+            })
+            .catch(() => {});
         })
         .catch((err: unknown) => {
           if (cancelled) return;
-          setStatus("error");
           const msg = err instanceof Error ? err.message : String(err);
           const lower = msg.toLowerCase();
+          if (currentDeviceId && (lower.includes("overconstrained") || lower.includes("constraint"))) {
+            setCurrentDeviceId(undefined);
+            return;
+          }
+          setStatus("error");
           if (lower.includes("permission") || lower.includes("notallowed")) {
             setErrorMessage("Permiso de cámara denegado. Puedes ingresar el código a mano.");
           } else if (lower.includes("notfound") || lower.includes("no device")) {
