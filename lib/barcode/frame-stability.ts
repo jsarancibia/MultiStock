@@ -44,7 +44,11 @@ export class FrameStabilityDetector {
     const sharpness = estimateSharpness(imageData);
     if (sharpness > this.bestSharpness) {
       this.bestSharpness = sharpness;
-      this.bestFrame = imageData;
+      this.bestFrame = new ImageData(
+        new Uint8ClampedArray(imageData.data),
+        imageData.width,
+        imageData.height,
+      );
     }
   }
 

@@ -7,10 +7,30 @@ export function grayscale(data: Uint8ClampedArray): void {
   }
 }
 
-export function stretchContrast(data: Uint8ClampedArray, low = 5, high = 95): void {
+function grayscaleWithHistogram(data: Uint8ClampedArray, histogram: Int32Array): void {
+  for (let i = 0; i < data.length; i += 4) {
+    const gray = (data[i] * 77 + data[i + 1] * 150 + data[i + 2] * 29) >> 8;
+    data[i] = gray;
+    data[i + 1] = gray;
+    data[i + 2] = gray;
+    histogram[gray]++;
+  }
+}
+
+export function stretchContrast(
+  data: Uint8ClampedArray,
+  low = 5,
+  high = 95,
+  prebuiltHistogram?: Int32Array,
+): void {
   const n = data.length / 4;
-  const histogram = new Int32Array(256);
-  for (let i = 0; i < n; i++) histogram[data[i * 4]]++;
+  let histogram: Int32Array;
+  if (prebuiltHistogram) {
+    histogram = prebuiltHistogram;
+  } else {
+    histogram = new Int32Array(256);
+    for (let i = 0; i < n; i++) histogram[data[i * 4]]++;
+  }
 
   let sum = 0;
   let pLow = 0;
@@ -35,7 +55,7 @@ export function sharpen(
   width: number,
   height: number,
 ): void {
-  const kernel = [-1, -1, -1, -1, 9, -1, -1, -1, -1];
+  const kernel = [-1, -1, -1, -1, 5, -1, -1, -1, -1];
   const copy = new Uint8ClampedArray(data);
 
   for (let y = 1; y < height - 1; y++) {
@@ -91,7 +111,8 @@ export function applyPipeline(
   width: number,
   height: number,
 ): void {
-  grayscale(data);
-  stretchContrast(data);
+  const histogram = new Int32Array(256);
+  grayscaleWithHistogram(data, histogram);
+  stretchContrast(data, 5, 95, histogram);
   sharpen(data, width, height);
 }

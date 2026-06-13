@@ -22,6 +22,7 @@ type ScanStatus = "idle" | "preparing" | "scanning" | "invalid_read" | "error";
 const DEDUPE_MS = 900;
 const REARM_MS = 450;
 const FOCUS_INTERVAL_MS = 2500;
+const FRAME_SKIP = 3;
 
 const HINTS = new Map<DecodeHintType, unknown>([
   [
@@ -33,6 +34,8 @@ const HINTS = new Map<DecodeHintType, unknown>([
       BarcodeFormat.UPC_E,
       BarcodeFormat.CODE_128,
       BarcodeFormat.CODE_39,
+      BarcodeFormat.CODE_93,
+      BarcodeFormat.ITF,
     ],
   ],
 ]);
@@ -140,6 +143,8 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
     readerRef.current = reader;
 
     const { drawImageOnCanvas: originalDraw } = BrowserMultiFormatOneDReader;
+    const frameCounter = { count: 0 };
+
     BrowserMultiFormatOneDReader.drawImageOnCanvas = (ctx, video) => {
       const vw = video instanceof HTMLVideoElement ? video.videoWidth : ctx.canvas.width;
       const vh = video instanceof HTMLVideoElement ? video.videoHeight : ctx.canvas.height;
@@ -148,10 +153,13 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
         return;
       }
 
-      const roiRatio = 0.55;
-      const roiw = vw * roiRatio;
-      const roih = vh * roiRatio;
-      ctx.drawImage(video, (vw - roiw) / 2, (vh - roih) / 2, roiw, roih, 0, 0, vw, vh);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(video, 0, 0, vw, vh);
+
+      frameCounter.count++;
+      if (frameCounter.count % FRAME_SKIP !== 0) {
+        return;
+      }
 
       const imageData = ctx.getImageData(0, 0, vw, vh);
       const state = stabilityRef.current.feed(imageData);
@@ -194,7 +202,7 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
           if (cancelled || hasDetectedRef.current) return;
           if (!result) {
             if (_err) failCountRef.current++;
-            if (!lowQualityRef.current && failCountRef.current >= 30) {
+            if (!lowQualityRef.current && failCountRef.current >= 15) {
               lowQualityRef.current = true;
               setQualityVersion((v) => v + 1);
             }
