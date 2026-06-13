@@ -18,6 +18,7 @@ type ScanStatus = "idle" | "preparing" | "scanning" | "invalid_read" | "error";
 
 const DEDUPE_MS = 900;
 const REARM_MS = 450;
+const FOCUS_INTERVAL_MS = 2500;
 
 const HINTS = new Map<DecodeHintType, unknown>([
   [
@@ -40,8 +41,8 @@ const supportsFocusMode =
 
 function buildConstraints(deviceId: string | undefined): MediaStreamConstraints {
   const video: MediaTrackConstraints & Record<string, unknown> = {
-    width: { min: 640, ideal: 1920, max: 1920 },
-    height: { min: 480, ideal: 1080, max: 1080 },
+    width: { min: 640, ideal: 1280, max: 1280 },
+    height: { min: 480, ideal: 720, max: 720 },
     frameRate: { ideal: 30, max: 30 },
   };
   if (deviceId) {
@@ -55,6 +56,17 @@ function buildConstraints(deviceId: string | undefined): MediaStreamConstraints 
   return { video, audio: false };
 }
 
+function reapplyFocusConstraint(track: MediaStreamTrack | null) {
+  if (!track) return;
+  try {
+    track
+      .applyConstraints({ advanced: [{ focusMode: "continuous" } as never] })
+      .catch(() => {});
+  } catch {
+    /* ignore */
+  }
+}
+
 export function BarcodeScanner({ open, onClose, onDetected, continuous = false }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const readerRef = useRef<BrowserMultiFormatOneDReader | null>(null);
@@ -62,6 +74,8 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
   const hasDetectedRef = useRef(false);
   const lastEmittedRef = useRef<{ code: string; at: number } | null>(null);
   const rearmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const trackRef = useRef<MediaStreamTrack | null>(null);
+  const focusIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const continuousRef = useRef(continuous);
   const onDetectedRef = useRef(onDetected);
   const onCloseRef = useRef(onClose);
@@ -71,6 +85,7 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
   const [lastOkRead, setLastOkRead] = useState<string | null>(null);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [currentDeviceId, setCurrentDeviceId] = useState<string | undefined>(undefined);
+  const [tapRipple, setTapRipple] = useState<{ x: number; y: number; key: number } | null>(null);
 
   useEffect(() => {
     onDetectedRef.current = onDetected;
@@ -176,6 +191,16 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
           if (controls.switchTorch) {
             controls.switchTorch(true).catch(() => {});
           }
+          const stream = video.srcObject as MediaStream | null;
+          if (stream) {
+            const [track] = stream.getVideoTracks();
+            trackRef.current = track;
+            reapplyFocusConstraint(track);
+            focusIntervalRef.current = setInterval(
+              () => reapplyFocusConstraint(track),
+              FOCUS_INTERVAL_MS,
+            );
+          }
           BrowserCodeReader.listVideoInputDevices()
             .then((cameras) => {
               if (!cancelled) setVideoDevices(cameras);
@@ -209,6 +234,11 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
         clearTimeout(rearmTimerRef.current);
         rearmTimerRef.current = null;
       }
+      if (focusIntervalRef.current) {
+        clearInterval(focusIntervalRef.current);
+        focusIntervalRef.current = null;
+      }
+      trackRef.current = null;
       try {
         controlsRef.current?.stop();
       } catch {
@@ -228,8 +258,8 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
     idle: "",
     preparing: "Preparando cámara…",
     scanning: continuous
-      ? "Escaneá varios códigos seguidos. Cuando termines, tocá el botón verde «Terminado» abajo."
-      : "Apuntá al código de barras dentro del recuadro.",
+      ? "Escaneá varios códigos. Tocá la cámara para re-enfocar. Terminá con el botón verde."
+      : "Apuntá al código a 15-30 cm. Tocá la cámara si se ve borroso.",
     invalid_read: "Ese código no es válido. Probá de nuevo.",
     error: errorMessage ?? "Error",
   };
@@ -239,6 +269,22 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
     const currentIndex = videoDevices.findIndex((d) => d.deviceId === currentDeviceId);
     const nextIndex = (currentIndex + 1) % videoDevices.length;
     setCurrentDeviceId(videoDevices[nextIndex].deviceId);
+  }
+
+  function handleTap(e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) {
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+    let clientX: number;
+    let clientY: number;
+    if ("touches" in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    setTapRipple({ x: clientX - rect.left, y: clientY - rect.top, key: Date.now() });
+    reapplyFocusConstraint(trackRef.current);
+    setTimeout(() => setTapRipple(null), 600);
   }
 
   function stopScannerAndClose() {
@@ -257,12 +303,19 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
   }
 
   const overlay = (
-    <div
-      className="fixed inset-0 z-[200] flex flex-col bg-zinc-950 pt-[env(safe-area-inset-top)] antialiased"
-      role="dialog"
-      aria-modal="true"
-      aria-label={continuous ? "Escanear varios códigos de barras" : "Escanear código de barras"}
-    >
+    <>
+      <style>{`
+        @keyframes tap-ripple {
+          0% { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
+          100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+        }
+      `}</style>
+      <div
+        className="fixed inset-0 z-[200] flex flex-col bg-zinc-950 pt-[env(safe-area-inset-top)] antialiased"
+        role="dialog"
+        aria-modal="true"
+        aria-label={continuous ? "Escanear varios códigos de barras" : "Escanear código de barras"}
+      >
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-zinc-950 px-4 py-3.5">
         <div className="min-w-0 flex-1">
           <p className="truncate text-base font-semibold tracking-tight text-white">
@@ -283,14 +336,25 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
 
       <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-zinc-950">
         <div className="mx-auto flex w-full max-w-lg flex-1 flex-col items-stretch gap-4 px-4 py-5">
-          <div className="relative shrink-0">
+          <div
+            className="relative shrink-0 cursor-crosshair overflow-hidden rounded-2xl"
+            onClick={handleTap}
+            onTouchStart={handleTap}
+          >
             <video
               ref={videoRef}
-              className="aspect-video w-full rounded-2xl bg-black object-cover shadow-xl ring-1 ring-white/10"
+              className="aspect-video w-full bg-black object-cover shadow-xl ring-1 ring-white/10"
               autoPlay
               muted
               playsInline
             />
+            {tapRipple && (
+              <span
+                key={tapRipple.key}
+                className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30"
+                style={{ left: tapRipple.x, top: tapRipple.y, width: 40, height: 40, animation: "tap-ripple 0.5s ease-out forwards" }}
+              />
+            )}
             {videoDevices.length >= 2 && (
               <button
                 type="button"
@@ -355,6 +419,7 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
         <footer className="shrink-0 bg-zinc-950 pb-[env(safe-area-inset-bottom)]" aria-hidden />
       )}
     </div>
+    </>
   );
 
   return createPortal(overlay, document.body);
