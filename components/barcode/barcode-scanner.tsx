@@ -5,6 +5,9 @@ import { createPortal } from "react-dom";
 import { BrowserCodeReader, BrowserMultiFormatOneDReader } from "@zxing/browser";
 import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 import { isValidBarcodeFormat, normalizeBarcode } from "@/lib/barcode/normalize";
+import { applyPipeline } from "@/lib/barcode/preprocess";
+import { FrameStabilityDetector } from "@/lib/barcode/frame-stability";
+import { recordScan } from "@/lib/barcode/scan-metrics";
 
 export type BarcodeScannerProps = {
   open: boolean;
@@ -39,12 +42,21 @@ const supportsFocusMode =
   typeof navigator.mediaDevices?.getSupportedConstraints === "function" &&
   !!(navigator.mediaDevices.getSupportedConstraints() as Record<string, unknown>).focusMode;
 
-function buildConstraints(deviceId: string | undefined): MediaStreamConstraints {
-  const video: MediaTrackConstraints & Record<string, unknown> = {
-    width: { min: 640, ideal: 1280, max: 1280 },
-    height: { min: 480, ideal: 720, max: 720 },
-    frameRate: { ideal: 30, max: 30 },
-  };
+function buildConstraints(
+  deviceId: string | undefined,
+  lowQuality: boolean,
+): MediaStreamConstraints {
+  const video: MediaTrackConstraints & Record<string, unknown> = lowQuality
+    ? {
+        width: { min: 320, ideal: 640, max: 640 },
+        height: { min: 240, ideal: 480, max: 480 },
+        frameRate: { ideal: 15, max: 15 },
+      }
+    : {
+        width: { min: 640, ideal: 1280, max: 1280 },
+        height: { min: 480, ideal: 720, max: 720 },
+        frameRate: { ideal: 30, max: 30 },
+      };
   if (deviceId) {
     video.deviceId = { exact: deviceId };
   } else {
@@ -76,6 +88,10 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
   const rearmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null);
   const focusIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const stabilityRef = useRef(new FrameStabilityDetector());
+  const startTimeRef = useRef(0);
+  const failCountRef = useRef(0);
+  const lowQualityRef = useRef(false);
   const continuousRef = useRef(continuous);
   const onDetectedRef = useRef(onDetected);
   const onCloseRef = useRef(onClose);
@@ -85,6 +101,7 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
   const [lastOkRead, setLastOkRead] = useState<string | null>(null);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [currentDeviceId, setCurrentDeviceId] = useState<string | undefined>(undefined);
+  const [qualityVersion, setQualityVersion] = useState(0);
   const [tapRipple, setTapRipple] = useState<{ x: number; y: number; key: number } | null>(null);
 
   useEffect(() => {
@@ -106,6 +123,10 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
 
     hasDetectedRef.current = false;
     lastEmittedRef.current = null;
+    startTimeRef.current = performance.now();
+    stabilityRef.current.reset();
+    failCountRef.current = 0;
+    lowQualityRef.current = false;
     startTransition(() => setLastOkRead(null));
     if (rearmTimerRef.current) {
       clearTimeout(rearmTimerRef.current);
@@ -117,6 +138,37 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
       delayBetweenScanSuccess: 200,
     });
     readerRef.current = reader;
+
+    const { drawImageOnCanvas: originalDraw } = BrowserMultiFormatOneDReader;
+    BrowserMultiFormatOneDReader.drawImageOnCanvas = (ctx, video) => {
+      const vw = video instanceof HTMLVideoElement ? video.videoWidth : ctx.canvas.width;
+      const vh = video instanceof HTMLVideoElement ? video.videoHeight : ctx.canvas.height;
+      if (!vw || !vh) {
+        originalDraw(ctx, video);
+        return;
+      }
+
+      const roiRatio = 0.55;
+      const roiw = vw * roiRatio;
+      const roih = vh * roiRatio;
+      ctx.drawImage(video, (vw - roiw) / 2, (vh - roih) / 2, roiw, roih, 0, 0, vw, vh);
+
+      const imageData = ctx.getImageData(0, 0, vw, vh);
+      const state = stabilityRef.current.feed(imageData);
+
+      if (state === "stable") {
+        const best = stabilityRef.current.getBestFrame();
+        if (best) {
+          applyPipeline(best.data, best.width, best.height);
+          ctx.putImageData(best, 0, 0);
+          stabilityRef.current.reset();
+          return;
+        }
+      }
+
+      applyPipeline(imageData.data, imageData.width, imageData.height);
+      ctx.putImageData(imageData, 0, 0);
+    };
 
     let cancelled = false;
 
@@ -138,12 +190,21 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
         .catch(() => {});
 
       reader
-        .decodeFromConstraints(buildConstraints(currentDeviceId), video, (result, _err, controls) => {
+        .decodeFromConstraints(buildConstraints(currentDeviceId, lowQualityRef.current), video, (result, _err, controls) => {
           if (cancelled || hasDetectedRef.current) return;
-          if (!result) return;
+          if (!result) {
+            if (_err) failCountRef.current++;
+            if (!lowQualityRef.current && failCountRef.current >= 30) {
+              lowQualityRef.current = true;
+              setQualityVersion((v) => v + 1);
+            }
+            return;
+          }
+          failCountRef.current = 0;
           const text = result.getText();
           const normalized = normalizeBarcode(text);
           if (!isValidBarcodeFormat(normalized)) {
+            recordScan("invalid", performance.now() - startTimeRef.current, continuousRef.current);
             setStatus("invalid_read");
             return;
           }
@@ -161,6 +222,7 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
 
           if (continuousRef.current) {
             onDetectedRef.current(normalized);
+            recordScan("success", performance.now() - startTimeRef.current, true);
             setLastOkRead(normalized);
             setStatus("scanning");
             if (rearmTimerRef.current) clearTimeout(rearmTimerRef.current);
@@ -178,6 +240,7 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
             /* ignore */
           }
           controlsRef.current = null;
+          recordScan("success", performance.now() - startTimeRef.current, false);
           onDetectedRef.current(normalized);
           onCloseRef.current();
         })
@@ -248,7 +311,7 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
       readerRef.current = null;
       BrowserCodeReader.releaseAllStreams();
     };
-  }, [open, continuous, currentDeviceId]);
+  }, [open, continuous, currentDeviceId, qualityVersion]);
 
   if (!open) return null;
 
@@ -288,6 +351,9 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
   }
 
   function stopScannerAndClose() {
+    if (!hasDetectedRef.current) {
+      recordScan("notfound", performance.now() - startTimeRef.current, continuousRef.current);
+    }
     if (rearmTimerRef.current) {
       clearTimeout(rearmTimerRef.current);
       rearmTimerRef.current = null;
@@ -354,6 +420,28 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
                 className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30"
                 style={{ left: tapRipple.x, top: tapRipple.y, width: 40, height: 40, animation: "tap-ripple 0.5s ease-out forwards" }}
               />
+            )}
+            {status === "scanning" && (
+              <svg
+                className="pointer-events-none absolute inset-0"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+              >
+                <rect
+                  x={22.5}
+                  y={22.5}
+                  width={55}
+                  height={55}
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="0.6"
+                  strokeDasharray="3 3"
+                  opacity={0.45}
+                  rx={1.5}
+                />
+                <line x1="0" y1="22.5" x2="100" y2="22.5" stroke="white" strokeWidth="0.3" opacity={0.15} />
+                <line x1="0" y1="77.5" x2="100" y2="77.5" stroke="white" strokeWidth="0.3" opacity={0.15} />
+              </svg>
             )}
             {videoDevices.length >= 2 && (
               <button
