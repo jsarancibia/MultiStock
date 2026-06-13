@@ -3,6 +3,7 @@
 import { startTransition, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BrowserCodeReader, BrowserMultiFormatOneDReader } from "@zxing/browser";
+import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 import { isValidBarcodeFormat, normalizeBarcode } from "@/lib/barcode/normalize";
 
 export type BarcodeScannerProps = {
@@ -17,6 +18,42 @@ type ScanStatus = "idle" | "preparing" | "scanning" | "invalid_read" | "error";
 
 const DEDUPE_MS = 900;
 const REARM_MS = 450;
+
+const HINTS = new Map<DecodeHintType, unknown>([
+  [
+    DecodeHintType.POSSIBLE_FORMATS,
+    [
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.EAN_8,
+      BarcodeFormat.UPC_A,
+      BarcodeFormat.UPC_E,
+      BarcodeFormat.CODE_128,
+      BarcodeFormat.CODE_39,
+    ],
+  ],
+]);
+
+const supportsFocusMode =
+  typeof navigator !== "undefined" &&
+  typeof navigator.mediaDevices?.getSupportedConstraints === "function" &&
+  !!(navigator.mediaDevices.getSupportedConstraints() as Record<string, unknown>).focusMode;
+
+function buildConstraints(deviceId: string | undefined): MediaStreamConstraints {
+  const video: MediaTrackConstraints & Record<string, unknown> = {
+    width: { min: 640, ideal: 1920, max: 1920 },
+    height: { min: 480, ideal: 1080, max: 1080 },
+    frameRate: { ideal: 30, max: 30 },
+  };
+  if (deviceId) {
+    video.deviceId = { exact: deviceId };
+  } else {
+    video.facingMode = { ideal: "environment" };
+  }
+  if (supportsFocusMode) {
+    video.focusMode = "continuous";
+  }
+  return { video, audio: false };
+}
 
 export function BarcodeScanner({ open, onClose, onDetected, continuous = false }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -60,8 +97,8 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
       rearmTimerRef.current = null;
     }
 
-    const reader = new BrowserMultiFormatOneDReader(undefined, {
-      delayBetweenScanAttempts: 200,
+    const reader = new BrowserMultiFormatOneDReader(HINTS, {
+      delayBetweenScanAttempts: 100,
       delayBetweenScanSuccess: 200,
     });
     readerRef.current = reader;
@@ -86,7 +123,7 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
         .catch(() => {});
 
       reader
-        .decodeFromVideoDevice(currentDeviceId, video, (result, _err, controls) => {
+        .decodeFromConstraints(buildConstraints(currentDeviceId), video, (result, _err, controls) => {
           if (cancelled || hasDetectedRef.current) return;
           if (!result) return;
           const text = result.getText();
@@ -136,6 +173,9 @@ export function BarcodeScanner({ open, onClose, onDetected, continuous = false }
           }
           controlsRef.current = controls;
           setStatus("scanning");
+          if (controls.switchTorch) {
+            controls.switchTorch(true).catch(() => {});
+          }
           BrowserCodeReader.listVideoInputDevices()
             .then((cameras) => {
               if (!cancelled) setVideoDevices(cameras);
