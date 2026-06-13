@@ -77,6 +77,7 @@ export function AppSidebar({ items, alertCount = 0 }: AppSidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={true}
                 className={cn(
                   "flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                   "md:shrink",

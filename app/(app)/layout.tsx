@@ -6,7 +6,7 @@ import { BusinessSwitcher } from "@/components/layout/business-switcher";
 import { businessTypes } from "@/config/business-types";
 import { getNavigationForBusinessType, type NavigationItem } from "@/config/navigation";
 import { isAdmin } from "@/lib/auth/is-admin";
-import { requireUser } from "@/lib/auth/session";
+import { getCurrentUser } from "@/lib/auth/session";
 import { getBusinessRole } from "@/lib/auth/require-business-role";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -20,9 +20,15 @@ type PrivateLayoutProps = {
 };
 
 export default async function PrivateLayout({ children }: PrivateLayoutProps) {
-  const user = await requireUser();
+  const user = (await getCurrentUser())!;
+  if (!user) {
+    // requireUser redirects, but we need the user here; if cached getCurrentUser
+    // returned null, redirect. This is a safety net.
+    const { redirect } = await import("next/navigation");
+    redirect("/auth/login");
+  }
+
   const userIsAdmin = await isAdmin(user);
-  const businesses = await listUserBusinesses(user.id);
   const business = await requireActiveBusiness(user.id);
   const businessType = businessTypes[business.business_type];
   const baseNavigation = getNavigationForBusinessType(
@@ -30,7 +36,12 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
     business.subscription_plan
   );
 
-  // Conteo de alertas no resueltas para el badge en sidebar
+  const userBusinessRole = !userIsAdmin ? await getBusinessRole(user.id, business.id) : null;
+
+  const businesses = userIsAdmin
+    ? await listUserBusinesses(user.id)
+    : [business];
+
   const supabase = await createClient();
   const { count: alertCount } = await supabase
     .from("stock_alerts")
@@ -42,9 +53,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
     ? [...baseNavigation, { label: "Admin Panel", href: "/admin", module: "admin" }]
     : baseNavigation;
 
-  // Filtrar navegación según rol: employee solo ve módulos esenciales
   const employeeModules = ["dashboard", "products", "inventory", "sales", "fiados"];
-  const userBusinessRole = !userIsAdmin ? await getBusinessRole(user.id, business.id) : null;
   const finalNavigation = userBusinessRole === "employee"
     ? navigation.filter((item) => employeeModules.includes(item.module))
     : navigation;

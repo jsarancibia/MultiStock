@@ -1,16 +1,20 @@
 import Link from "next/link";
 import { Boxes } from "lucide-react";
-import type { Database } from "@/types/database";
 import { cn, formatQuantity } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AgregarStockButton } from "@/components/inventario/agregar-stock-button";
 import { ReducirStockButton } from "@/components/inventario/reducir-stock-button";
 
-type StockProduct = Pick<
-  Database["public"]["Tables"]["products"]["Row"],
-  "id" | "name" | "unit_type" | "current_stock" | "min_stock" | "sku" | "barcode"
->;
+type StockProduct = {
+  id: string;
+  name: string;
+  unit_type: string;
+  current_stock: string;
+  min_stock: string;
+  sku: string | null;
+  barcode: string | null;
+};
 
 type StockTableProps = {
   products: StockProduct[];

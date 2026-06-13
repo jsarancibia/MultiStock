@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Package, Pencil, Trash2 } from "lucide-react";
 import type { BusinessType } from "@/config/business-types";
@@ -43,6 +44,7 @@ function meta(m: unknown) {
 }
 
 export function ProductsTable({ businessType, products, suppliers, categories, isEmployee = false }: ProductsTableProps) {
+  const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState(false);
@@ -209,7 +211,7 @@ export function ProductsTable({ businessType, products, suppliers, categories, i
           await deleteProductAction(deletingId);
           setDeletingId(null);
           setPendingDelete(false);
-          window.location.reload();
+          router.refresh();
         }}
       />
     </div>

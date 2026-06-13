@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { ActiveBusiness } from "@/lib/business/get-active-business";
 import { getPlanLimits, isEffectivelyUnlimited } from "@/config/plans";
@@ -12,19 +13,11 @@ export type QuotaInfo = {
   effectivelyUnlimited: boolean;
 };
 
-/**
- * Obtiene el conteo actual de productos activos y lo compara
- * con el límite del plan.
- *
- * Para planes "comercialmente ilimitados" (enterprise) retorna
- * limit: null, evitando banners de upgrade.
- */
-export async function getProductQuota(business: ActiveBusiness): Promise<QuotaInfo> {
+export const getProductQuota = cache(async (business: ActiveBusiness): Promise<QuotaInfo> => {
   const supabase = await createClient();
   const planLimit = getPlanLimits(business.subscription_plan).products;
   const effectivelyUnlimited = isEffectivelyUnlimited(business.subscription_plan, "products");
 
-  // Si es comercialmente ilimitado, no mostrar medidores
   if (effectivelyUnlimited) {
     return {
       current: 0,
@@ -58,21 +51,13 @@ export async function getProductQuota(business: ActiveBusiness): Promise<QuotaIn
     isAtLimit: percentage >= 100,
     effectivelyUnlimited: false,
   };
-}
+});
 
-/**
- * Obtiene el conteo actual de miembros (owner + employees) y lo compara
- * con el límite del plan.
- *
- * Para planes "comercialmente ilimitados" (enterprise) retorna
- * limit: null, evitando banners de upgrade.
- */
-export async function getMemberQuota(business: ActiveBusiness): Promise<QuotaInfo> {
+export const getMemberQuota = cache(async (business: ActiveBusiness): Promise<QuotaInfo> => {
   const supabase = await createClient();
   const planLimit = getPlanLimits(business.subscription_plan).members;
   const effectivelyUnlimited = isEffectivelyUnlimited(business.subscription_plan, "members");
 
-  // Si es comercialmente ilimitado, no mostrar medidores
   if (effectivelyUnlimited) {
     return {
       current: 0,
@@ -88,7 +73,6 @@ export async function getMemberQuota(business: ActiveBusiness): Promise<QuotaInf
     return { current: 0, limit: null, percentage: 0, isNearLimit: false, isAtLimit: false, effectivelyUnlimited: false };
   }
 
-  // business_users incluye al owner + employees, el count es el total de miembros
   const { count } = await supabase
     .from("business_users")
     .select("id", { count: "exact", head: true })
@@ -105,4 +89,4 @@ export async function getMemberQuota(business: ActiveBusiness): Promise<QuotaInf
     isAtLimit: percentage >= 100,
     effectivelyUnlimited: false,
   };
-}
+});

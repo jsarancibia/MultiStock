@@ -1,13 +1,19 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { buttonVariants } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
 import { SalesTable } from "@/components/ventas/sales-table";
 import { NewSaleShortcut } from "@/components/ventas/new-sale-shortcut";
 import { cn } from "@/lib/utils";
 import { listSales } from "@/modules/core/sales/actions";
 
-export default async function VentasPage() {
-  const sales = await listSales();
+type VentasPageProps = {
+  searchParams: Promise<Record<string, string | undefined>>;
+};
+
+export default async function VentasPage({ searchParams }: VentasPageProps) {
+  const params = await searchParams;
+  const { sales, totalCount, page, pageSize, totalPages } = await listSales(params);
 
   return (
     <section className="space-y-6">
@@ -27,6 +33,12 @@ export default async function VentasPage() {
         </Link>
       </div>
       <SalesTable sales={sales} />
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalItems={totalCount}
+        pageSize={pageSize}
+      />
     </section>
   );
 }

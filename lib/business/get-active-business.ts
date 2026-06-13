@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { linkPendingInvitationsForUser } from "@/lib/auth/link-pending-invitations";
 import { createClient } from "@/lib/supabase/server";
@@ -25,7 +26,7 @@ function normalizeBusiness(row: ActiveBusiness | null): ActiveBusiness | null {
   };
 }
 
-export async function listUserBusinesses(userId: string): Promise<ActiveBusiness[]> {
+export const listUserBusinesses = cache(async (userId: string): Promise<ActiveBusiness[]> => {
   const supabase = await createClient();
   const { data: links, error } = await supabase
     .from("business_users")
@@ -59,9 +60,9 @@ export async function listUserBusinesses(userId: string): Promise<ActiveBusiness
     if (normalized) deduped.set(normalized.id, normalized);
   }
   return [...deduped.values()];
-}
+});
 
-export async function getActiveBusiness(userId: string): Promise<ActiveBusiness | null> {
+export const getActiveBusiness = cache(async (userId: string): Promise<ActiveBusiness | null> => {
   await linkPendingInvitationsForUser({ userId });
   const userBusinesses = await listUserBusinesses(userId);
   const cookieBusinessId = await getActiveBusinessIdFromCookie();
@@ -107,7 +108,7 @@ export async function getActiveBusiness(userId: string): Promise<ActiveBusiness 
     .maybeSingle();
 
   return normalizeBusiness((businessByOwner as ActiveBusiness | null) ?? null);
-}
+});
 
 export async function requireActiveBusiness(userId: string) {
   const business = await getActiveBusiness(userId);

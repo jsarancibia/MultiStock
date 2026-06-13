@@ -1,18 +1,18 @@
 "use server";
 
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
 
 export type BusinessRole = "owner" | "employee";
 
-export async function getBusinessRole(
+export const getBusinessRole = cache(async (
   userId: string,
   businessId: string
-): Promise<BusinessRole | null> {
+): Promise<BusinessRole | null> => {
   const supabase = await createClient();
 
-  // 1. Verificar si es owner del negocio
   const { data: business } = await supabase
     .from("businesses")
     .select("owner_id")
@@ -21,7 +21,6 @@ export async function getBusinessRole(
 
   if (business?.owner_id === userId) return "owner";
 
-  // 2. Verificar en business_users
   const { data } = await supabase
     .from("business_users")
     .select("role")
@@ -31,7 +30,7 @@ export async function getBusinessRole(
 
   if (!data) return null;
   return data.role as BusinessRole;
-}
+});
 
 export async function requireBusinessRole(allowedRoles: BusinessRole[]) {
   const user = await requireUser();

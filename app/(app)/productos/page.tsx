@@ -6,6 +6,7 @@ import { ProductsTable } from "@/components/productos/products-table";
 import { ProductFilterBar } from "@/components/productos/product-filter-bar";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { listCategories, createCategoryAction } from "@/modules/core/categories/actions";
@@ -13,8 +14,8 @@ import { listSuppliers } from "@/modules/core/suppliers/actions";
 import { getProductFocusFilterOptions } from "@/lib/business/business-type-config";
 import { listProducts } from "@/modules/core/products/actions";
 import { getBusinessRole } from "@/lib/auth/require-business-role";
-import { requireUser } from "@/lib/auth/session";
-import { requireActiveBusiness } from "@/lib/business/get-active-business";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getActiveBusiness } from "@/lib/business/get-active-business";
 import { getProductQuota } from "@/lib/billing/get-quota";
 import { PlanUpgradeBanner } from "@/components/billing/plan-upgrade-banner";
 
@@ -24,19 +25,18 @@ type ProductosPageProps = {
 
 export default async function ProductosPage({ searchParams }: ProductosPageProps) {
   const params = await searchParams;
-  const [{ products, business }, categories, suppliers] = await Promise.all([
+  const user = await getCurrentUser();
+
+  const [{ products, business, totalCount, page, pageSize, totalPages }, categories, suppliers] = await Promise.all([
     listProducts(params),
     listCategories(),
     listSuppliers(),
   ]);
 
-  // Verificar si el usuario es employee para ocultar botones de edición
-  const user = await requireUser();
-  const activeBusiness = await requireActiveBusiness(user.id);
-  const userBusinessRole = await getBusinessRole(user.id, activeBusiness.id);
-  const isEmployee = userBusinessRole === "employee";
+  const isEmployee = user
+    ? (await getBusinessRole(user.id, business.id)) === "employee"
+    : false;
 
-  // Cuota de productos para el banner de upgrade
   const productQuota = await getProductQuota(business);
 
   return (
@@ -93,13 +93,21 @@ export default async function ProductosPage({ searchParams }: ProductosPageProps
           }
         />
       ) : (
-        <ProductsTable
-          businessType={business.business_type}
-          products={products}
-          suppliers={suppliers.map((s) => ({ id: s.id, name: s.name }))}
-          categories={categories.map((c) => ({ id: c.id, name: c.name }))}
-          isEmployee={isEmployee}
-        />
+        <>
+          <ProductsTable
+            businessType={business.business_type}
+            products={products}
+            suppliers={suppliers.map((s) => ({ id: s.id, name: s.name }))}
+            categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+            isEmployee={isEmployee}
+          />
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            totalItems={totalCount}
+            pageSize={pageSize}
+          />
+        </>
       )}
 
       {!isEmployee && (

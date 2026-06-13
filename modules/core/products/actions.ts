@@ -107,16 +107,23 @@ export async function listProducts(rawFilters: Record<string, string | undefined
   const supabase = await createClient();
   const filters = productFiltersSchema.parse(rawFilters);
 
+  const page = Math.max(1, Number(rawFilters.page) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number(rawFilters.pageSize) || 50));
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
   const qRaw = (filters.q ?? "").trim();
   const q = qRaw.replace(/%/g, "");
 
   let query = supabase
     .from("products")
     .select(
-      "id,name,sku,barcode,unit_type,sale_price,cost_price,current_stock,min_stock,active,created_at,metadata,supplier_id,category_id,categories(name),suppliers(name)"
+      "id,name,sku,barcode,unit_type,sale_price,cost_price,current_stock,min_stock,active,created_at,metadata,supplier_id,category_id,categories(name),suppliers(name)",
+      { count: "exact" }
     )
     .eq("business_id", business.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (q) {
     if (business.business_type === "ferreteria") {
@@ -141,8 +148,8 @@ export async function listProducts(rawFilters: Record<string, string | undefined
     query = query.contains("metadata", { fast_rotation: true });
   }
 
-  const { data, error } = await query;
-  if (error) return { products: [], business };
+  const { data, error, count } = await query;
+  if (error) return { products: [], totalCount: 0, page, pageSize, totalPages: 0, business };
 
   type Row = (NonNullable<typeof data>[number]) & { metadata: unknown; cost_price: string };
   let products: Row[] = (data ?? []) as Row[];
@@ -172,7 +179,10 @@ export async function listProducts(rawFilters: Record<string, string | undefined
     );
   }
 
-  return { products, business };
+  const totalCount = count ?? products.length;
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  return { products, totalCount, page, pageSize, totalPages, business };
 }
 
 export async function getProductById(productId: string) {

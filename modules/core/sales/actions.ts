@@ -27,19 +27,27 @@ function sortProductsForAlmacen(products: ProductFromDb[]): ProductFromDb[] {
   });
 }
 
-export async function listSales() {
+export async function listSales(rawParams?: Record<string, string | undefined>) {
   const user = await requireUser();
   const business = await requireActiveBusiness(user.id);
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("sales")
-    .select("id,total,payment_method,created_at,created_by,sale_items(quantity,subtotal,products(name))")
-    .eq("business_id", business.id)
-    .order("created_at", { ascending: false });
+  const page = Math.max(1, Number(rawParams?.page) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number(rawParams?.pageSize) || 50));
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
-  if (error) return [];
-  return data ?? [];
+  const { data, error, count } = await supabase
+    .from("sales")
+    .select("id,total,payment_method,created_at,created_by,sale_items(quantity,subtotal,products(name))", { count: "exact" })
+    .eq("business_id", business.id)
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (error) return { sales: [], totalCount: 0, page, pageSize, totalPages: 0 };
+  const totalCount = count ?? 0;
+  const totalPages = Math.ceil(totalCount / pageSize);
+  return { sales: data ?? [], totalCount, page, pageSize, totalPages };
 }
 
 export async function getSaleById(saleId: string) {
