@@ -133,7 +133,7 @@ export async function resetPasswordAction(
   const origin = `${protocol}://${host}`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-    redirectTo: `${origin}/auth/update-password`,
+    redirectTo: `${origin}/auth/callback?next=/auth/update-password`,
   });
 
   if (error) {
