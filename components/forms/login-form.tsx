@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { authInputClass } from "@/components/auth/auth-field-styles";
 import { loginAction, type AuthActionState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,15 @@ export function LoginForm() {
           placeholder="••••••"
         />
         <FormMessage message={state?.errors?.password?.[0]} />
+      </div>
+
+      <div className="flex justify-end">
+        <Link
+          href="/auth/forgot-password"
+          className="text-sm text-muted-foreground hover:text-primary hover:underline"
+        >
+          ¿Olvidaste tu contrasena?
+        </Link>
       </div>
 
       <FormMessage message={state?.message} />

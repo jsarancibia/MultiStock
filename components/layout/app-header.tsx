@@ -1,4 +1,5 @@
-import { LogOut } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
+import Link from "next/link";
 import { logoutAction } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -68,6 +69,13 @@ export function AppHeader({
             >
               {userInitials(userEmail)}
             </span>
+            <Link
+              href="/configuracion"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition"
+              title="Configuracion"
+            >
+              <Settings className="size-3.5" />
+            </Link>
             <form action={logoutAction} className="shrink-0">
               <Button
                 type="submit"
