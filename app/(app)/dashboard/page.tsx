@@ -27,6 +27,7 @@ import { getDashboardMetrics } from "@/lib/business/dashboard-metrics";
 import { cn, formatCurrency } from "@/lib/utils";
 import { requireUser } from "@/lib/auth/session";
 import { requireActiveBusiness } from "@/lib/business/get-active-business";
+import { isAdmin } from "@/lib/auth/is-admin";
 import { VerduleriaDashboardCards } from "@/modules/verduleria/dashboard-cards";
 import { AlmacenDashboardCards } from "@/modules/almacen/dashboard-cards";
 import { FerreteriaDashboardCards } from "@/modules/ferreteria/dashboard-cards";
@@ -34,6 +35,7 @@ import { FerreteriaDashboardCards } from "@/modules/ferreteria/dashboard-cards";
 export default async function DashboardPage() {
   const user = await requireUser();
   const business = await requireActiveBusiness(user.id);
+  const userIsAdmin = await isAdmin(user);
   const rubro = businessTypes[business.business_type];
   const { metrics, businessType } = await getDashboardMetrics(business);
   const salesLast7Days = metrics.trend.reduce((acc, point) => acc + point.salesTotal, 0);
@@ -169,12 +171,16 @@ export default async function DashboardPage() {
                   helper: "Mantener catálogo activo para no frenar ventas.",
                   action: <Link href="/productos/nuevo" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>Crear</Link>,
                 },
-                {
-                  id: "new-movement",
-                  label: "Registrar ingreso o ajuste",
-                  helper: "Actualizar stock real antes de la próxima venta.",
-                  action: <Link href="/inventario/movimientos/nuevo" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>Registrar</Link>,
-                },
+                ...(userIsAdmin
+                  ? [
+                      {
+                        id: "new-movement" as const,
+                        label: "Registrar ingreso o ajuste" as const,
+                        helper: "Actualizar stock real antes de la próxima venta." as const,
+                        action: <Link href="/inventario/movimientos/nuevo" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>Registrar</Link>,
+                      },
+                    ]
+                  : []),
               ]}
             />
           </div>

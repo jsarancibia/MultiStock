@@ -1,20 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const handledRef = useRef(false);
 
   useEffect(() => {
+    if (handledRef.current) return;
+    handledRef.current = true;
+
     const supabase = createClient();
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     async function handleCallback() {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
-      const next = params.get("next") ?? "/dashboard";
+      const rawNext = params.get("next") ?? "/dashboard";
+      const next = rawNext.startsWith("/") ? rawNext : "/dashboard";
 
       if (code) {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
@@ -31,10 +37,14 @@ export default function AuthCallbackPage() {
       }
 
       setError("No se pudo verificar el enlace. Solicita uno nuevo.");
-      setTimeout(() => router.push("/auth/forgot-password"), 3000);
+      timeoutId = setTimeout(() => router.push("/auth/forgot-password"), 3000);
     }
 
     handleCallback();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [router]);
 
   return (
