@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
+import { BackButton } from "@/components/ui/back-button";
 import { MovementsTable } from "@/components/inventario/movements-table";
 import { getProductById } from "@/modules/core/products/actions";
 import { listStockMovements } from "@/modules/core/stock-movements/actions";
@@ -15,6 +16,7 @@ export default async function ProductMovementsPage({ params }: ProductMovementsP
 
   return (
     <section className="space-y-6">
+      <BackButton href={`/productos/${id}`} />
       <PageHeader
         title={`Movimientos de ${product.name}`}
         description="Historial de stock del producto seleccionado."

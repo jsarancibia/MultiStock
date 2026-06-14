@@ -114,16 +114,6 @@ export function SaleForm({
     );
   }
 
-  function updateUnitPrice(productId: string, unitPrice: number) {
-    setClientError(null);
-    setItems((prev) =>
-      prev.map((item) => {
-        if (item.productId !== productId) return item;
-        return { ...item, unitPrice: Number.isFinite(unitPrice) ? unitPrice : item.unitPrice };
-      })
-    );
-  }
-
   function removeItem(productId: string) {
     setClientError(null);
     setItems((prev) => prev.filter((item) => item.productId !== productId));
@@ -236,7 +226,6 @@ export function SaleForm({
             <SaleItemsTable
               items={items}
               onUpdateQuantity={updateQuantity}
-              onUpdateUnitPrice={updateUnitPrice}
               onRemove={removeItem}
             />
           </div>

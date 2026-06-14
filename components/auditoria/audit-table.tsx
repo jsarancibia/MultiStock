@@ -9,6 +9,9 @@ const entityLabels: Record<string, string> = {
   category: "Categoría",
   stock_alert: "Alerta",
   business: "Negocio",
+  credit_customer: "Cliente fiado",
+  credit_transaction: "Transacción fiado",
+  team_member: "Miembro equipo",
 };
 
 const actionLabels: Record<string, string> = {
@@ -20,6 +23,12 @@ const actionLabels: Record<string, string> = {
   price_changed: "Precio",
   sale_confirmed: "Venta",
   alert_resolved: "Alerta resuelta",
+  alert_bulk_resolved: "Alertas resueltas",
+  payment_registered: "Pago registrado",
+  limit_changed: "Límite cambiado",
+  credit_adjusted: "Saldo ajustado",
+  voided: "Anulado",
+  sale_credited: "Venta acreditada",
 };
 
 type AuditTableProps = {

@@ -25,14 +25,12 @@ export type SaleCartItem = {
 type SaleItemsTableProps = {
   items: SaleCartItem[];
   onUpdateQuantity: (productId: string, quantity: number) => void;
-  onUpdateUnitPrice: (productId: string, unitPrice: number) => void;
   onRemove: (productId: string) => void;
 };
 
 export function SaleItemsTable({
   items,
   onUpdateQuantity,
-  onUpdateUnitPrice,
   onRemove,
 }: SaleItemsTableProps) {
   const [quantityDrafts, setQuantityDrafts] = useState<Record<string, string>>({});
@@ -95,6 +93,7 @@ export function SaleItemsTable({
               const qAttrs = quantityInputConstraints(item.unitType);
               const unitAbbr = quantityUnitAbbrev(item.unitType);
               const qtyDisplay = quantityInputValue(item.productId, item.quantity, item.unitType);
+              const priceLabel = unitPriceFieldLabel(item.unitType);
               return (
                 <li
                   key={item.productId}
@@ -134,17 +133,11 @@ export function SaleItemsTable({
                     </div>
                     <div>
                       <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                        {unitPriceFieldLabel(item.unitType)}
+                        {priceLabel}
                       </label>
-                      <input
-                        type="number"
-                        aria-label={`${unitPriceFieldLabel(item.unitType)} de ${item.name}`}
-                        min="0"
-                        step="0.0001"
-                        value={item.unitPrice}
-                        onChange={(event) => onUpdateUnitPrice(item.productId, Number(event.target.value))}
-                        className={mobileNumericClass}
-                      />
+                      <p className="text-sm font-semibold text-foreground">
+                        {formatCurrency(item.unitPrice)}
+                      </p>
                     </div>
                   </div>
                   <p className="mt-2 text-sm font-semibold text-foreground">Subtotal: {formatCurrency(subtotal)}</p>
@@ -199,15 +192,7 @@ export function SaleItemsTable({
                   </td>
                   <td className="px-3 py-2">
                     <p className="mb-1 text-[11px] text-muted-foreground">{priceLabel}</p>
-                    <input
-                      type="number"
-                      aria-label={`${priceLabel} de ${item.name}`}
-                      min="0"
-                      step="0.0001"
-                      value={item.unitPrice}
-                      onChange={(event) => onUpdateUnitPrice(item.productId, Number(event.target.value))}
-                      className={panelInputCompactClass}
-                    />
+                    <p className="font-medium text-foreground">{formatCurrency(item.unitPrice)}</p>
                   </td>
                   <td className="px-3 py-2">{formatCurrency(subtotal)}</td>
                   <td className="px-3 py-2 text-right">
